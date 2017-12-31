@@ -1,0 +1,37 @@
+﻿<!--
+    Author: Anthony John Ripa
+    Date:   12/31/2017
+    Demo for Newton: An A.I. for Math
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Newton</title>
+    <meta charset="utf-8" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js"></script>
+    <script src="newton.js"></script>
+    <script>
+        function go() {
+            var input, expr, constant;
+            input = $('input').val();
+            [expr, constant] = input.split('|');
+            expr = Newton.simplify(expr)
+            $('#tv').html(expr);
+            if (constant) {
+                expr = expr.replace('h', constant);
+                expr = Newton.simplify(expr)
+                $('#tv').append('<br>' + expr);
+            }
+        }
+    </script>
+</head>
+<body>
+    <center>
+        <h1>Newton</h1>
+        <input value="((x+h)^2-x^2)/h|0"/>
+        <button onclick="go()">Go</button>
+        <div id="tv"></div>
+    </center>
+</body>
+</html>
