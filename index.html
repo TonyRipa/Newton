@@ -1,37 +1,57 @@
-﻿<!--
+﻿
+<!--
     Author: Anthony John Ripa
-    Date:   12/31/2017
+    Date:   1/21/2018
     Demo for Newton: An A.I. for Math
 -->
+
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Newton</title>
-    <meta charset="utf-8" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js"></script>
-    <script src="newton.js"></script>
-    <script>
-        function go() {
-            var input, expr, constant;
-            input = $('input').val();
-            [expr, constant] = input.split('|');
-            expr = Newton.simplify(expr)
-            $('#tv').html(expr);
-            if (constant) {
-                expr = expr.replace('h', constant);
-                expr = Newton.simplify(expr)
-                $('#tv').append('<br>' + expr);
+    <head>
+        <title>Newton</title>
+        <meta charset="utf-8" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js"></script>
+        <script src="newton.js"></script>
+        <script>
+            function go() {
+                var input = $('input').val();
+                var expr = Newton.simplify(input);
+                $('#tv').html(expr);
             }
-        }
-    </script>
-</head>
-<body>
-    <center>
-        <h1>Newton</h1>
-        <input value="((x+h)^2-x^2)/h|0"/>
-        <button onclick="go()">Go</button>
-        <div id="tv"></div>
-    </center>
-</body>
+        </script>
+    </head>
+    <body>
+        <center>
+            <h1>Newton</h1>
+            <select onchange="$('input').val($(this).val())">
+                <option selected disabled>Populate</option>
+                <optgroup label="0 Variable">
+                    <option>0</option>
+                    <option>1</option>
+                    <option>2</option>
+                </optgroup>
+                <optgroup label="1 Variable">
+                    <option>x</option>
+                    <option>x/x</option>
+                    <option>(x^2-1)/(x-1)</option>
+                    <option>2+h</option>
+                    <option>(2+h)^2</option>
+                    <option>(2+h)^2-2^2</option>
+                    <option>((2+h)^2-2^2)/h</option>
+                    <option>((2+h)^2-2^2)/h|0</option>
+                </optgroup>
+                <optgroup label="2 Variable">
+                    <option>x+h</option>
+                    <option>(x+h)^2</option>
+                    <option>(x+h)^2-x^2</option>
+                    <option>((x+h)^2-x^2)/h</option>
+                    <option>((x+h)^2-x^2)/h|0</option>
+                </optgroup>
+            </select>
+            <input />
+            <button onclick="go()">Go</button>
+            <div id="tv"></div>
+        </center>
+    </body>
 </html>
