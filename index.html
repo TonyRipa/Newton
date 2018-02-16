@@ -1,7 +1,7 @@
 ﻿
 <!--
     Author: Anthony John Ripa
-    Date:   1/21/2018
+    Date:   2/15/2018
     Demo for Newton: An A.I. for Math
 -->
 
@@ -12,46 +12,127 @@
         <meta charset="utf-8" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.6/jsxgraphcore.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css" />
         <script src="newton.js"></script>
+        <script src="plot.js"></script>
         <script>
             function go() {
-                var input = $('input').val();
-                var expr = Newton.simplify(input);
-                $('#tv').html(expr);
+                var input = $('input').val() || '0';
+                var expr = input.split('|')[0];
+                var constant = input.split('|')[1];
+                var exprsimp = Newton.simplify(expr);
+                var d = 1 + Newton.x.length;
+                var xy = Newton.getxy();
+                var xsy = Newton.getxsy();
+                var totalsimp = Newton.simplify(input, true);
+                if (d == 2) plot1(xy, expr); else plot13(xsy, expr);
+                if (d == 2) plot2(exprsimp); else plot23(exprsimp);
+                if (d == 2) plot3(exprsimp, constant, totalsimp); else plot33(exprsimp, constant, totalsimp);
+                //console.log(Newton.x);
+            }
+            function plot1(xy, title) {
+                $('#title1').html(title);
+                Plot.plot(xy, 'graph1');
+            }
+            function plot13(xsy, title) {
+                $('#title1').html(title);
+                Plot.plot3(xsy, 'graph1', {});
+            }
+            function plot2(expr) {
+                Plot.graph(expr, 'graph2');
+                $('#title2').html(expr);
+            }
+            function plot23(expr) {
+                Plot.graph3(expr, 'graph2', { style: 'surface' });
+                $('#title2').html(expr);
+            }
+            function plot3(expr, x, y) {
+                if (x) {
+                    $('#td3').show();
+                    $('#tv').show();
+                    $('#title3').html(expr + '|' + x);
+                    $('#tv').html(y);
+                    //console.log(expr, x, y);
+                    var board = Plot.graph(expr, 'graph3');
+                    if (x) board.create('point', [x, y], { name: '', size: .1 });
+                    $('#tv').html(y);
+                } else {
+                    $('#td3').hide();
+                    $('#tv').hide();
+                }
+            }
+            function plot33(expr, x, totalsimp) {
+                if (x) {
+                    $('#td3').show();
+                    $('#tv').show();
+                    $('#title3').html(expr + '|' + x);
+                    $('#tv').html(totalsimp);
+                    //console.log(expr, x, totalsimp);
+                    var data = Plot.graph3(totalsimp, 'graph3', { style: 'line' });
+                    $('#tv').html(totalsimp);
+                } else {
+                    $('#td3').hide();
+                    $('#tv').hide();
+                }
             }
         </script>
     </head>
     <body>
         <center>
             <h1>Newton</h1>
-            <select onchange="$('input').val($(this).val())">
-                <option selected disabled>Populate</option>
-                <optgroup label="0 Variable">
-                    <option>0</option>
-                    <option>1</option>
-                    <option>2</option>
-                </optgroup>
-                <optgroup label="1 Variable">
-                    <option>x</option>
-                    <option>x/x</option>
-                    <option>(x^2-1)/(x-1)</option>
-                    <option>2+h</option>
-                    <option>(2+h)^2</option>
-                    <option>(2+h)^2-2^2</option>
-                    <option>((2+h)^2-2^2)/h</option>
-                    <option>((2+h)^2-2^2)/h|0</option>
-                </optgroup>
-                <optgroup label="2 Variable">
-                    <option>x+h</option>
-                    <option>(x+h)^2</option>
-                    <option>(x+h)^2-x^2</option>
-                    <option>((x+h)^2-x^2)/h</option>
-                    <option>((x+h)^2-x^2)/h|0</option>
-                </optgroup>
-            </select>
-            <input />
-            <button onclick="go()">Go</button>
-            <div id="tv"></div>
+            <table border="1">
+                <tr>
+                    <td>
+                        <input placeholder="Type or Click Dropdown" style="position:absolute" />
+                        <select onchange="$('input').val($(this).val())">
+                            <option selected disabled>Choose a option or type</option>
+                            <optgroup label="0 Variable">
+                                <option>0</option>
+                                <option>1</option>
+                                <option>2</option>
+                            </optgroup>
+                            <optgroup label="1 Variable">
+                                <option>x</option>
+                                <option>x/x</option>
+                                <option>(x^2-1)/(x-1)</option>
+                                <option>2+h</option>
+                                <option>(2+h)^2</option>
+                                <option>(2+h)^2-2^2</option>
+                                <option>((2+h)^2-2^2)/h</option>
+                                <option>((2+h)^2-2^2)/h|0</option>
+                            </optgroup>
+                            <optgroup label="2 Variable">
+                                <option>x+h</option>
+                                <option>(x+h)^2</option>
+                                <option>(x+h)^2-x^2</option>
+                                <option>((x+h)^2-x^2)/h</option>
+                                <option>((x+h)^2-x^2)/h|0</option>
+                            </optgroup>
+                        </select>
+                        <button onclick="go()">Go</button>
+                    </td>
+                    <td width="110px">
+                        <div id="title1" style="text-align:center"></div>
+                    </td>
+                    <td>
+                        <div id="graph1" style="border:thin solid black; width:400px; height:400px"></div>
+                    </td>
+                    <td>
+                        <div id="graph2" style="border:thin solid black; width:400px; height:400px"></div>
+                    </td>
+                    <td width="100px">
+                        <div id="title2" style="text-align:center"></div>
+                    </td>
+                    <td id="td3" style="display:none">
+                        <div id="title3" style="text-align:center">.</div>
+                        <div id="graph3" style="border:thin solid black; width:400px; height:400px"></div>
+                    </td>
+                    <td style="text-align:center;display:none" id="tv" width="100px">
+                    </td>
+                </tr>
+            </table>
         </center>
     </body>
 </html>

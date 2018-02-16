@@ -3,7 +3,10 @@ Newton: An A.I. for Math
 ========================
 
 Author : Anthony John Ripa
-Date : 2018.01.21
+
+Date : 2018.02.15
+
+Live Demo at <a target='_blank' href='http://tonyripa.github.io/Newton/'>http://tonyripa.github.io/Newton/</a>
 
 Newton
 ------
@@ -17,4 +20,4 @@ Consider the problem ((2+h)^2-2^2)/h | 0. These are secants lines of the functio
 
 Dependencies
 ------------
-<a href='http://jquery.com'>jQuery</a> and <a href='http://mathjs.org'>mathjs</a>
+<a href='http://jquery.com'>jQuery</a> , <a href='http://mathjs.org'>mathjs</a> and <a href='http://visjs.org'>visjs</a>

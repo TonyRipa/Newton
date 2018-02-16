@@ -1,24 +1,39 @@
 ﻿
 /*
     Author: Anthony John Ripa
-    Date:   1/21/2018
+    Date:   2/10/2018
     Newton: An A.I. for Math
 */
 
 class Newton {
-    static simplify(input) {
+    static getxy() {
+        var xy = [];
+        for (var i = 0; i < Newton.x[0].length; i++)
+            xy.push([Newton.x[0][i], Newton.y[i][0]]);
+        return xy;
+    }
+    static getxsy() {
+        if (Newton.x.length == 1) return Newton.getxy();
+        var xy = [];
+        for (var i = 0; i < Newton.x[0].length; i++)
+            xy.push([Newton.x[0][i], Newton.x[1][i], Newton.y[i][0]]);
+        return xy;
+    }
+    static simplify(input, full) {
         var expr, constant;
         [expr, constant] = input.split('|');
         expr = infer(expr)
         if (constant) {
-            expr = evaluate(expr, constant);
+            if (full) expr = evaluate(expr, constant);
             expr = infer(expr)
+            if (!full) expr += '|' + constant;
         }
         return expr;
         function evaluate(input, val) {
-            return substitute(input, getvars(input).slice(-1), val);
+            return substitute(input, getvars(input).slice(-1)[0], val);
         }
         function substitute(input, vari, val) {
+            if (vari === undefined) return input;
             return input.replace(new RegExp(vari, 'g'), '(' + val + ')');
         }
         function getvars(input) {
@@ -43,8 +58,9 @@ class Newton {
             return toString(vect, vars);
             function makexs(vars) {
                 var xs = [];
-                xs.ones = Array(10).fill(1);
-                for (var i = 0; i < vars.length; i++) xs.push(xs.ones.map(Math.random));
+                xs.ones = Array(20).fill(1);
+                for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
+                Newton.x = xs;
                 return xs;
             }
             function solve(A, b) {
@@ -62,7 +78,7 @@ class Newton {
             function coef(num, vari) {
                 if (num == 0) return '';
                 if (num == 1) return '+' + vari;
-                return '+' + num + (vari == '1' ? '' : vari);
+                return '+' + num + (vari == '1' ? '' : '*' + vari);
             }
             function parser22() {
                 return [
@@ -106,6 +122,7 @@ class Newton {
                                 ys.push(math.eval(expression));
                             }
                             var b = math.transpose([ys]);
+                            Newton.y = b;
                             return b;
                         }
                     },
