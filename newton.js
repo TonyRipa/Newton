@@ -1,31 +1,22 @@
 ﻿
 /*
     Author: Anthony John Ripa
-    Date:   2/10/2018
+    Date:   3/15/2018
     Newton: An A.I. for Math
 */
 
 class Newton {
-    static getxy() {
-        var xy = [];
-        for (var i = 0; i < Newton.x[0].length; i++)
-            xy.push([Newton.x[0][i], Newton.y[i][0]]);
-        return xy;
-    }
-    static getxsy() {
-        if (Newton.x.length == 1) return Newton.getxy();
-        var xy = [];
-        for (var i = 0; i < Newton.x[0].length; i++)
-            xy.push([Newton.x[0][i], Newton.x[1][i], Newton.y[i][0]]);
-        return xy;
+    static getpoints() {
+        //xy.push([Newton.x[0][i], Newton.x[1][i], Newton.y[i][0]]);
+        return math.transpose([...Newton.x, math.transpose(Newton.y)[0]]);
     }
     static simplify(input, full) {
         var expr, constant;
         [expr, constant] = input.split('|');
-        expr = infer(expr)
+        expr = infer(expr);
         if (constant) {
             if (full) expr = evaluate(expr, constant);
-            expr = infer(expr)
+            expr = infer(expr);
             if (!full) expr += '|' + constant;
         }
         return expr;
@@ -38,22 +29,18 @@ class Newton {
         }
         function getvars(input) {
             var vars = [];
-            var alphabet = 'abcdefghijklmnopqrstuvwxyz';
-            for (var i = 0; i < input.length; i++) {
-                var symbol = input[i];
-                if (isin(symbol, alphabet)) {
-                    if (!isin(symbol, vars)) vars.push(symbol);
+            var alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            for (let symbol of input) {
+                if (alphabet.includes(symbol)) {
+                    if (!vars.includes(symbol)) vars.push(symbol);
                 }
             }
             return vars;
-            function isin(needle, haystack) {
-                return haystack.indexOf(needle)>-1;
-            }
         }
         function infer(input) {
             var vars = getvars(input);
             var input2matrix, toString;
-            [input2matrix, toString] = parser22();
+            [input2matrix, toString] = parser32();
             var vect = solve(...input2matrix(input));
             return toString(vect, vars);
             function makexs(vars) {
@@ -79,6 +66,89 @@ class Newton {
                 if (num == 0) return '';
                 if (num == 1) return '+' + vari;
                 return '+' + num + (vari == '1' ? '' : '*' + vari);
+            }
+            function parser32() {
+                var power = 3;
+                return [
+                    function input2matrix(input) {
+                        var vars = getvars(input);
+                        var xs = makexs(vars);
+                        var A = makeA(xs);
+                        var b = makeb(xs, input);
+                        return [A, b];
+                        function makeA(xs) {
+                            var AT = [];
+                            if (xs.length == 0) {
+                                AT.push(xs.ones);
+                            } else if (xs.length == 1) {
+                                AT = AT.concat(makepowercols(xs[0]));
+                            } else if (xs.length == 2) {
+                                for (var i = 0; i <= power; i++) {
+                                    AT = AT.concat(makepowercols(xs[0]).map(x=>coltimescol(x, xs[1].map(xi=>math.pow(xi, i)))));
+                                }
+                            }
+                            return math.transpose(AT);
+                            function coltimescol(col1, col2) {
+                                var ret = [];
+                                for (var i = 0; i < col1.length; i++)
+                                    ret.push(col1[i] * col2[i]);
+                                return ret;
+                            }
+                            function makepowercols(x) {
+                                var cols = [];
+                                for (var p = 0; p <= power; p++) cols.push(x.map(xi=>math.pow(xi, p)));
+                                return cols;
+                            }
+                        }
+                        function makeb(xs, input) {
+                            var ys = [];
+                            for (var datai = 0; datai < xs.ones.length; datai++) {
+                                var expression = input;
+                                for (var varj = 0; varj < vars.length; varj++) {
+                                    expression = substitute(expression, vars[varj], xs[varj][datai]);
+                                }
+                                ys.push(math.eval(expression));
+                            }
+                            var b = math.transpose([ys]);
+                            Newton.y = b;
+                            return b;
+                        }
+                    },
+                    function toString(vect, vars) {
+                        //console.log(vect.join('\n'))
+                        //console.log(vars)
+                        var varcombo = [];
+                        if (vars.length == 0) varcombo.push('1');
+                        if (vars.length == 1) {
+                            for (var v1 = 0; v1 <= power; v1++)
+                                varcombo.push(term(v1, '1', vars));
+                        }
+                        if (vars.length == 2) {
+                            for (var v2 = 0; v2 <= power; v2++)
+                                for (var v1 = 0; v1 <= power; v1++)
+                                    varcombo.push(term(v1, v2, vars));
+                        }
+                        vect = vect.map(round);
+                        var ret = '';
+                        for (var i = 0; i < varcombo.length; i++) {
+                            ret += i == 0 ? vect[i] : coef(vect[i], varcombo[i]);
+                        }
+                        if (ret.length == 1) return ret;
+                        if (ret[0] == '0') ret = ret.substr(1);
+                        if (ret[0] == '+') ret = ret.substr(1);
+                        return ret;
+                        function term(i, j, vars) {
+                            if (vars.length == 1) return subterm(vars[0], i);
+                            if (j == 0) return subterm(vars[0], i);
+                            if (i == 0) return subterm(vars[1], j);
+                            return subterm(vars[0], i) + '*' + subterm(vars[1], j);
+                            function subterm(vari, ind) {
+                                if (ind == 0) return '';
+                                return vari + (ind == 1 ? '' : '^' + ind);
+                            }
+                        }
+                    }
+                ];
             }
             function parser22() {
                 return [
@@ -129,7 +199,6 @@ class Newton {
                     function toString22(vect, vars) {
                         //console.log(vect.join('\n'))
                         //console.log(vars)
-                        //console.log(vars.length)
                         var varcombo = [];
                         if (vars.length == 0) varcombo.push('1');
                         if (vars.length == 1) {
@@ -187,6 +256,7 @@ class Newton {
                                 ys.push(math.eval(expression));
                             }
                             var b = math.transpose([ys]);
+                            Newton.y = b;
                             return b;
                         }
                     },
@@ -224,6 +294,7 @@ class Newton {
                                 ys.push(math.eval(expression));
                             }
                             var b = math.transpose([ys]);
+                            Newton.y = b;
                             return b;
                         }
                     },
@@ -231,7 +302,8 @@ class Newton {
                         vect = vect.map(round);
                         var ret = '';
                         for (var i = 0; i < vect.length; i++) {
-                            ret += coef(vect[i], vars[0] + '^' + i);
+                            if (i == 0) ret += coef(vect[i], 1);
+                            else ret += coef(vect[i], vars[0] + '^' + i);
                         }
                         return ret.substr(1);
                     }
