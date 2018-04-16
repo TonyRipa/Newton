@@ -1,7 +1,7 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   3/15/2018
+    Date:   4/15/2018
     Plot.js: A plot library
 */
 
@@ -97,7 +97,7 @@ class Plot {
         var vars = Plot.getvars(expr);
         if (vars.length <= 1) return Plot.expressiontofunction1(expr);
         if (vars.length == 2) return Plot.expressiontofunction2(expr);
-        throw new Error('Not the right amount of variables.');
+        throw new Error('Not the right amount of variables: expr = ' + expr);
     }
 
     static expressiontofunction1(expr) {

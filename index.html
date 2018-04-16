@@ -1,7 +1,7 @@
 ﻿
 <!--
     Author: Anthony John Ripa
-    Date:   3/15/2018
+    Date:   4/15/2018
     Demo for Newton: An A.I. for Math
 -->
 
@@ -12,6 +12,7 @@
         <meta charset="utf-8" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.6/jsxgraphcore.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -19,6 +20,7 @@
         <script src="newton.js"></script>
         <script src="plot.js"></script>
         <script>
+            parser = 'polynomial';
             function go() {
                 var input = $('input').val() || '0';
                 var expr = input.split('|')[0];
@@ -39,7 +41,7 @@
             function plot13(points, title) {
                 $('#title1').html(title);
                 var vars = Plot.getvars(title);
-                Plot.plot3(points, 'graph1', { xLabel: vars[0], yLabel: vars[1] });
+                Plot.plot3(points, 'graph1', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
             }
             function plot2(expr) {
                 Plot.graph(expr, 'graph2');
@@ -47,7 +49,7 @@
             }
             function plot23(expr) {
                 var vars = Plot.getvars(expr);
-                Plot.graph3(expr, 'graph2', { style: 'surface', xLabel: vars[0], yLabel: vars[1] });
+                Plot.graph3(expr, 'graph2', { style: 'surface', xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
                 $('#title2').html(expr);
             }
             function plot23s(expr) {
@@ -101,6 +103,10 @@
         </script>
     </head>
     <body>
+        <select>
+            <option onclick="parser = 'polynomial'">2 Variable</option>
+            <option onclick="parser = 'rational'">1 Variable</option>
+        </select>
         <center>
             <h1>Newton</h1>
             <table border="1">
@@ -118,6 +124,7 @@
                                 <option>x</option>
                                 <option>x/x</option>
                                 <option>(x^2-1)/(x-1)</option>
+                                <option>(x-1)/(x^2-1)</option>
                                 <option>2+h</option>
                                 <option>(2+h)^2</option>
                                 <option>(2+h)^2-2^2</option>

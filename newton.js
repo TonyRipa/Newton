@@ -1,14 +1,15 @@
 ﻿
 /*
     Author: Anthony John Ripa
-    Date:   3/15/2018
+    Date:   4/15/2018
     Newton: An A.I. for Math
 */
 
 class Newton {
     static getpoints() {
         //xy.push([Newton.x[0][i], Newton.x[1][i], Newton.y[i][0]]);
-        return math.transpose([...Newton.x, math.transpose(Newton.y)[0]]);
+        return _.zip(Newton.x[0], _.unzip(Newton.y)[0]);
+        //return math.transpose([...Newton.x, math.transpose(Newton.y)[0]]);
     }
     static simplify(input, full) {
         var expr, constant;
@@ -39,9 +40,17 @@ class Newton {
         }
         function infer(input) {
             var vars = getvars(input);
-            var input2matrix, toString;
-            [input2matrix, toString] = parser32();
-            var vect = solve(...input2matrix(input));
+            if (parser == 'rational') {
+                var input2vect, toString;
+                [input2vect, toString] = parsernon();
+                var vect = input2vect(input);
+                console.log(vect)
+            } if (parser == 'polynomial') {
+                var input2matrix, toString;
+                [input2matrix, toString] = parser32();
+                var vect = solve(...input2matrix(input));
+            }
+            console.log(toString(vect, vars))
             return toString(vect, vars);
             function makexs(vars) {
                 var xs = [];
@@ -49,6 +58,19 @@ class Newton {
                 for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
                 Newton.x = xs;
                 return xs;
+            }
+            function makeb(xs, input) {
+                var ys = [];
+                for (var datai = 0; datai < xs.ones.length; datai++) {
+                    var expression = input;
+                    for (var varj = 0; varj < vars.length; varj++) {
+                        expression = substitute(expression, vars[varj], xs[varj][datai]);
+                    }
+                    ys.push(math.eval(expression));
+                }
+                var b = math.transpose([ys]);
+                Newton.y = b;
+                return b;
             }
             function solve(A, b) {
                 var AT = math.transpose(A);
@@ -66,6 +88,80 @@ class Newton {
                 if (num == 0) return '';
                 if (num == 1) return '+' + vari;
                 return '+' + num + (vari == '1' ? '' : '*' + vari);
+            }
+            function parsernon() {
+                return [
+                    function input2vec(input) {
+                        var vars = getvars(input);
+                        var xs = makexs(vars);
+                        var b = makeb(xs, input);
+                        var x = xs[0];
+                        var y = math.transpose(b)[0];
+                        var param = search(_.zip(x, y));
+                        return param;
+                        function search(allpoints) {
+                            var eye = math.eye([5, 5]);
+                            var restartmax = 500
+                            for (var restart = 0; restart < restartmax; restart++) {
+                                var points = _.sample(allpoints, 9);
+                                var param = math.ones([5]).map((v, i) =>Math.round(([2, 2, 2, 1, 1][i] * Math.random() - [.5, .5, .5, 0, 0][i]) * (restart / restartmax) * 10 * [1, 1, .5, .5, .5][i]));
+                                var f = (x, p) =>(p[0] + p[1] * x + p[2] * x * x) / (p[3] + p[4] * x);
+                                var maxtime = 30;
+                                for (var search = 0; search <= maxtime; search++) {
+                                    var candidates = [];
+                                    for (var i = 0; i < eye.length; i++) {
+                                        candidates.push(math.add(param, eye[i]));
+                                        candidates.push(math.subtract(param, eye[i]));
+                                    }
+                                    if (Math.max(...param.map(Math.abs)) > 10) break;
+                                    var diffs = candidates.map(v=>diff(f, points, v));
+                                    var best = Math.min(...diffs);
+                                    var bestindex = diffs.indexOf(best);
+                                    var param = candidates[bestindex];
+                                    if (typeof (param) == 'undefined') { console.log(candidates, diffs, best); console.trace(); end }
+                                    if (diff(f, points, param) < .005) return param;
+                                }
+                            }
+                            return [0, 0, 0, 1, 0];
+                            function diff(f, points, p) {
+                                var ys = points.map(xy=>[xy[1], f(xy[0], p)])
+                                var d0 = ys.map(pair =>1 / pair[0] == 0 && 1 / pair[1] == 0 ? 0 : isNaN(pair[0]) && isNaN(pair[1]) ? 0 : pair[0] - pair[1]);
+                                var d = d0.map(x=>x * x);
+                                d = d.map(x=>1 / x == 0 ? 1 : x);
+                                d = d.map(x=>isNaN(x) ? 1 : x);
+                                d = Math.sqrt(math.sum(...d));
+                                if (isNaN(d)) { console.log('disNaN', p, d0, y, y1); end }
+                                return d;
+                            }
+                        }
+                    },
+                    function toString(vect, vars) {
+                        if (vect[2] != 0) {
+                            var bot = sum(vect[3], vect[4]);
+                            var top = (vect[0] || '') + coef(vect[1], vars[0]) + coef(vect[2], vars[0] + '^2');
+                            if (top[0] == '+') return top.substr(1);
+                            if (bot == '1') return top;
+                            return '( ' + top + ' ) / ( ' + vect[3] + ' + ' + vect[4] + '*' + vars[0] + ' ) ';
+                        }
+                        var top = sum(vect[0], vect[1]);
+                        var bot = sum(vect[3], vect[4]);
+                        if (bot == '1') return top.toString();
+                        if (!top.toString().includes('+')) return top + ' / (' + bot + ')';
+                        return '(' + top + ') / (' + bot + ')';
+                        function sum(a, b) {
+                            if (a == 0) {
+                                if (b == 0) return 0;
+                                if (b == 1) return vars[0];
+                                if (b == -1) return '-' + vars[0];
+                                return b + '*' + vars[0];
+                            }
+                            if (b == 0) return a;
+                            if (b == 1) return a + ' + ' + vars[0];
+                            if (b == -1) return a + ' - ' + vars[0];
+                            return a + ' + ' + b + '*' + vars[0];
+                        }
+                    }
+                ]
             }
             function parser32() {
                 var power = 3;
@@ -99,19 +195,6 @@ class Newton {
                                 for (var p = 0; p <= power; p++) cols.push(x.map(xi=>math.pow(xi, p)));
                                 return cols;
                             }
-                        }
-                        function makeb(xs, input) {
-                            var ys = [];
-                            for (var datai = 0; datai < xs.ones.length; datai++) {
-                                var expression = input;
-                                for (var varj = 0; varj < vars.length; varj++) {
-                                    expression = substitute(expression, vars[varj], xs[varj][datai]);
-                                }
-                                ys.push(math.eval(expression));
-                            }
-                            var b = math.transpose([ys]);
-                            Newton.y = b;
-                            return b;
                         }
                     },
                     function toString(vect, vars) {
@@ -182,19 +265,6 @@ class Newton {
                                 return cols;
                             }
                         }
-                        function makeb(xs, input) {
-                            var ys = [];
-                            for (var datai = 0; datai < xs.ones.length; datai++) {
-                                var expression = input;
-                                for (var varj = 0; varj < vars.length; varj++) {
-                                    expression = substitute(expression, vars[varj], xs[varj][datai]);
-                                }
-                                ys.push(math.eval(expression));
-                            }
-                            var b = math.transpose([ys]);
-                            Newton.y = b;
-                            return b;
-                        }
                     },
                     function toString22(vect, vars) {
                         //console.log(vect.join('\n'))
@@ -246,19 +316,6 @@ class Newton {
                             var A = math.transpose(AT);
                             return A;
                         }
-                        function makeb(xs, input) {
-                            var ys = [];
-                            for (var datai = 0; datai < xs[0].length; datai++) {
-                                var expression = input;
-                                for (var varj = 0; varj < vars.length; varj++) {
-                                    expression = substitute(expression, vars[varj], xs[varj][datai]);
-                                }
-                                ys.push(math.eval(expression));
-                            }
-                            var b = math.transpose([ys]);
-                            Newton.y = b;
-                            return b;
-                        }
                     },
                     function toString2(vect, vars) {
                         vect = vect.map(round);
@@ -285,17 +342,6 @@ class Newton {
                             var AT = [];
                             for (var power = 0; power <= 2; power++) AT.push(xs[0].map(xi=>math.pow(xi, power)));
                             return math.transpose(AT);
-                        }
-                        function makeb(xs, input) {
-                            var ys = [];
-                            for (var datai = 0; datai < xs[0].length; datai++) {
-                                var expression = input;
-                                expression = substitute(expression, vars[0], xs[0][datai]);
-                                ys.push(math.eval(expression));
-                            }
-                            var b = math.transpose([ys]);
-                            Newton.y = b;
-                            return b;
                         }
                     },
                     function toString1(vect, vars) {
