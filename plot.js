@@ -1,7 +1,7 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   4/15/2018
+    Date:   4/26/2018
     Plot.js: A plot library
 */
 
@@ -39,6 +39,10 @@ class Plot {
 
     static graph3(expr, dom, options) {
         var f = Plot.expressiontofunction(expr);
+        return Plot.graph3f(f, dom, options);
+    }
+
+    static graph3f(f, dom, options) {
         var data = Plot.functiontovisdata(f);
         Plot.plot3__data(data, dom, options);
         return data;

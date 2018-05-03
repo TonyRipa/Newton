@@ -1,7 +1,7 @@
 ﻿
 <!--
     Author: Anthony John Ripa
-    Date:   4/15/2018
+    Date:   4/30/2018
     Demo for Newton: An A.I. for Math
 -->
 
@@ -20,7 +20,6 @@
         <script src="newton.js"></script>
         <script src="plot.js"></script>
         <script>
-            parser = 'polynomial';
             function go() {
                 var input = $('input').val() || '0';
                 var expr = input.split('|')[0];
@@ -103,10 +102,6 @@
         </script>
     </head>
     <body>
-        <select>
-            <option onclick="parser = 'polynomial'">2 Variable</option>
-            <option onclick="parser = 'rational'">1 Variable</option>
-        </select>
         <center>
             <h1>Newton</h1>
             <table border="1">

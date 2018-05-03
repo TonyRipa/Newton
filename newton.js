@@ -1,14 +1,14 @@
 ﻿
 /*
     Author: Anthony John Ripa
-    Date:   4/15/2018
+    Date:   5/2/2018
     Newton: An A.I. for Math
 */
 
 class Newton {
     static getpoints() {
         //xy.push([Newton.x[0][i], Newton.x[1][i], Newton.y[i][0]]);
-        return _.zip(Newton.x[0], _.unzip(Newton.y)[0]);
+        return _.zip(...Newton.x, _.unzip(Newton.y)[0]);
         //return math.transpose([...Newton.x, math.transpose(Newton.y)[0]]);
     }
     static simplify(input, full) {
@@ -40,22 +40,54 @@ class Newton {
         }
         function infer(input) {
             var vars = getvars(input);
-            if (parser == 'rational') {
-                var input2vect, toString;
-                [input2vect, toString] = parsernon();
-                var vect = input2vect(input);
-                console.log(vect)
-            } if (parser == 'polynomial') {
-                var input2matrix, toString;
-                [input2matrix, toString] = parser32();
+            console.log('Trying Polynomial');
+            var candidate = inferpolynomial();
+            if (validate(input, candidate)) return candidate;
+            console.log('Not Polynomial. Trying Rational.');
+            var candidate = inferrational();
+            if (validate(input, candidate)) return candidate;
+            console.log('not polynomial. not rational');
+            return '0';
+            function inferpolynomial() {
+                var input2matrix, vect2matrix;
+                [input2matrix, vect2matrix] = parser32();
                 var vect = solve(...input2matrix(input));
+                var ret = stringify(vect2matrix(vect, vars), vars)
+                console.log('Infer-Polynomial: ', ret);
+                return ret;
             }
-            console.log(toString(vect, vars))
-            return toString(vect, vars);
+            function inferrational() {
+                var input2matrix, vect2matrixnum, vect2matrixden;
+                [input2matrix, vect2matrixnum, vect2matrixden] = parserrationalclosed();
+                var matrix = input2matrix(input)
+                console.log('matrix', matrix);
+                var vect = solve(...matrix);
+                console.log('vect', vect);
+                console.log(stringify(vect2matrixnum(vect), vars) + ' : ' + stringify(vect2matrixden(vect), vars));
+                var num = stringify(vect2matrixnum(vect), vars);
+                var den = stringify(vect2matrixden(vect), vars);
+                if (den == '1') return num;
+                if (num.includes('+') || num.includes('-')) num = '(' + num + ')';
+                if (den.includes('+') || den.includes('-')) den = '(' + den + ')';
+                return num + ' / ' + den;
+            }
+            function validate(inputstring, outputstring) {
+                var scope = {};
+                for (let char of 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+                    scope[char] = Math.random() * 10 - 5;
+                var input = math.eval(inputstring, scope);
+                var output = math.eval(outputstring, scope);
+                var error = Math.abs(input - output);
+                console.log('Error', error)
+                return error < .0001;
+            }
             function makexs(vars) {
                 var xs = [];
                 xs.ones = Array(20).fill(1);
+                //xs.push([-2, -1, 0, 1]);
                 for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
+                //xs = xs.map(row=>row.map(cell=>Math.round(1000 * cell) / 1000));
+                //xs.ones = Array(10).fill(1);
                 Newton.x = xs;
                 return xs;
             }
@@ -75,21 +107,100 @@ class Newton {
             function solve(A, b) {
                 var AT = math.transpose(A);
                 var ATA = math.multiply(AT, A);
-                var ATA = math.multiply(AT, A);
-                var ATAinv = math.divide(math.eye(A[0].length), ATA);
                 var ATb = math.multiply(AT, b);
-                var x = math.multiply(ATAinv, ATb);
-                return x.valueOf();
+                return solvesquare(ATA, ATb);
+                function solvesquare(A, b) {
+                    console.log('Solve > SolveSquare > Determinant', math.det(A));
+                    if (math.det(A) < .1) return solvesquare2(A, b);
+                    var Ainv = math.divide(math.eye(A[0].length), A);
+                    var x = math.multiply(Ainv, b);
+                    return x.valueOf();
+                }
+                function solvesquare2(A, b) {
+                    console.log('det2', math.det(A));
+                    var Ainv = math.divide(math.eye(A[0].length), A);
+                    var x = math.multiply(Ainv, b);
+                    return x.valueOf();
+                }
             }
-            function round(x) {
-                return Math.round(x * 100) / 100;
+            function stringify(termcoefs, vars) {
+                //console.log(termcoefs)
+                //console.log(vars)
+                var power = termcoefs.length - 1;
+                termcoefs = termcoefs.map(row=>row.map(cell=>Math.round(cell * 10000) / 10000));
+                var ret = '';
+                for (var v2 = 0; v2 <= power; v2++) {
+                    for (var v1 = 0; v1 <= power; v1++) {
+                        ret += (v1 == 0 && v2 == 0) ? termcoefs[v2][v1] : term(termcoefs[v2][v1] || 0, termvars(v1, v2, vars));
+                    }
+                }
+                if (ret.length == 1) return ret;
+                if (ret[0] == '0') ret = ret.substr(1);
+                if (ret[0] == '+') ret = ret.substr(1);
+                return ret;
+                function term(termcoef, termvar) {
+                    if (termcoef == 0) return '';
+                    if (termcoef == 1) return '+' + termvar;
+                    return '+' + termcoef + (termvar == '1' ? '' : '*' + termvar);
+                }
+                function termvars(v1, v2, vars) {
+                    if (vars.length == 1) return subterm(vars[0], v1);
+                    if (v2 == 0) return subterm(vars[0], v1);
+                    if (v1 == 0) return subterm(vars[1], v2);
+                    return subterm(vars[0], v1) + '*' + subterm(vars[1], v2);
+                    function subterm(variable, power) {
+                        if (power == 0) return '';
+                        return variable + (power == 1 ? '' : '^' + power);
+                    }
+                }
             }
-            function coef(num, vari) {
-                if (num == 0) return '';
-                if (num == 1) return '+' + vari;
-                return '+' + num + (vari == '1' ? '' : '*' + vari);
+            function parserrationalclosed() {   //      (a+bx)/(c+dx)
+                return [
+                    function input2matrix1(input) {
+                        var vars = getvars(input);
+                        var xs = makexs(vars);
+                        var b = makeb(xs, input);
+                        var y = _.unzip(b)[0];
+                        try {
+                            var A = makeA(xs);
+                        } catch (e) {
+                            alert(e)
+                        }
+                        b = [...xs.ones.map(q=>0), 1];
+                        return [A, b];
+                        function makeA(xs) {
+                            var c1 = [...xs[0], 0];
+                            var c2 = [...xs.ones, 0];
+                            var c3 = [...math.multiply(-1, math.dotMultiply(xs[0], y)), 1];
+                            var c4 = [...math.multiply(-1, y), 0];
+                            //var c5 = [0, 0, 0, 0, 1];
+                            console.log('xs[0]', c1);
+                            console.log('xs.ones', c2);
+                            console.log('xs[0]*y', c3);
+                            console.log('y', c4);
+                            //console.log('c5', c5);
+                            var AT = [];
+                            AT.push(c1);
+                            AT.push(c2);
+                            AT.push(c3);
+                            AT.push(c4);
+                            //AT.push(c5);
+                            return math.transpose(AT);
+                        }
+                    },
+                    function vect2matrixnum(vect, vars) {
+                        //vect = vect.map(v=>v * math.factorial(13)).map(Math.round)
+                        //vect = vect.map(v=>v / math.gcd(...vect));
+                        return [[vect[1], vect[0], 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+                    },
+                    function vect2matrixden(vect, vars) {
+                        //vect = vect.map(v=>v * math.factorial(13)).map(Math.round)
+                        //vect = vect.map(v=>v / math.gcd(...vect));
+                        return [[vect[3], vect[2], 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+                    }
+                ];
             }
-            function parsernon() {
+            function parserrationalsearch() {   //      (a+bx+cx²)/(d+ex)
                 return [
                     function input2vec(input) {
                         var vars = getvars(input);
@@ -135,35 +246,15 @@ class Newton {
                             }
                         }
                     },
-                    function toString(vect, vars) {
-                        if (vect[2] != 0) {
-                            var bot = sum(vect[3], vect[4]);
-                            var top = (vect[0] || '') + coef(vect[1], vars[0]) + coef(vect[2], vars[0] + '^2');
-                            if (top[0] == '+') return top.substr(1);
-                            if (bot == '1') return top;
-                            return '( ' + top + ' ) / ( ' + vect[3] + ' + ' + vect[4] + '*' + vars[0] + ' ) ';
-                        }
-                        var top = sum(vect[0], vect[1]);
-                        var bot = sum(vect[3], vect[4]);
-                        if (bot == '1') return top.toString();
-                        if (!top.toString().includes('+')) return top + ' / (' + bot + ')';
-                        return '(' + top + ') / (' + bot + ')';
-                        function sum(a, b) {
-                            if (a == 0) {
-                                if (b == 0) return 0;
-                                if (b == 1) return vars[0];
-                                if (b == -1) return '-' + vars[0];
-                                return b + '*' + vars[0];
-                            }
-                            if (b == 0) return a;
-                            if (b == 1) return a + ' + ' + vars[0];
-                            if (b == -1) return a + ' - ' + vars[0];
-                            return a + ' + ' + b + '*' + vars[0];
-                        }
+                    function vect2matrixnum(vect, vars) {
+                        return [[vect[0], vect[1], vect[2], 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+                    },
+                    function vect2matrixden(vect, vars) {
+                        return [[vect[3], vect[4], 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
                     }
                 ]
             }
-            function parser32() {
+            function parser32() {    //  a+bx+cx²+dx³ + ey+fxy+gx²y+hx³y + iy²+jxy²+kx²y²+lx³y² + my³+nxy³+ox²y³+px³y³
                 var power = 3;
                 return [
                     function input2matrix(input) {
@@ -197,43 +288,13 @@ class Newton {
                             }
                         }
                     },
-                    function toString(vect, vars) {
-                        //console.log(vect.join('\n'))
-                        //console.log(vars)
-                        var varcombo = [];
-                        if (vars.length == 0) varcombo.push('1');
-                        if (vars.length == 1) {
-                            for (var v1 = 0; v1 <= power; v1++)
-                                varcombo.push(term(v1, '1', vars));
-                        }
-                        if (vars.length == 2) {
-                            for (var v2 = 0; v2 <= power; v2++)
-                                for (var v1 = 0; v1 <= power; v1++)
-                                    varcombo.push(term(v1, v2, vars));
-                        }
-                        vect = vect.map(round);
-                        var ret = '';
-                        for (var i = 0; i < varcombo.length; i++) {
-                            ret += i == 0 ? vect[i] : coef(vect[i], varcombo[i]);
-                        }
-                        if (ret.length == 1) return ret;
-                        if (ret[0] == '0') ret = ret.substr(1);
-                        if (ret[0] == '+') ret = ret.substr(1);
-                        return ret;
-                        function term(i, j, vars) {
-                            if (vars.length == 1) return subterm(vars[0], i);
-                            if (j == 0) return subterm(vars[0], i);
-                            if (i == 0) return subterm(vars[1], j);
-                            return subterm(vars[0], i) + '*' + subterm(vars[1], j);
-                            function subterm(vari, ind) {
-                                if (ind == 0) return '';
-                                return vari + (ind == 1 ? '' : '^' + ind);
-                            }
-                        }
+                    function vect2matrix(vect, vars) {
+                        //if (vars.length < 2) return [[vect[0], vect[1], vect[2], vect[3]], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+                        return [[vect[0], vect[1], vect[2], vect[3]], [vect[4], vect[5], vect[6], vect[7]], [vect[8], vect[9], vect[10], vect[11]], [vect[12], vect[13], vect[14], vect[15]]];
                     }
                 ];
             }
-            function parser22() {
+            function parser22() {    //  a+bx+cx² + dy+exy+fx²y + gy²+hxy²+ix²y²
                 return [
                     function input2matrix22(input) {
                         var vars = getvars(input);
@@ -266,43 +327,12 @@ class Newton {
                             }
                         }
                     },
-                    function toString22(vect, vars) {
-                        //console.log(vect.join('\n'))
-                        //console.log(vars)
-                        var varcombo = [];
-                        if (vars.length == 0) varcombo.push('1');
-                        if (vars.length == 1) {
-                            for (var v1 = 0; v1 <= 2; v1++)
-                                varcombo.push(term(v1, '1', vars));
-                        }
-                        if (vars.length == 2) {
-                            for (var v2 = 0; v2 <= 2; v2++)
-                                for (var v1 = 0; v1 <= 2; v1++)
-                                    varcombo.push(term(v1, v2, vars));
-                        }
-                        vect = vect.map(round);
-                        var ret = '';
-                        for (var i = 0; i < varcombo.length; i++) {
-                            ret += i == 0 ? vect[i] : coef(vect[i], varcombo[i]);
-                        }
-                        if (ret.length == 1) return ret;
-                        if (ret[0] == '0') ret = ret.substr(1);
-                        if (ret[0] == '+') ret = ret.substr(1);
-                        return ret;
-                        function term(i, j, vars) {
-                            if (vars.length == 1) return subterm(vars[0], i);
-                            if (j == 0) return subterm(vars[0], i);
-                            if (i == 0) return subterm(vars[1], j);
-                            return subterm(vars[0], i) + '*' + subterm(vars[1], j);
-                            function subterm(vari, ind) {
-                                if (ind == 0) return '';
-                                return vari + (ind == 1 ? '' : '^' + ind);
-                            }
-                        }
+                    function vect2matrix(vect, vars) {
+                        return [[vect[0], vect[1], vect[2], 0], [vect[3], vect[4], vect[5], 0], [vect[6], vect[7], vect[8], 0], [0, 0, 0, 0]];
                     }
                 ];
             }
-            function parser2() {
+            function parser2() {    //  a+bx+cy
                 return [
                     function input2matrix2(input) {
                         var vars = getvars(input);
@@ -317,20 +347,12 @@ class Newton {
                             return A;
                         }
                     },
-                    function toString2(vect, vars) {
-                        vect = vect.map(round);
-                        var ret = '';
-                        console.log(vars)
-                        console.log(vect)
-                        for (var i = 0; i < vars.length; i++) {
-                            ret += coef(vect[i + 1], vars[i]);
-                        }
-                        if (vect[0] != 0) ret += '+' + vect[0];
-                        return ret.substr(1);
+                    function vect2matrix(vect, vars) {
+                        return [[vect[0], vect[1], 0, 0], [vect[2], 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
                     }
                 ];
             }
-            function parser1() {
+            function parser1() {    //  a+bx+cx²
                 return [
                     function input2matrix1(input) {
                         var vars = getvars(input);
@@ -344,14 +366,8 @@ class Newton {
                             return math.transpose(AT);
                         }
                     },
-                    function toString1(vect, vars) {
-                        vect = vect.map(round);
-                        var ret = '';
-                        for (var i = 0; i < vect.length; i++) {
-                            if (i == 0) ret += coef(vect[i], 1);
-                            else ret += coef(vect[i], vars[0] + '^' + i);
-                        }
-                        return ret.substr(1);
+                    function vect2matrix(vect, vars) {
+                        return [[vect[0], vect[1], vect[2], 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
                     }
                 ];
             }
