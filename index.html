@@ -1,180 +1,182 @@
 ﻿
 <!--
-    Author: Anthony John Ripa
-    Date:   6/10/2018
-    Demo for Newton: An A.I. for Math
+	Author: Anthony John Ripa
+	Date:	7/8/2018
+	Demo for Newton: An A.I. for Math
 -->
 
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Newton</title>
-        <meta charset="utf-8" />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.6/jsxgraphcore.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
-        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="https://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css" />
-        <script src="transform.js"></script>
-        <script src="newton.js"></script>
-        <script src="plot.js"></script>
-        <script>
-            function go() {
-                var input, expr, constant, pointss, points, exprsimp, totalsimp, d, tran;
-                input = $('input').val() || '0';
-                expr = input.split('|')[0];
-                constant = input.split('|')[1];
-                [pointss, exprsimp, totalsimp] = Newton.simplify(input);
-                points = pointss.orig;
-                d = points[0].length;
-                if (d == 2) plot1(points, expr); else plot13(points, expr);
-                if (d == 2) plot2(pointss.tran, expr); else plot23(points, expr);
-                if (d == 2) plot3(exprsimp); else plot33(exprsimp);
-                if (d == 2) plot4(exprsimp, constant, totalsimp); else plot43(exprsimp, constant, totalsimp);
-                //console.log(Newton.x);
-            }
-            function plot1(points, title) {
-                $('#title1').html(title);
-                Plot.plot(points, 'graph1');
-            }
-            function plot13(points, title) {
-                $('#title1').html(title);
-                var vars = Plot.getvars(title);
-                Plot.plot3(points, 'graph1', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
-            }
-            function plot2(points, title) {
-                $('#title2').html(title);
-                Plot.plot(points, 'graph2');
-            }
-            function plot23(points, title) {
-                $('#title2').html(title);
-                var vars = Plot.getvars(title);
-                Plot.plot3(points, 'graph2', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
-            }
-            function plot3(expr) {
-                Plot.graph(expr, 'graph3');
-                $('#title3').html(expr);
-            }
-            function plot33(expr) {
-                var vars = Plot.getvars(expr);
-                Plot.graph3(expr, 'graph3', { style: 'surface', xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
-                $('#title3').html(expr);
-            }
-            function plot33s(expr) {
-                Plot.graph3s(expr, 'graph3', { style: 'surface' });
-                $('#title3').html(expr);
-            }
-            function plot4(expr, x, y) {
-                if (x) {
-                    $('#td4').show();
-                    $('#tv').show();
-                    $('#title4').html(expr + '|' + x);
-                    //$('#tv').html(y);
-                    //console.log(expr, x, y);
-                    var board = Plot.graph(expr, 'graph4');
-                    if (x) board.create('point', [x, y], { name: '', size: .1 });
-                    $('#tv').html(y);
-                } else {
-                    $('#td4').hide();
-                    $('#tv').hide();
-                }
-            }
-            function plot43(expr, x, totalsimp) {
-                if (x) {
-                    $('#td4').show();
-                    $('#tv').show();
-                    $('#title4').html(expr + '|' + x);
-                    $('#tv').html(totalsimp);
-                    //console.log(expr, x, totalsimp);
-                    var vars = Plot.getvars(expr);
-                    var data = Plot.graph3(totalsimp, 'graph4', { style: 'line', yMin: -5, yMax: 5, xLabel: vars[0], yLabel: vars[1] });
-                    $('#tv').html(totalsimp);
-                } else {
-                    $('#td4').hide();
-                    $('#tv').hide();
-                }
-            }
-            function plot43s(expr, x, totalsimp) {alert()
-                if (x) {
-                    $('#td4').show();
-                    $('#tv').show();
-                    $('#title4').html(expr + '|' + x);
-                    $('#tv').html(totalsimp);
-                    //console.log(expr, x, totalsimp);
-                    var data = Plot.graph3s(totalsimp, 'graph4', { style: 'line', yMin: -5, yMax: 5 });
-                    $('#tv').html(totalsimp);
-                } else {
-                    $('#td4').hide();
-                    $('#tv').hide();
-                }
-            }
-        </script>
-    </head>
-    <body>
-        <center>
-            <h1>Newton</h1>
-            <table border="1">
-                <tr>
-                    <td>
-                        <input placeholder="Type or Click Dropdown" style="position:absolute;height:11px;width:140px" />
-                        <select onchange="$('input').val($(this).val())" style="height:23px;width:190px">   <!--    2018.6  width for linux firefox -->
-                            <option selected disabled>Choose a option or type</option>
-                            <optgroup label="0 Variable">
-                                <option>0</option>
-                                <option>1</option>
-                                <option>2</option>
-                            </optgroup>
-                            <optgroup label="1 Variable">
-                                <option>x</option>
-                                <option>x/x</option>
-                                <option>(x^2-1)/(x-1)</option>
-                                <option>(x-1)/(x^2-1)</option>
-                                <option>2+h</option>
-                                <option>(2+h)^2</option>
-                                <option>(2+h)^2-2^2</option>
-                                <option>((2+h)^2-2^2)/h</option>
-                                <option>((2+h)^2-2^2)/h|0</option>
-                            </optgroup>
-                            <optgroup label="2 Variable">
-                                <option>x+h</option>
-                                <option>(x+h)^2</option>
-                                <option>(x+h)^2-x^2</option>
-                                <option>((x+h)^2-x^2)/h</option>
-                                <option>((x+h)^2-x^2)/h|0</option>
-                            </optgroup>
-                            <optgroup label="Exponential">
-                                <option>sin(x)</option>
-                                <option>2.718^-x</option>
-                            </optgroup>
-                        </select>
-                        <button onclick="trans=false;go()">Go</button>
-                        <button onclick="trans=true;go()">GoTransform</button>
-                    </td>
-                    <td width="110px">
-                        <div id="title1" style="text-align:center"></div>
-                    </td>
-                    <td>
-                        <div id="graph1" style="border:thin solid black; width:400px; height:400px"></div>
-                    </td>
-                    <td>
-                        <div id="graph2" style="border:thin solid black; width:400px; height:400px"></div>
-                    </td>
-                    <td>
-                        <div id="graph3" style="border:thin solid black; width:400px; height:400px"></div>
-                    </td>
-                    <td width="100px">
-                        <div id="title3" style="text-align:center"></div>
-                    </td>
-                    <td id="td4" style="display:none">
-                        <div id="title4" style="text-align:center">.</div>
-                        <div id="graph4" style="border:thin solid black; width:400px; height:400px"></div>
-                    </td>
-                    <td style="text-align:center;display:none" id="tv" width="100px">
-                    </td>
-                </tr>
-            </table>
-        </center>
-    </body>
+	<head>
+		<title>Newton</title>
+		<meta charset="utf-8" />
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.6/jsxgraphcore.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+		<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="https://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css" />
+		<script src="transform.js"></script>
+		<script src="newton.js"></script>
+		<script src="plot.js"></script>
+		<script>
+			function go() {
+				var input, expr, constant, pointss, points, exprsimp, totalsimp, d, tran;
+				input = $('input').val() || '0';
+				expr = input.split('|')[0];
+				constant = input.split('|')[1];
+				[pointss, exprsimp, totalsimp] = Newton.simplify(input);
+				points = pointss.orig;
+				d = points[0].length;
+				$('#td2').toggle(trans);
+				if (d == 2) plot1(points, expr); else plot13(points, expr);
+				if (d == 2) plot2(pointss.tran, expr); else plot23(points, expr);
+				if (d == 2) plot3(exprsimp); else plot33(exprsimp);
+				if (d == 2) plot4(exprsimp, constant, totalsimp); else plot43(exprsimp, constant, totalsimp);
+				//console.log(Newton.x);
+			}
+			function plot1(points, title) {
+				$('#title1').html(title);
+				Plot.plot(points, 'graph1');
+			}
+			function plot13(points, title) {
+				$('#title1').html(title);
+				var vars = Plot.getvars(title);
+				Plot.plot3(points, 'graph1', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
+			}
+			function plot2(points, title) {
+				$('#title2').html(title);
+				Plot.plot(points, 'graph2');
+			}
+			function plot23(points, title) {
+				$('#title2').html(title);
+				var vars = Plot.getvars(title);
+				Plot.plot3(points, 'graph2', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
+			}
+			function plot3(expr) {
+				Plot.graph(expr, 'graph3');
+				$('#title3').html(expr);
+			}
+			function plot33(expr) {
+				var vars = Plot.getvars(expr);
+				Plot.graph3(expr, 'graph3', { style: 'surface', xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
+				$('#title3').html(expr);
+			}
+			function plot33s(expr) {
+				Plot.graph3s(expr, 'graph3', { style: 'surface' });
+				$('#title3').html(expr);
+			}
+			function plot4(expr, x, y) {
+				if (x) {
+					$('#td4').show();
+					$('#tv').show();
+					$('#title4').html(expr + '|' + x);
+					//$('#tv').html(y);
+					//console.log(expr, x, y);
+					var board = Plot.graph(expr, 'graph4');
+					if (x) board.create('point', [x, y], { name: '', size: .1 });
+					$('#tv').html(y);
+				} else {
+					$('#td4').hide();
+					$('#tv').hide();
+				}
+			}
+			function plot43(expr, x, totalsimp) {
+				if (x) {
+					$('#td4').show();
+					$('#tv').show();
+					$('#title4').html(expr + '|' + x);
+					$('#tv').html(totalsimp);
+					//console.log(expr, x, totalsimp);
+					var vars = Plot.getvars(expr);
+					var data = Plot.graph3(totalsimp, 'graph4', { style: 'line', yMin: -5, yMax: 5, xLabel: vars[0], yLabel: vars[1] });
+					$('#tv').html(totalsimp);
+				} else {
+					$('#td4').hide();
+					$('#tv').hide();
+				}
+			}
+			function plot43s(expr, x, totalsimp) {alert()
+				if (x) {
+					$('#td4').show();
+					$('#tv').show();
+					$('#title4').html(expr + '|' + x);
+					$('#tv').html(totalsimp);
+					//console.log(expr, x, totalsimp);
+					var data = Plot.graph3s(totalsimp, 'graph4', { style: 'line', yMin: -5, yMax: 5 });
+					$('#tv').html(totalsimp);
+				} else {
+					$('#td4').hide();
+					$('#tv').hide();
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<center>
+			<h1>Newton</h1>
+			<table border="1">
+				<tr>
+					<td>
+						<button onclick="trans=false;go()">Go</button>
+						<button onclick="trans=true;go()">GoTransform</button><br><br>
+						<input placeholder="Type or Click Dropdown" style="position:absolute" />
+						<select onchange="$('input').val($(this).val())" style="height:23px;width:190px">	<!--	2018.6	width for linux firefox -->
+							<option selected disabled>Choose a option or type</option>
+							<optgroup label="0 Variable">
+								<option>0</option>
+								<option>1</option>
+								<option>2</option>
+							</optgroup>
+							<optgroup label="1 Variable">
+								<option>x</option>
+								<option>x/x</option>
+								<option>(x^2-1)/(x-1)</option>
+								<option>(x-1)/(x^2-1)</option>
+								<option>2+h</option>
+								<option>(2+h)^2</option>
+								<option>(2+h)^2-2^2</option>
+								<option>((2+h)^2-2^2)/h</option>
+								<option>((2+h)^2-2^2)/h|0</option>
+							</optgroup>
+							<optgroup label="2 Variable">
+								<option>x+h</option>
+								<option>(x+h)^2</option>
+								<option>(x+h)^2-x^2</option>
+								<option>((x+h)^2-x^2)/h</option>
+								<option>((x+h)^2-x^2)/h|0</option>
+							</optgroup>
+							<optgroup label="Exponential">
+								<option>2.718^-x</option>
+								<option>sin(x)</option>
+								<option>cos(x)</option>
+							</optgroup>
+						</select>
+					</td>
+					<td width="110px">
+						<div id="title1" style="text-align:center"></div>
+					</td>
+					<td>
+						<div id="graph1" style="border:thin solid black; width:400px; height:400px"></div>
+					</td>
+					<td id="td2" style="display:none">
+						<div id="graph2" style="border:thin solid black; width:400px; height:400px"></div>
+					</td>
+					<td>
+						<div id="graph3" style="border:thin solid black; width:400px; height:400px"></div>
+					</td>
+					<td width="100px">
+						<div id="title3" style="text-align:center"></div>
+					</td>
+					<td id="td4" style="display:none">
+						<div id="title4" style="text-align:center">.</div>
+						<div id="graph4" style="border:thin solid black; width:400px; height:400px"></div>
+					</td>
+					<td style="text-align:center;display:none" id="tv" width="100px">
+					</td>
+				</tr>
+			</table>
+		</center>
+	</body>
 </html>
