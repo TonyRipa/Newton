@@ -1,19 +1,29 @@
 ﻿
 /*
-	Author: Anthony John Ripa
-	Date:   7/8/2018
-	Newton: An A.I. for Math
+	Author:	Anthony John Ripa
+	Date:	8/10/2018
+	Newton:	An A.I. for Math
 */
+
+function assert(x, s = 'Assertion Failed') {	//	2018.8
+	if (!x) {
+		alert(s);
+		throw new Error(s);
+	}
+}
 
 class Newton {
 	static getpoints() {
 		//xy.push([Newton.x[0][i], Newton.x[1][i], Newton.y[i][0]]);
-		//  return _.zip(...Newton.x, _.unzip(Newton.y)[0]);            //  2018.6  Removed
+		//  return _.zip(...Newton.x, _.unzip(Newton.y)[0]);					//	2018.6	Removed
 		var orig = _.zip(...Newton.x, Newton.y);
-		var tran = transform(orig);
+		var tran = math.fraction(transform(orig));								//	2018.8	Fraction
 		console.log('getpoints',tran);
-		return {orig, tran};                            //  2018.6  Added
+		return {orig, tran};													//	2018.6	Added
 		//return math.transpose([...Newton.x, math.transpose(Newton.y)[0]]);
+	}
+	static getpointsreal() {													//	2018.8	Added
+		return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.number(xyz)));
 	}
 	static getrightpoints() {
 		if (trans) return Newton.getpoints().tran;
@@ -23,8 +33,11 @@ class Newton {
 		var expr, constant;
 		[expr, constant] = input.split('|');
 		expr = infer(expr);
-		if (!constant) return [Newton.getpoints(), expr];
-		return [Newton.getpoints(), expr, infer(evaluate(expr, constant))];
+		//	if (!constant) return [Newton.getpoints(), expr];					//	2018.8	Removed
+		assert(expr !== undefined, "Newton.simplify returning undefined")		//	2018.8	Added
+		if (!constant) return [Newton.getpointsreal(), expr];					//	2018.8	Added
+		//	return [Newton.getpoints(), expr, infer(evaluate(expr, constant))];	//	2018.8	Removed
+		return [Newton.getpointsreal(), expr, infer(evaluate(expr, constant))];	//	2018.8	Added
 		function evaluate(input, val) {
 			return substitute(input, getvars(input).slice(-1)[0], val);
 		}
@@ -44,6 +57,7 @@ class Newton {
 			return vars;
 		}
 		function infer(input) {
+			assert(input !== undefined, "Newton.infer Arg undefined")			//	2018.8	Added
 			var vars = getvars(input);
 			var xs = makexs(vars);
 			var y = makey(xs, input);
@@ -56,19 +70,24 @@ class Newton {
 			console.log(JSON.stringify(y))
 
 			if (vars.length==2) return inferpolynomial(xs, y, parser32);
-			var e = [100000, 100000, 100000, 100000, 100000];
+			var e = math.fraction([100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
 			var candidate = []
-			for (var i = 0; i < 5; i++) {
+			var numcandidates = 5;
+			for (var i = 0; i < numcandidates; i++) {
 				try {
 					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser41) : i==3 ? inferrational(xs, y, 1) : inferrational(xs, y, 2);
+					assert(candidate[i] !== undefined);
 					e[i] = geterrorbypoints(Newton.getrightpoints(), candidate[i]);
-				} catch {}
+				} catch(e) { console.log(`Candidate[${i}] fails.`); /* Ignore error because some inference engines must fail */ }
 			}
-			e[4] *= 100;	//	complexity
+			e[4] = e[4].mul(100);	//	complexity
 			console.log('Infer > Error > ', e, candidate)
 			//return candidate[0]
-			for (var i = 0; i < 5; i++)
-				if (e[i] == Math.min(...e)) return candidate[i];
+			for (var i = 0; i < numcandidates; i++)
+				if (e[i] == Math.min(...e)) {
+					assert(candidate[i] !== undefined, `Newton.infer returning candidate[${i}]=undefined : candidates=${candidate}`)	//	2018.8
+					return candidate[i];
+				}
 			
 			//console.log('Trying Polynomial');
 			//var candidate = inferpolynomial(xs, y);
@@ -89,6 +108,7 @@ class Newton {
 				var vect = solve(...tomatrix(xs, y));
 				var ret = stringify(vect, vars, decoder);
 				console.log('Infer-Polynomial: ', ret);
+				if (ret === undefined) { var s = "Newton.infer.inferpolynomial returning undefined" ; alert(s) ; throw new Error(s) }	//	2018.8
 				return ret;
 			}
 			function inferrational(xs, y, algo) {
@@ -108,6 +128,7 @@ class Newton {
 				//console.log(stringify(vect2matrixnum(vect), vars) + ' : ' + stringify(vect2matrixden(vect), vars));
 				var num = stringify(vect, vars, decodernum);
 				var den = stringify(vect, vars, decoderden);
+				assert(num !== undefined, "Newton.infer.inferrational returning undefined")	//	2018.8
 				if (den == '1') return num;
 				if (num.includes('+') || num.includes('-')) num = '(' + num + ')';
 				if (den.includes('+') || den.includes('-')) den = '(' + den + ')';
@@ -116,28 +137,28 @@ class Newton {
 			function validate(inputstring, outputstring, tolerance) {
 				var scope = {};
 				for (let char of 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
-					scope[char] = Math.random() * 10 - 5;
+					scope[char] = math.fraction(Math.random() * 10 - 5);
 				var input = math.eval(inputstring, scope);
 				var output = math.eval(outputstring, scope);
-				var error = Math.abs(input - output);
-				console.log('Error', error, inputstring, outputstring)
+				var error = math.abs(input.sub(output));
+				console.log('Validate > Error', error, inputstring, outputstring)
 				return error < tolerance;
 			}
 			function validatebypoints(points, outputstring, tolerance) {
 				return geterrorbypoints(points, outputstring) < tolerance;
 			}
 			function geterrorbypoints(points, outputstring) {
-				var error = 0;
+				var error = math.fraction(0);
 				for(var i = 0 ; i < points.length ; i++ ) {
 					var scope = {};
 					for (let char of 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
 						scope[char] = points[i][0];
 					var input = points[i][1];
 					var output = math.eval(outputstring, scope);
-					var abserror = Math.abs(input - output);
-					if (!isNaN(abserror)) error += abserror*abserror;
+					var abserror = math.abs(input.sub(output));							//	2018.8	sub
+					if (!isNaN(abserror)) error = error.add(abserror.mul(abserror));	//	2018.8	add&mul
 				}
-				console.log('Error', error, points, outputstring)
+				console.log('Geterrorbypoints > Error', error, points, outputstring)
 				return error;
 			}
 			function makexs(vars) {
@@ -146,7 +167,8 @@ class Newton {
 				xs.ones = Array(numpoints).fill(1);
 				//xs.push([-2, -1, 0, 1]);
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
-				if (!trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random()*8));
+				//	if (!trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random()*8));				//	2018.8	Removed
+				if (!trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added
 				if (trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5).map(Math.round));
 				//xs = xs.map(row=>row.map(cell=>Math.round(1000 * cell) / 1000));
@@ -154,19 +176,45 @@ class Newton {
 				Newton.x = xs;
 				return xs;
 			}
-			function makey(xs, input) {             //  2018.6  Added
+			function makescope(vars, vals) {		//	2018.8	Added
+				var scope = {};
+				for (let i=0; i<vars.length; i++) {
+					scope[vars[i]] = vals[i];
+				}
+				return scope;
+			}
+			function makey(xs, input) {             //  2018.8  Added
+				var nofrac = input.includes('2.718') || input.includes('sin') || input.includes('cos');	//	2018.8	math.eval can't do fractions
 				var ys = [];
 				for (var datai = 0; datai < xs.ones.length; datai++) {
 					var expression = input;
+					var vals = [];
 					for (var varj = 0; varj < vars.length; varj++) {
-						expression = substitute(expression, vars[varj], xs[varj][datai]);
+						var val = xs[varj][datai];
+						if (nofrac) val = math.number(val);												//	2018.8	math.eval can't do fractions
+						vals.push(val);
 					}
-					ys.push(math.eval(expression));
+					var scope = makescope(vars, vals);
+					ys.push(math.fraction(math.eval(expression, scope)));								//	2018.8	in case math.eval is not fraction
 				}
 				Newton.y = ys;
 				return ys;
 			}
+			//function makey(xs, input) {             //  2018.6  Added		//	2018.8	Removed
+			//	var ys = [];
+			//	for (var datai = 0; datai < xs.ones.length; datai++) {
+			//		var expression = input;
+			//		for (var varj = 0; varj < vars.length; varj++) {
+			//			expression = substitute(expression, vars[varj], xs[varj][datai]);
+			//		}
+			//		ys.push(math.eval(expression));
+			//	}
+			//	Newton.y = ys;
+			//	alert(ys)
+			//	return ys;
+			//}
 			function solve(A, b) {
+				console.log(A, b);
 				var AT = math.transpose(A);
 				var ATA = math.multiply(AT, A);
 				var ATb = math.multiply(AT, b);
@@ -522,7 +570,7 @@ class Newton {
 							function coltimescol(col1, col2) {
 								var ret = [];
 								for (var i = 0; i < col1.length; i++)
-									ret.push(col1[i] * col2[i]);
+									ret.push(col1[i].mul(col2[i]));	//	2018.8	* -> mul for fraction
 								return ret;
 							}
 							function makepowercols(x) {
@@ -600,7 +648,7 @@ class Newton {
 					decoder: [[0,0],[1,0],[2,0]]
 				};
 			}
-			function parser41() {    //  a+bx+cx²+dx^3+ex^4
+			function parser41() {    //  ax^-2+bx^-1+c+dx+ex²+fx^3+gx^4
 				return {
 					tomatrix: function (xs, y) {
 						var A = makeA(xs);
