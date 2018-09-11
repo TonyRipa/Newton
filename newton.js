@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2018
+	Date:	9/10/2018
 	Newton:	An A.I. for Math
 */
 
@@ -14,10 +14,12 @@ function assert(x, s = 'Assertion Failed') {	//	2018.8
 
 class Newton {
 	static getpoints() {
-		//xy.push([Newton.x[0][i], Newton.x[1][i], Newton.y[i][0]]);
 		//  return _.zip(...Newton.x, _.unzip(Newton.y)[0]);					//	2018.6	Removed
 		var orig = _.zip(...Newton.x, Newton.y);
-		var tran = math.fraction(transform(orig));								//	2018.8	Fraction
+		console.log(orig)
+		var t = transform(orig)
+		//var tran = math.fraction(t);											//	2018.8	Fraction	//	2018.9	Removed
+		var tran = t.map(point=>point.map(x=>math.fraction(0).add(x)));			//	2018.8	Fraction	//	2018.9	Added for NaN handling
 		console.log('getpoints',tran);
 		return {orig, tran};													//	2018.6	Added
 		//return math.transpose([...Newton.x, math.transpose(Newton.y)[0]]);
@@ -56,13 +58,14 @@ class Newton {
 			}
 			return vars;
 		}
-		function infer(input) {
+		function infer(input) {//alert('infer')
 			assert(input !== undefined, "Newton.infer Arg undefined")			//	2018.8	Added
 			var vars = getvars(input);
 			var xs = makexs(vars);
 			var y = makey(xs, input);
 			//if (trans) return inferrational(xs, y);
 			console.log(JSON.stringify(xs))
+			console.log(y)
 			console.log(JSON.stringify(y))
 			console.log(JSON.stringify(_.unzip(Newton.getpoints().tran)))
 			if (trans) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }
@@ -70,24 +73,33 @@ class Newton {
 			console.log(JSON.stringify(y))
 
 			if (vars.length==2) return inferpolynomial(xs, y, parser32);
-			var e = math.fraction([100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
+			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
 			var candidate = []
-			var numcandidates = 5;
-			for (var i = 0; i < numcandidates; i++) {
+			var candidates = [0,1,2,3,4,5]
+			for (let i of candidates) {
 				try {
-					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser41) : i==3 ? inferrational(xs, y, 1) : inferrational(xs, y, 2);
+					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser41) : i==3 ? inferrational(xs, y, 1) : i==4 ? inferrational(xs, y, 2) : inferrational(xs, y, 3);
 					assert(candidate[i] !== undefined);
 					e[i] = geterrorbypoints(Newton.getrightpoints(), candidate[i]);
-				} catch(e) { console.log(`Candidate[${i}] fails.`); /* Ignore error because some inference engines must fail */ }
+				} catch(e) { console.log(`Candidate[${i}] fails : ${e}`); /* Ignore error because some inference engines must fail */ }
 			}
-			e[4] = e[4].mul(100);	//	complexity
+			if (e[5]) e[5] = e[5].mul(100);	//	complexity
 			console.log('Infer > Error > ', e, candidate)
 			//return candidate[0]
-			for (var i = 0; i < numcandidates; i++)
-				if (e[i] == Math.min(...e)) {
+			for (let i of candidates) {
+				//alert(i)
+				//alert(e)
+				//alert(e[i])
+				//alert(nanmin(e))
+				if (e[i] == nanmin(e)) {
+					//alert(i)
+					//alert(e)
+					//alert(e[i])
+					//alert(nanmin(e))
 					assert(candidate[i] !== undefined, `Newton.infer returning candidate[${i}]=undefined : candidates=${candidate}`)	//	2018.8
 					return candidate[i];
 				}
+			}
 			
 			//console.log('Trying Polynomial');
 			//var candidate = inferpolynomial(xs, y);
@@ -99,9 +111,14 @@ class Newton {
 			//var candidate = inferrational(xs, y, 2);
 			//if (validatebypoints(Newton.getrightpoints(), candidate, .01)) return candidate;
 			//console.log('not polynomial. not rational.');
+			alert('No fit');
 			return '0';
 			//return inferpolynomial(xs, y);
 			//return inferrational(xs, y);
+			function nanmin(array) {
+				if(array.every(isNaN)) return array[0];
+				return Math.min(...array.filter(x=>!isNaN(x)));
+			}
 			function inferpolynomial(xs, y, parser) {
 				var tomatrix, decoder;
 				({tomatrix, decoder} = parser());
@@ -114,8 +131,8 @@ class Newton {
 			function inferrational(xs, y, algo) {
 				if (arguments.length<3) algo = 0;
 				var tovect, tomatrix, decodernum, decoderden, parser;
-				var parser = [parserrationalclosed, parserrational1, parserrational2, parserrationalsearch, parserrationalbrute][algo];
-				if (algo<=2) {
+				var parser = [parserrationalclosed, parserrational0, parserrational1, parserrational2, parserrationalsearch, parserrationalbrute][algo];
+				if (algo<=3) {
 					({tomatrix, decodernum, decoderden} = parser());
 					var matrix = tomatrix(xs, y);
 					console.log('matrix', matrix);
@@ -148,6 +165,7 @@ class Newton {
 				return geterrorbypoints(points, outputstring) < tolerance;
 			}
 			function geterrorbypoints(points, outputstring) {
+				if (outputstring=='0 / 0') return math.fraction(0).add(NaN);									//	2018.9
 				var error = math.fraction(0);
 				for(var i = 0 ; i < points.length ; i++ ) {
 					var scope = {};
@@ -156,7 +174,8 @@ class Newton {
 					var input = points[i][1];
 					var output = math.eval(outputstring, scope);
 					var abserror = math.abs(input.sub(output));							//	2018.8	sub
-					if (!isNaN(abserror)) error = error.add(abserror.mul(abserror));	//	2018.8	add&mul
+					if (!isNaN(abserror)) error = error.add(abserror.mul(abserror));	//	2018.8	add&mul		//	2018.9	Removed test
+					//error = error.add(abserror.mul(abserror));						//	2018.8	add&mul		//	2018.9	Removed test
 				}
 				console.log('Geterrorbypoints > Error', error, points, outputstring)
 				return error;
@@ -164,7 +183,7 @@ class Newton {
 			function makexs(vars) {
 				var xs = [];
 				var numpoints = trans ? 300 : 40;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)
-				xs.ones = Array(numpoints).fill(1);
+				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
 				//xs.push([-2, -1, 0, 1]);
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
 				//	if (!trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random()*8));				//	2018.8	Removed
@@ -195,7 +214,8 @@ class Newton {
 						vals.push(val);
 					}
 					var scope = makescope(vars, vals);
-					ys.push(math.fraction(math.eval(expression, scope)));								//	2018.8	in case math.eval is not fraction
+					//ys.push(math.fraction(math.eval(expression, scope)));								//	2018.8	in case math.eval is not fraction
+					ys.push(math.fraction(0).add(math.eval(expression, scope)));						//	2018.8	in case math.eval is not fraction	//	2018.9	0+ is Robust for NaN
 				}
 				Newton.y = ys;
 				return ys;
@@ -214,28 +234,30 @@ class Newton {
 			//	return ys;
 			//}
 			function solve(A, b) {
-				console.log(A, b);
+				console.log('solve',A, b);
 				var AT = math.transpose(A);
 				var ATA = math.multiply(AT, A);
 				var ATb = math.multiply(AT, b);
 				return solvesquare(ATA, ATb);
 				function solvesquare(A, b) {
 					console.log('Solve > SolveSquare > Determinant', math.det(A));
-					if (math.det(A) < .1) return solvesquare2(A, b);
+					//if (math.det(A) < .1) return solvesquare2(A, b);
+					if (math.abs(math.det(A)) < .1) { var ret = matrix.solve(A, b) ; if (ret!=undefined) return ret; };	//	2018.9	matrix.
 					var Ainv = math.divide(math.eye(A[0].length), A);
 					var x = math.multiply(Ainv, b);
 					return x.valueOf();
 				}
-				function solvesquare2(A, b) {
-					console.log('det2', math.det(A));
-					var Ainv = math.divide(math.eye(A[0].length), A);
-					var x = math.multiply(Ainv, b);
-					return x.valueOf();
-				}
+				//function solvesquare2(A, b) {											//	2018.9	Removed
+				//	console.log('det2', math.det(A));
+				//	var Ainv = math.divide(math.eye(A[0].length), A);
+				//	var x = math.multiply(Ainv, b);
+				//	return x.valueOf();
+				//}
 			}
 			function stringify(termcoefs, vars, decoder) {
-				console.log('stringify',termcoefs)
-				termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);
+				console.log('stringify: termcoefs=',termcoefs)
+				termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);	//	2018.9
+				//termcoefs = termcoefs.map(cell=>Math.round(cell * 10.0) / 10.0);	//	2018.9
 				var ret = '';
 				for (var i = 0; i < decoder.length; i++)
 					if (Array.isArray(decoder[i]))
@@ -247,7 +269,7 @@ class Newton {
 				if (ret[0] == '0') ret = ret.substr(1);
 				if (ret[0] == '+') ret = ret.substr(1);
 				if (ret == '') ret = '0';
-				console.log('stringify',ret);
+				console.log('stringify: ret=',ret);
 				return ret;
 				function term(termcoef, termvar) {
 					if (termcoef == 0) return '';
@@ -266,7 +288,7 @@ class Newton {
 					}
 				}
 			}
-			function parserrational0() {   //      (a+bx)/(1+cx+dx^2)
+			function parserrationalOLD() {   //      (a+bx)/(1+cx+dx^2)
 				return {
 					tomatrix: function (xs, y) {
 						var A = makeA(xs);
@@ -296,7 +318,31 @@ class Newton {
 					//decoderden: [0,0,[0,0],[2,0,1]]
 				};
 			}
-			function parserrational1() {   //      (a+bx)/(c+x)
+			function parserrational0() {   //      a/b	//	2018.9
+				return {
+					tomatrix: function (xs, y) {
+						var A = makeA(xs);
+						//var b = math.dotMultiply(math.dotMultiply(xs[0], xs[0]), y);	//	'xs[0]^2*y'
+						var b = xs.ones.map(q=>0);
+						return [A, b];
+						function makeA(xs) {
+							var c1 = xs.ones;
+							var c2 = math.multiply(-1, y);
+							console.log('xs.ones', c1);
+							console.log('-y', c2);
+							var AT = [];
+							AT.push(c1);
+							AT.push(c2);
+							return math.transpose(AT);
+						}
+					},
+					decodernum: [[0,0]],
+					decoderden: [0,[0,0]]
+					//decoderden: [0,0,[0,0],[1,0],[2,0,1]]
+					//decoderden: [0,0,[0,0],[2,0,1]]
+				};
+			}
+			function parserrational1() {   //      (a+bx)/(c+1*x)
 				return {
 					tomatrix: function (xs, y) {
 						var A = makeA(xs);
