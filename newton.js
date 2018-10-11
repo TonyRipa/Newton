@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	9/10/2018
+	Date:	10/10/2018
 	Newton:	An A.I. for Math
 */
 
@@ -73,17 +73,17 @@ class Newton {
 			console.log(JSON.stringify(y))
 
 			if (vars.length==2) return inferpolynomial(xs, y, parser32);
-			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
+			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
 			var candidate = []
-			var candidates = [0,1,2,3,4,5]
+			var candidates = [0,1,2,3,4,5,6]
 			for (let i of candidates) {
 				try {
-					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser41) : i==3 ? inferrational(xs, y, 1) : i==4 ? inferrational(xs, y, 2) : inferrational(xs, y, 3);
+					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser41) : i==3 ? inferrational(xs, y, 1) : i==4 ? inferrational(xs, y, 2) : i==5 ? inferrational(xs, y, 3) : inferrational(xs, y, 4);
 					assert(candidate[i] !== undefined);
 					e[i] = geterrorbypoints(Newton.getrightpoints(), candidate[i]);
 				} catch(e) { console.log(`Candidate[${i}] fails : ${e}`); /* Ignore error because some inference engines must fail */ }
 			}
-			if (e[5]) e[5] = e[5].mul(100);	//	complexity
+			if (e[6]) e[6] = e[6].mul(100);	//	complexity
 			console.log('Infer > Error > ', e, candidate)
 			//return candidate[0]
 			for (let i of candidates) {
@@ -101,16 +101,6 @@ class Newton {
 				}
 			}
 			
-			//console.log('Trying Polynomial');
-			//var candidate = inferpolynomial(xs, y);
-			//if (validate(input, candidate, .0001)) return candidate;
-			//console.log('Not Polynomial. Trying Rational1.');
-			//var candidate = inferrational(xs, y, 1);
-			//if (validatebypoints(Newton.getrightpoints(), candidate, .01)) return candidate;
-			//console.log('not polynomial. not rational1.');
-			//var candidate = inferrational(xs, y, 2);
-			//if (validatebypoints(Newton.getrightpoints(), candidate, .01)) return candidate;
-			//console.log('not polynomial. not rational.');
 			alert('No fit');
 			return '0';
 			//return inferpolynomial(xs, y);
@@ -131,8 +121,8 @@ class Newton {
 			function inferrational(xs, y, algo) {
 				if (arguments.length<3) algo = 0;
 				var tovect, tomatrix, decodernum, decoderden, parser;
-				var parser = [parserrationalclosed, parserrational0, parserrational1, parserrational2, parserrationalsearch, parserrationalbrute][algo];
-				if (algo<=3) {
+				var parser = [parserrationalclosed, parserrational0, parserrational21, parserrational1, parserrational2, parserrationalsearch, parserrationalbrute][algo];
+				if (algo<=4) {
 					({tomatrix, decodernum, decoderden} = parser());
 					var matrix = tomatrix(xs, y);
 					console.log('matrix', matrix);
@@ -240,7 +230,7 @@ class Newton {
 				var ATb = math.multiply(AT, b);
 				return solvesquare(ATA, ATb);
 				function solvesquare(A, b) {
-					console.log('Solve > SolveSquare > Determinant', math.det(A));
+					console.log('Solve > SolveSquare > Determinant', A, math.det(A), math.number(math.det(A)));
 					//if (math.det(A) < .1) return solvesquare2(A, b);
 					if (math.abs(math.det(A)) < .1) { var ret = matrix.solve(A, b) ; if (ret!=undefined) return ret; };	//	2018.9	matrix.
 					var Ainv = math.divide(math.eye(A[0].length), A);
@@ -319,6 +309,10 @@ class Newton {
 				};
 			}
 			function parserrational0() {   //      a/b	//	2018.9
+				//	Set up problem as Ax=b with			//	2018.10
+				//	A = [1,-Y]							//	2018.10
+				//	x = (a,b)							//	2018.10
+				//	b = (0,0)							//	2018.10
 				return {
 					tomatrix: function (xs, y) {
 						var A = makeA(xs);
@@ -340,6 +334,34 @@ class Newton {
 					decoderden: [0,[0,0]]
 					//decoderden: [0,0,[0,0],[1,0],[2,0,1]]
 					//decoderden: [0,0,[0,0],[2,0,1]]
+				};
+			}
+			function parserrational21() {   //      (a+bx)/c	//	2018.10
+				//	Set up problem as Ax=b with					//	2018.10
+				//	A = [1,x,-Y]								//	2018.10
+				//	x = (a,b,c)									//	2018.10
+				//	b = (0,0,0)									//	2018.10
+				return {
+					tomatrix: function (xs, y) {
+						var A = makeA(xs);
+						var b = xs.ones.map(q=>0);
+						return [A, b];
+						function makeA(xs) {
+							var c1 = xs.ones;
+							var c2 = xs[0];
+							var c3 = math.multiply(-1, y);
+							console.log('xs.ones', c1);
+							console.log('xs[0]', c2);
+							console.log('-y', c3);
+							var AT = [];
+							AT.push(c1);
+							AT.push(c2);
+							AT.push(c3);
+							return math.transpose(AT);
+						}
+					},
+					decodernum: [[0,0],[1,0]],
+					decoderden: [0,0,[0,0]]
 				};
 			}
 			function parserrational1() {   //      (a+bx)/(c+1*x)

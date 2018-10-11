@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	9/10/2018
+	Date:	10/10/2018
 	Matrix:	A matrix library
 */
 
@@ -27,7 +27,55 @@ matrix.homogeneous = class {
 				return ret.map(x=>math.divide(x,gcd))
 			}
 		}
+		if (A.length==3) {		//	2018.10	Added
+			if (A[0].length==3) {
+				A = matrix.homogeneous.rref(A);
+				var row0 = A[0];
+				var row1 = A[1];
+				row0 = math.divide(row0,row0[2]);	//	Make both rows have 1 in last row
+				row1 = math.divide(row1,row1[2]);	//	Make both rows have 1 in last row
+				var ret = [math.unaryMinus(math.divide(row0[2],row0[0])), math.unaryMinus(math.divide(row0[2],row1[1])), row0[2]];
+				ret = math.multiply(ret,2*3*4*5*6*7*8*9*10*11*12*13);
+				ret = math.round(ret);
+				var gcd = ret.reduce((x,y)=>math.gcd(x,y))
+				if (gcd==0) return ret;
+				return math.divide(ret,gcd)
+			}
+		}
 		return undefined;
+	}
+
+	static ref(A) {				//	2018.10	Added
+		if (A.length==1) return A;
+		A = zerosbelow(A);
+		let S = submatrix(A);
+		S = matrix.homogeneous.ref(S);
+		A = overlay(A,S);
+		return A;
+		function zerosbelow(A) {
+			let row0 = A[0];
+			let ret = [row0];
+			for ( let i = 1 ; i<A.length ; i++ ) {
+				let row = A[i];
+				if (row[0]!=0 && row0[0]!=0) row = math.subtract(row,math.multiply(math.divide(row[0],row0[0]),row0));
+				ret.push(row);
+			}
+			return ret;
+		}
+		function submatrix(A) {
+			return A.filter((x,i)=>i>0).map(row=>row.filter((x,i)=>i>0))
+		}
+		function overlay(A,S) {
+			return [A[0],...S.map((row,i)=>[A[i+1][0],...row])]
+		}
+	}
+
+	static rref(A) {			//	2018.10	Added
+		var ref = matrix.homogeneous.ref;
+		return flip(ref(flip(ref(A))));
+		function flip(A) {
+			return A.slice().reverse();
+		}
 	}
 
 }
