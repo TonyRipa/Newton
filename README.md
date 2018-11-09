@@ -4,7 +4,7 @@ Newton: An A.I. for Math
 
 Author : Anthony John Ripa
 
-Date : 2018.05.02
+Date : 2018.11.09
 
 Live Demo at <a target='_blank' href='http://tonyripa.github.io/Newton/'>http://tonyripa.github.io/Newton/</a>
 
@@ -36,6 +36,12 @@ The hypothesis space is polynomial and rational functions.  The system works wel
 Conclusion: Smoothing not Limits
 -------------------------------------
 `Newton` solves algebraic problems without reliance on domain-specific algorithms. `Newton` does not make the classical algorithm mistake of concluding ((2+h)^2 – 2^2)/h is (4+h if h!=0 else undefined) and instead returns the smooth solution 4+h. `Newton`'s approach to algebra is clean enough to answer questions which would otherwise require a needlessly complicated workaround like calculus.
+
+Extensions
+--------------
+`Newton`'s power to recognize functions other than rational functions (like transcendental functions) can be extended by preprocessing the data with a transform that maps a larger space of functions into rational functions. `Newton` can then recognize that rational function. These are in a sense spectacles for Newton. By introducing an optional Laplace-like preprocessing step, `Newton` can recognize a larger class of functions. A possible downside is that it is a bit numerically expensive because it is an integral transform.
+
+Complementarily, `Newton` can also do an optional differential transform. The differential transform has 2 advantages. One is that it is cheaper to calculate. Two is that it is all in one instead of preprocessing. This transform is again Laplace-like. It comes from the observation that the Taylor coefficients without factorial denominators (basically just the derivatives) can be put into (possibly repeating) sequence expansion .f(0)f'(0)f''(0)f'''(0) , and that this sequence is the Laplace transform , which `Newton` can put into fraction-form to look more Laplace-like , since the expansion is a relatively untraditional form .
 
 Dependencies
 ------------

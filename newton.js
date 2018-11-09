@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	10/10/2018
+	Date:	11/09/2018
 	Newton:	An A.I. for Math
 */
 
@@ -28,7 +28,7 @@ class Newton {
 		return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.number(xyz)));
 	}
 	static getrightpoints() {
-		if (trans) return Newton.getpoints().tran;
+		if (trans==1) return Newton.getpoints().tran;
 		return Newton.getpoints().orig;
 	}
 	static simplify(input) {
@@ -68,11 +68,12 @@ class Newton {
 			console.log(y)
 			console.log(JSON.stringify(y))
 			console.log(JSON.stringify(_.unzip(Newton.getpoints().tran)))
-			if (trans) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }
+			if (trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }
 			console.log(JSON.stringify(xs))
 			console.log(JSON.stringify(y))
 
 			if (vars.length==2) return inferpolynomial(xs, y, parser32);
+			if (trans==2) return inferdifferential(xs);
 			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
 			var candidate = []
 			var candidates = [0,1,2,3,4,5,6]
@@ -108,6 +109,15 @@ class Newton {
 			function nanmin(array) {
 				if(array.every(isNaN)) return array[0];
 				return Math.min(...array.filter(x=>!isNaN(x)));
+			}
+			function inferdifferential(xs) {	//	2018.11
+				var tovect, decodernum, decoderden;
+				({tovect, decodernum, decoderden} = parserdifferential());
+				var vect = tovect(Newton.getpoints().orig);//alert(JSON.stringify(vect))
+				var num = stringify(vect, vars, decodernum);
+				var den = stringify(vect, vars, decoderden);
+				if (den == 1) return num;
+				return num + ' / (' + den + ')';
 			}
 			function inferpolynomial(xs, y, parser) {
 				var tomatrix, decoder;
@@ -210,19 +220,6 @@ class Newton {
 				Newton.y = ys;
 				return ys;
 			}
-			//function makey(xs, input) {             //  2018.6  Added		//	2018.8	Removed
-			//	var ys = [];
-			//	for (var datai = 0; datai < xs.ones.length; datai++) {
-			//		var expression = input;
-			//		for (var varj = 0; varj < vars.length; varj++) {
-			//			expression = substitute(expression, vars[varj], xs[varj][datai]);
-			//		}
-			//		ys.push(math.eval(expression));
-			//	}
-			//	Newton.y = ys;
-			//	alert(ys)
-			//	return ys;
-			//}
 			function solve(A, b) {
 				console.log('solve',A, b);
 				var AT = math.transpose(A);
@@ -276,6 +273,42 @@ class Newton {
 						if (power == 0) return '';
 						return variable + (power == 1 ? '' : '^' + power);
 					}
+				}
+			}
+			function parserdifferential() {	//	2018.11
+				return {
+					tovect: function transform(points) {
+						function divide(num,den) {
+							return div(num,den,3).slice(0,4);
+							function div(n,d,c) {
+								if (c<=0) return n;
+								var q = math.divide(n[0],math.fraction(d[0]));
+								var sub = math.multiply(math.fraction(d),math.fraction(q));
+								var r = math.subtract(n,sub);
+								r.shift();
+								r.push(0);
+								var rest = div(r,den,c-1);
+								rest.unshift(q);
+								return rest;
+							}
+						}
+						console.log('here',points.map(x=>math.number(x[1])));
+						var derivatives = [points[0][1],
+							(points[1][1]-points[0][1])/(points[1][0]-points[0][0]),
+							(points[2][1]-2*points[1][1]+points[0][1])/(points[1][0]-points[0][0])**2,
+							(points[3][1]-3*points[2][1]+3*points[1][1]-points[0][1])/(points[1][0]-points[0][0])**3];
+						if (math.abs(derivatives[3])<.01) return [0,0,...derivatives,1,0,0,0];
+						var num = [0,1,0];
+						if (math.abs(derivatives[0])<.01) {derivatives.push(derivatives.shift()); num=[0,0,1]}
+						var den = divide([1,0,0,0],derivatives);
+						var width = math.abs(den[3])>.15 ? 4 : math.abs(den[2])>.15 ? 3 : 2;
+						if (width==3) num.push(num.shift());
+						den.reverse()
+						while (math.abs(den[0])<.15) den.shift();
+						return [...num,0,0,0,...den];
+					},
+					decodernum: [[1,0],[0,0],[-1,0],[-2,0],[-3,0]],
+					decoderden: [0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]
 				}
 			}
 			function parserrationalOLD() {   //      (a+bx)/(1+cx+dx^2)

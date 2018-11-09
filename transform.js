@@ -1,7 +1,7 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   9/10/2018
+    Date:   11/09/2018
     Transform: A data transformer
 */
 
@@ -11,11 +11,11 @@ function transform(points) {
 	var ret, ret2, sum;
 	//alert(JSON.stringify(points))
 	ret = points.slice();
-	ret.sort((xy1,xy2)=>xy1[0]-xy2[0]);//alert(JSON.stringify(ret))
+	ret.sort((xy1,xy2)=>xy1[0]-xy2[0]);
 	return laplace(ret);
 
 	function laplace(points) {
-		return [1,2,3,4].map(s=>laplace1(points,s));
+		return [.8,1,2,3,4].map(s=>laplace1(points,s));
 	}
 	function laplace1(points, s) {
 		return [s, integratedef(points.map(xy=>[xy[0],xy[1]*Math.exp(-s*xy[0])]))];
