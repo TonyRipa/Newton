@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	11/09/2018
+	Date:	12/10/2018
 	Newton:	An A.I. for Math
 */
 
@@ -14,7 +14,6 @@ function assert(x, s = 'Assertion Failed') {	//	2018.8
 
 class Newton {
 	static getpoints() {
-		//  return _.zip(...Newton.x, _.unzip(Newton.y)[0]);					//	2018.6	Removed
 		var orig = _.zip(...Newton.x, Newton.y);
 		console.log(orig)
 		var t = transform(orig)
@@ -31,6 +30,17 @@ class Newton {
 		if (trans==1) return Newton.getpoints().tran;
 		return Newton.getpoints().orig;
 	}
+	static getvars(input) {	//	2018.12
+		input = input.replace('sin','').replace('cos','').replace('exp','');
+		var vars = [];
+		var alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		for (let symbol of input) {
+			if (alphabet.includes(symbol)) {
+				if (!vars.includes(symbol)) vars.push(symbol);
+			}
+		}
+		return vars;
+	}
 	static simplify(input) {
 		var expr, constant;
 		[expr, constant] = input.split('|');
@@ -41,26 +51,15 @@ class Newton {
 		//	return [Newton.getpoints(), expr, infer(evaluate(expr, constant))];	//	2018.8	Removed
 		return [Newton.getpointsreal(), expr, infer(evaluate(expr, constant))];	//	2018.8	Added
 		function evaluate(input, val) {
-			return substitute(input, getvars(input).slice(-1)[0], val);
+			return substitute(input, Newton.getvars(input).slice(-1)[0], val);
 		}
 		function substitute(input, vari, val) {
 			if (vari === undefined) return input;
 			return input.replace(new RegExp(vari, 'g'), '(' + val + ')');
 		}
-		function getvars(input) {
-			input = input.replace('sin','').replace('cos','').replace('exp','');
-			var vars = [];
-			var alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-			for (let symbol of input) {
-				if (alphabet.includes(symbol)) {
-					if (!vars.includes(symbol)) vars.push(symbol);
-				}
-			}
-			return vars;
-		}
 		function infer(input) {//alert('infer')
 			assert(input !== undefined, "Newton.infer Arg undefined")			//	2018.8	Added
-			var vars = getvars(input);
+			var vars = Newton.getvars(input);
 			var xs = makexs(vars);
 			var y = makey(xs, input);
 			//if (trans) return inferrational(xs, y);
@@ -79,7 +78,7 @@ class Newton {
 			var candidates = [0,1,2,3,4,5,6]
 			for (let i of candidates) {
 				try {
-					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser41) : i==3 ? inferrational(xs, y, 1) : i==4 ? inferrational(xs, y, 2) : i==5 ? inferrational(xs, y, 3) : inferrational(xs, y, 4);
+					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser51) : i==3 ? inferrational(xs, y, 1) : i==4 ? inferrational(xs, y, 2) : i==5 ? inferrational(xs, y, 3) : inferrational(xs, y, 4);
 					assert(candidate[i] !== undefined);
 					e[i] = geterrorbypoints(Newton.getrightpoints(), candidate[i]);
 				} catch(e) { console.log(`Candidate[${i}] fails : ${e}`); /* Ignore error because some inference engines must fail */ }
@@ -132,7 +131,7 @@ class Newton {
 				if (arguments.length<3) algo = 0;
 				var tovect, tomatrix, decodernum, decoderden, parser;
 				var parser = [parserrationalclosed, parserrational0, parserrational21, parserrational1, parserrational2, parserrationalsearch, parserrationalbrute][algo];
-				if (algo<=4) {
+				if (algo<=5) {
 					({tomatrix, decodernum, decoderden} = parser());
 					var matrix = tomatrix(xs, y);
 					console.log('matrix', matrix);
@@ -148,7 +147,7 @@ class Newton {
 				assert(num !== undefined, "Newton.infer.inferrational returning undefined")	//	2018.8
 				if (den == '1') return num;
 				if (num.includes('+') || num.includes('-')) num = '(' + num + ')';
-				if (den.includes('+') || den.includes('-')) den = '(' + den + ')';
+				if (den.includes('+') || den.includes('-') || den.includes('*')) den = '(' + den + ')';
 				return num + ' / ' + den;
 			}
 			function validate(inputstring, outputstring, tolerance) {
@@ -182,13 +181,14 @@ class Newton {
 			}
 			function makexs(vars) {
 				var xs = [];
-				var numpoints = trans ? 300 : 40;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)
+				var numpoints = (trans==1) ? 300 : (trans==0) ? 40 : 4;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
 				//xs.push([-2, -1, 0, 1]);
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
 				//	if (!trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random()*8));				//	2018.8	Removed
-				if (!trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added
-				if (trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc
+				if (trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added
+				if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc
+				if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5).map(Math.round));
 				//xs = xs.map(row=>row.map(cell=>Math.round(1000 * cell) / 1000));
 				//xs.ones = Array(10).fill(1);
@@ -749,7 +749,7 @@ class Newton {
 					decoder: [[0,0],[1,0],[2,0]]
 				};
 			}
-			function parser41() {    //  ax^-2+bx^-1+c+dx+ex²+fx^3+gx^4
+			function parser51() {    //  ax^-2+bx^-1+c+dx+ex²+fx^3+gx^4+hx^5
 				return {
 					tomatrix: function (xs, y) {
 						var A = makeA(xs);
@@ -757,11 +757,11 @@ class Newton {
 						return [A, b];
 						function makeA(xs) {
 							var AT = [];
-							for (var power = -2; power <= 4; power++) AT.push(xs[0].map(xi=>math.pow(xi, power)));
+							for (var power = -2; power <= 5; power++) AT.push(xs[0].map(xi=>math.pow(xi, power)));
 							return math.transpose(AT);
 						}
 					},
-					decoder: [[-2,0],[-1,0],[0,0],[1,0],[2,0],[3,0],[4,0]]
+					decoder: [[-2,0],[-1,0],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0]]
 				};
 			}
 			function parser_21() {    //  ax^-2+bx^-1

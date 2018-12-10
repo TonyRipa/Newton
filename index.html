@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	11/09/2018
+	Date:	12/10/2018
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -17,7 +17,6 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.6/jsxgraphcore.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
-		<!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->									<!--	2018.8	Removed	-->
 		<link rel="stylesheet" type="text/css" href="https://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css" />
 		<script src="transform.js"></script>
 		<script src="matrix.js"></script>	<!--	2018.9	Added	-->
@@ -28,11 +27,12 @@
 				var input, expr, constant, pointss, points, exprsimp, totalsimp, d;
 				trans = Number($("input[name='myrad']:checked").val());	//	2018.11
 				input = $('#inp').val() || '0';
+				d = math.max(Newton.getvars(input).length,1) + 1;										//	2018.12
+				if (d==3 && trans!=0) { alert('Error : Attempting to transform a 3D graph.') ; return }	//	2018.12
 				expr = input.split('|')[0];
 				constant = input.split('|')[1];
 				[pointss, exprsimp, totalsimp] = Newton.simplify(input);
 				points = pointss.orig;
-				d = points[0].length;
 				$('#td2').toggle(trans==1);
 				if (d == 2) plot1(points, expr); else plot13(points, expr);
 				if (d == 2) plot2(pointss.tran, expr); else plot23(points, expr);
