@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	10/10/2018
+	Date:	1/10/2019
 	Matrix:	A matrix library
 */
 
@@ -11,6 +11,20 @@ class matrix {
 	static solve(A, b) {
 		if (b.every(x=>x==0)) return matrix.homogeneous.solve(A);
 		return undefined;
+	}
+
+	static scaletoint(vect) {								//	2019.1	Added
+		var candidates = [];
+		var scores = [];
+		for (var i = 0; i<=10; i++) {
+			for (var j = 1; j<=10; j++) {
+				candidates.push([i,j]);
+				scores.push(math.abs(math.subtract(math.divide(i,j),math.divide(vect[0],vect[1]))));
+			}
+		}
+		var bestscore = math.min(scores);
+		var bestindex = scores.indexOf(bestscore);
+		return candidates[bestindex];
 	}
 
 }
@@ -24,6 +38,7 @@ matrix.homogeneous = class {
 				var ret = [math.unaryMinus(A2[1]),A2[0]]
 				var gcd = math.gcd(A2[0],A2[1])
 				if (gcd==0) return ret;
+				if (math.norm(ret.map(x=>math.divide(x,gcd)))>1000) return matrix.scaletoint(ret);	//	2019.1	Added
 				return ret.map(x=>math.divide(x,gcd))
 			}
 		}
