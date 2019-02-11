@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	1/10/2019
+	Date:	2/10/2019
 	Newton:	An A.I. for Math
 */
 
@@ -17,7 +17,6 @@ class Newton {
 		var orig = _.zip(...Newton.x, Newton.y);
 		console.log(orig)
 		var t = transform(orig)
-		//var tran = math.fraction(t);											//	2018.8	Fraction	//	2018.9	Removed
 		var tran = t.map(point=>point.map(x=>math.fraction(0).add(x)));			//	2018.8	Fraction	//	2018.9	Added for NaN handling
 		console.log('getpoints',tran);
 		return {orig, tran};													//	2018.6	Added
@@ -30,7 +29,7 @@ class Newton {
 		return Newton.getpoints().orig;
 	}
 	static getvars(input) {	//	2018.12
-		input = input.replace('sin','').replace('cos','').replace('exp','');
+		input = input.replace('sinh','').replace('sin','').replace('cosh','').replace('cos','').replace('exp','');	//	2019.2	sinh & cosh
 		var vars = [];
 		var alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 		for (let symbol of input) {
@@ -69,7 +68,6 @@ class Newton {
 			if (trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }
 			console.log(JSON.stringify(xs))
 			console.log(JSON.stringify(y))
-
 			if (vars.length==2) return inferpolynomial(xs, y, parser32);
 			if (trans==2) return inferdifferential(xs);
 			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
@@ -77,7 +75,7 @@ class Newton {
 			var candidates = [0,1,2,3,4,5,6,7]
 			for (let i of candidates) {
 				try {
-					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser51) : i==3 ? inferrational(xs, y, 1) : i==4 ? inferrational(xs, y, 2) : i==5 ? inferrational(xs, y, 3) : i==6 ? inferrational(xs, y, 4) : inferrational(xs, y, 5);
+					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser51) : inferrational(xs, y, i-2);
 					assert(candidate[i] !== undefined);
 					e[i] = geterrorbypoints(Newton.getrightpoints(), candidate[i]);
 				} catch(e) { console.log(`Candidate[${i}] fails : ${e}`); /* Ignore error because some inference engines must fail */ }
@@ -130,7 +128,7 @@ class Newton {
 				if (arguments.length<3) algo = 0;
 				var tovect, tomatrix, decodernum, decoderden, parser;
 				var parser = [parserrationalclosed, parserrational0, parserrational11, parserrational21, parserrational1, parserrational2, parserrationalsearch, parserrationalbrute][algo];
-				if (algo<=5) {
+				if (algo<=6) {
 					({tomatrix, decodernum, decoderden} = parser());
 					var matrix = tomatrix(xs, y);
 					console.log('matrix', matrix);

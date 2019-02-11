@@ -4,7 +4,7 @@ Newton: An A.I. for Math
 
 Author : Anthony John Ripa
 
-Date : 2018.12.10
+Date : 2019.02.10
 
 Live Demo at <a target='_blank' href='http://tonyripa.github.io/Newton/'>http://tonyripa.github.io/Newton/</a>
 
@@ -41,7 +41,7 @@ Extensions
 --------------
 `Newton`'s power to recognize functions other than rational functions (like transcendental functions) can be extended by preprocessing the data with a transform that maps a larger space of functions into rational functions. `Newton` can then recognize that rational function. These are in a sense spectacles for Newton. By introducing an optional Laplace-like preprocessing step, `Newton` can recognize a larger class of functions. A possible downside is that it is a bit numerically expensive because it is an integral transform.
 
-Complementarily, `Newton` can also do an optional differential transform. The differential transform has 2 advantages. One is that it is cheaper to calculate. Two is that it is all-in-one instead of preprocessing. This transform is again Laplace-like. It comes from the observation that the Taylor coefficients without factorial denominators (basically just the derivatives) can be put into (possibly repeating) sequence expansion .f(0)f'(0)f''(0)f'''(0) , and that this sequence is the Laplace transform , which `Newton` can put into fraction-form to look more Laplace-like , since the expansion is a relatively untraditional form . Another (although not necessarily the best) way of looking at this (for those who are already familiar with generating functions) is that the Laplace-Transform is the Generating Function of the nth-derivatives of f.
+Complementarily, `Newton` can also do an optional differential transform. The differential transform has 2 advantages. One is that it is cheaper (Time÷Accuracy) to calculate. Two is that it is all-in-one instead of preprocessing. This transform is again Laplace-like. It comes from the observation that the Taylor coefficients without factorial denominators (basically just the derivatives) can be put into (possibly repeating) sequence expansion .f(0)f'(0)f''(0)f'''(0) , and that this sequence is the Laplace transform , which `Newton` can put into fraction-form to look more Laplace-like , since the expansion is a relatively untraditional form . Another (although not necessarily the best) way of looking at this (for those who are already familiar with generating functions) is that the Laplace-Transform is the Generating Function of the nth-derivatives of f.
 
 Dependencies
 ------------
