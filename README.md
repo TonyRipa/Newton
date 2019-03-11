@@ -4,7 +4,7 @@ Newton: An A.I. for Math
 
 Author : Anthony John Ripa
 
-Date : 2019.02.10
+Date : 2019.03.10
 
 Live Demo at <a target='_blank' href='http://tonyripa.github.io/Newton/'>http://tonyripa.github.io/Newton/</a>
 
@@ -45,4 +45,4 @@ Complementarily, `Newton` can also do an optional differential transform. The di
 
 Dependencies
 ------------
-<a href='http://jquery.com'>jQuery</a> , <a href='http://mathjs.org'>math.js</a>  , <a href='http://lodash.com'>Lodash</a> and <a href='http://visjs.org'>vis.js</a>
+<a href='http://jquery.com'>jQuery</a> , <a href='http://mathjs.org'>math.js</a> , <a href='http://lodash.com'>Lodash</a> , <a href='http://visjs.org'>vis.js</a> and <a href='http://vuejs.org'>Vue.js</a>

@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	2/10/2019
+	Date:	3/10/2019
 	Newton:	An A.I. for Math
 */
 
@@ -25,7 +25,7 @@ class Newton {
 		return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.number(xyz)));
 	}
 	static getrightpoints() {
-		if (trans==1) return Newton.getpoints().tran;
+		if (vm.trans==1) return Newton.getpoints().tran;						//	2019.3	vm.trans
 		return Newton.getpoints().orig;
 	}
 	static getvars(input) {	//	2018.12
@@ -43,7 +43,6 @@ class Newton {
 		var expr, constant;
 		[expr, constant] = input.split('|');
 		expr = infer(expr);
-		//	if (!constant) return [Newton.getpoints(), expr];					//	2018.8	Removed
 		assert(expr !== undefined, "Newton.simplify returning undefined")		//	2018.8	Added
 		if (!constant) return [Newton.getpointsreal(), expr];					//	2018.8	Added
 		//	return [Newton.getpoints(), expr, infer(evaluate(expr, constant))];	//	2018.8	Removed
@@ -60,28 +59,32 @@ class Newton {
 			var vars = Newton.getvars(input);
 			var xs = makexs(vars);
 			var y = makey(xs, input);
-			//if (trans) return inferrational(xs, y);
+			//if (vm.trans) return inferrational(xs, y);
 			console.log(JSON.stringify(xs))
 			console.log(y)
 			console.log(JSON.stringify(y))
 			console.log(JSON.stringify(_.unzip(Newton.getpoints().tran)))
-			if (trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }
+			if (vm.trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }
 			console.log(JSON.stringify(xs))
 			console.log(JSON.stringify(y))
 			if (vars.length==2) return inferpolynomial(xs, y, parser32);
-			if (trans==2) return inferdifferential(xs);
-			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
+			if (vm.trans==2) return inferdifferential(xs);
+			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
 			var candidate = []
-			var candidates = [0,1,2,3,4,5,6,7]
+			var candidates = [0,1,2,3,4,5,6,7,8]
 			for (let i of candidates) {
 				try {
 					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser51) : inferrational(xs, y, i-2);
 					assert(candidate[i] !== undefined);
 					e[i] = geterrorbypoints(Newton.getrightpoints(), candidate[i]);
+					//alert([candidate[i],_.range(vm.range+1,9).some(x=>candidate[i].replace('^2','').includes(x))])
+					//if (candidate[i].replace('^2','').split('').some(x=>_.range(vm.range+1,9).includes(x))) e[i]=math.fraction(99999);
+					if (_.range(Number(vm.range)+1,9+1).some(x=>candidate[i].includes(x))) e[i]=math.fraction(99999);	//	2019.3	Complexity Control
+					//console.log(['vm.range',vm.range])
 				} catch(e) { console.log(`Candidate[${i}] fails : ${e}`); /* Ignore error because some inference engines must fail */ }
 			}
 			if (e[7]) e[7] = e[7].mul(100);	//	complexity
-			console.log('Infer > Error > ', e, candidate)
+			console.log('Infer > Error > ', math.number(e), candidate)
 			//return candidate[0]
 			for (let i of candidates) {
 				//alert(i)
@@ -127,16 +130,18 @@ class Newton {
 			function inferrational(xs, y, algo) {
 				if (arguments.length<3) algo = 0;
 				var tovect, tomatrix, decodernum, decoderden, parser;
-				var parser = [parserrationalclosed, parserrational0, parserrational11, parserrational21, parserrational1, parserrational2, parserrationalsearch, parserrationalbrute][algo];
-				if (algo<=6) {
-					({tomatrix, decodernum, decoderden} = parser());
-					var matrix = tomatrix(xs, y);
-					console.log('matrix', matrix);
-					var vect = solve(...matrix);
-				} else {
-					({tovect, decodernum, decoderden} = parser());
-					var vect = tovect(Newton.getpoints().tran);
-				}
+				var parser = [parserrationalclosed, parserrational0, parserrational11, parserrational21, parserrational1, parserrational2, sparser, parserrationalbrute, parserrationalsearch][algo];
+				//if (algo<=6) {																	//	2019.3	Removed
+				//	({tomatrix, decodernum, decoderden} = parser());
+				//	var matrix = tomatrix(xs, y);
+				//	console.log('matrix', matrix);
+				//	var vect = solve(...matrix);
+				//} else {
+				//	({tovect, decodernum, decoderden} = parser());
+				//	var vect = tovect(Newton.getpoints().tran);
+				//}
+				({tovect, tomatrix, decodernum, decoderden} = parser());							//	2019.3	Added
+				var vect = tomatrix ? solve(...tomatrix(xs, y)) : tovect(Newton.getpoints().tran);	//	2019.3	Added
 				console.log('vect', vect);
 				//console.log(stringify(vect2matrixnum(vect), vars) + ' : ' + stringify(vect2matrixden(vect), vars));
 				var num = stringify(vect, vars, decodernum);
@@ -168,24 +173,29 @@ class Newton {
 					for (let char of 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
 						scope[char] = points[i][0];
 					var input = points[i][1];
-					var output = math.eval(outputstring, scope);
+					try {
+						var output = math.eval(outputstring, scope);
+					} catch(e) {
+						var output = 0;
+					} 
 					var abserror = math.abs(input.sub(output));							//	2018.8	sub
 					if (!isNaN(abserror)) error = error.add(abserror.mul(abserror));	//	2018.8	add&mul		//	2018.9	Removed test
 					//error = error.add(abserror.mul(abserror));						//	2018.8	add&mul		//	2018.9	Removed test
 				}
-				console.log('Geterrorbypoints > Error', error, points, outputstring)
+				console.log('Geterrorbypoints > Error', math.number(error), math.number(points), outputstring)
 				return error;
 			}
 			function makexs(vars) {
 				var xs = [];
-				var numpoints = (trans==1) ? 300 : (trans==0) ? 40 : 4;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)
+				var numpoints = (vm.trans==1) ? 300 : (vm.trans==0) ? 40 : 4;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)
+				numpoints = Number(vm.size);	//	2019.3
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
 				//xs.push([-2, -1, 0, 1]);
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
 				//	if (!trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random()*8));				//	2018.8	Removed
-				if (trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added
-				if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc
-				if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin
+				if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added
+				if (vm.trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc
+				if (vm.trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5).map(Math.round));
 				//xs = xs.map(row=>row.map(cell=>Math.round(1000 * cell) / 1000));
 				//xs.ones = Array(10).fill(1);
@@ -271,6 +281,80 @@ class Newton {
 						return variable + (power == 1 ? '' : '^' + power);
 					}
 				}
+			}
+
+			function sparser() {	//	2019.3
+				return {
+					tovect: function brute(allpoints) {
+						//var points = allpoints;
+						var points = _.sampleSize(allpoints, 4);
+						var f = (x, p) =>(p[1] + p[3] * x + p[5] * x * x) / (p[0] + p[2] * x + p[4] * x * x);
+						var range = vm.range;
+						if (range>4) range=4;
+						var bestval = 1000;
+						var besti;
+						var p;
+						for (var n = [0]; n.length<=range; increment(n,6)) {
+							p = [0,0,0,0,0,0];
+							for (var e of n) p[e]++;
+							//console.log(JSON.stringify([n,p]));
+							if (p[0]+p[2]+p[4]==0) continue;
+							for (var sp=p; sp.some(x=>x>0); sp=incrementsign(sp)) {
+								//console.log(JSON.stringify([n,p,sp]));
+								var curval = diff(f, points, sp);
+								//if (JSON.stringify(n)=='[0,3]') alert(JSON.stringify([n,p,sp,curval,f(points[0][0],sp)]))
+								if (curval < bestval) {//alert(JSON.stringify([n,p,sp,curval,f(points[0][0],sp)]))
+									besti = sp;
+									bestval = curval;
+								}
+							}
+
+							//for (var sign=0; sign<32; sign++) {
+							//	var bits = [sign%2,(sign>>1)%2,(sign>>2)%2,(sign>>3)%2,(sign>>4)%2,(sign>>5)%2].map(x=>x*2-1).map(x=>-x)
+							//	var sp = _.zip(p,bits).map(pb=>pb[0]*pb[1]);
+							//	//console.log(JSON.stringify([n,p,sp]));
+							//	var curval = diff(f, points, sp);
+							//	//if (JSON.stringify(n)=='[0,0,1,1,1]') alert(JSON.stringify([n,p,sp,curval,f(points[0][0],sp)]))
+							//	if (curval < bestval) {
+							//		besti = sp;
+							//		bestval = curval;
+							//	}
+							//}
+						}
+						//alert(JSON.stringify([n,p,sp,bestval,besti]));
+						return besti;
+						function incrementsign(number) {//console.log(JSON.stringify(['number',number]))
+							if (number.length==0) return [];
+							if (number[0]==0) return [0,...incrementsign(number.slice(1))];
+							if (number[0]> 0) return [-number[0],...number.slice(1)];
+							if (number[0]< 0) return [-number[0],...incrementsign(number.slice(1))];
+						}
+						function increment(number,base) {//console.log('increment')
+							number[0]++;
+							regroup(number,base);
+							function regroup(number,base) {
+								for (var i = 0; i<number.length; i++) {
+									if (number[i] >= base) {
+										number[i] -= base;
+										if (i==number.length-1) number.push(0); else number[i+1]++;
+									}
+								}
+							}
+						}
+						function diff(f, points, p) {
+							var ys = points.map(xy=>[xy[1], f(xy[0], p)])
+							var d0 = ys.map(pair =>1 / pair[0] == 0 && 1 / pair[1] == 0 ? 0 : isNaN(pair[0]) && isNaN(pair[1]) ? 0 : pair[0] - pair[1]);
+							var d = d0.map(x=>x * x);
+							d = d.map(x=>1 / x == 0 ? 1 : x);
+							d = d.map(x=>isNaN(x) ? 1 : x);
+							d = Math.sqrt(math.sum(...d));
+							if (isNaN(d)) { console.log('disNaN', p, d0, y, y1); end }
+							return d;
+						}
+					},
+					decodernum: [0,[0,0],0,[1,0],0,[2,0]],
+					decoderden: [[0,0],0,[1,0],0,[2,0]]
+				}				
 			}
 			function parserdifferential() {	//	2018.11
 				return {
@@ -508,7 +592,9 @@ class Newton {
 					tovect: function brute(allpoints) {
 						var points = allpoints//_.sample(allpoints, 39);
 						var f = (x, p) =>(p[0] + p[1] * x + p[2] * x * x) / (p[6] + p[7] * x + p[8] * x * x);
-						var range = 2;
+						//var range = 2;
+						var range = vm.range;
+						if (range>2) range=2;
 						var bestval = 1000;
 						var besti;
 						for (var p0 = -range; p0<=range*2; p0++)        //  a+bx+cx²
@@ -531,7 +617,7 @@ class Newton {
 										bestval = curval;
 									}
 								}
-						if (bestval<.1) return besti;
+						if (bestval<.01) return besti;
 						for (var p0 = range; p0>=-range; p0--)          //  (a+bx+cx²)/(d+ex)
 							for (var p1 = -range; p1<=range; p1++)
 								for (var p2 = -range; p2<=range; p2++)
@@ -544,16 +630,23 @@ class Newton {
 											}
 										}
 						if (bestval<.0001) return besti;
-						for (var p0 = -range; p0<=range; p0++)
+						for (var p0 = -range; p0<=range; p0++)			//	(a+bx+cx²)/(d+ex+fx²)
 							for (var p1 = -range; p1<=range; p1++)
 								for (var p2 = -range; p2<=range; p2++)
-									for (var p3 = 0; p3<=range; p3++)
+									for (var p3 = -range; p3<=range; p3++)
 										for (var p4 = -range; p4<=range; p4++)
 											for (var p5 = -range; p5<=range; p5++) {
 												var curval = diff(f, points, [p0,p1,p2,0,0,0,p3,p4,p5]);
 												if (curval < bestval) {
 													besti = [p0,p1,p2,0,0,0,p3,p4,p5];
 													bestval = curval;
+												}
+												if (curval == bestval) {
+													var besti2 = [p0,p1,p2,0,0,0,p3,p4,p5];
+													if (math.sum(math.abs(besti2)) < math.sum(math.abs(besti)) || math.sum(math.sign(besti2)) > math.sum(math.sign(besti))) {
+														besti = besti2;
+														bestval = curval;
+													}
 												}
 											}
 						var f2 = (x1,x2, p) =>(p[0] + p[1] * x1 + p[2] * x1 * x1 + p[3] * x2 + p[4] * x1 * x2 + p[5] * x2 * x2);

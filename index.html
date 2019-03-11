@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	2/10/2019
+	Date:	3/10/2019
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -11,7 +11,6 @@
 		<title>Newton</title>
 		<meta charset="utf-8" />
 		<script src='../js/jquery.js'></script><script>window.jQuery || document.write("<script src='https://code.jquery.com/jquery-latest.js'><" + "/script>")</script>
-		<!--	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js"></script>	-->		<!--	2018.8	Removed	-->
 		<script src='../js/math3.js'></script><script>window.math || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js'><" + "/script>")</script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.6/jsxgraphcore.js"></script>
@@ -21,18 +20,20 @@
 		<script src="matrix.js"></script>	<!--	2018.9	Added	-->
 		<script src="newton.js"></script>
 		<script src="plot.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js"></script>	<!--	2019.3	Added	-->
 		<script>
 			function go() {
 				var input, expr, constant, pointss, points, exprsimp, totalsimp, d;
-				trans = Number($("input[name='myrad']:checked").val());	//	2018.11
+				//trans = Number($("input[name='myrad']:checked").val());												//	2018.11
 				input = $('#inp').val() || '0';
-				d = math.max(Newton.getvars(input).length,1) + 1;										//	2018.12
-				if (d==3 && trans!=0) { alert('Error : Attempting to transform a 3D graph.') ; return }	//	2018.12
+				d = math.max(Newton.getvars(input).length,1) + 1;														//	2018.12
+				if (d==3 && vm.trans!=0) { alert('Error : Attempting to transform a 3D graph.') ; return }				//	2018.12
 				expr = input.split('|')[0];
 				constant = input.split('|')[1];
+				if (constant && vm.trans!=0) { alert('Error : Attempting to transform a point evaluation.') ; return }	//	2019.3
 				[pointss, exprsimp, totalsimp] = Newton.simplify(input);
 				points = pointss.orig;
-				$('#td2').toggle(trans==1);
+				$('#td2').toggle(vm.trans==1);
 				if (d == 2) plot1(points, expr); else plot13(points, expr);
 				if (d == 2) plot2(pointss.tran, expr); else plot23(points, expr);
 				if (d == 2) plot3(exprsimp); else plot33(exprsimp);
@@ -118,21 +119,21 @@
 		</script>
 	</head>
 	<body>
-		<center>
+		<center id='app'>
 			<h1>Newton</h1>
 			<table border="1">
 				<tr>
 					<td>
-						<input type='radio' name='myrad' value='0' id='ut' checked><label for='ut'>Untransformed</label><br>
-						<input type='radio' name='myrad' value='1' id='it'><label for='it'>Integral Transform</label><br>
-						<input type='radio' name='myrad' value='2' id='dt'><label for='dt'>Differential Transform</label><br> <!-- 2018.11 Dif -->
+						<input type='radio' value='0' id='ut' v-model='trans' onclick='vm.size=40'><label for='ut'>Untransformed</label><br>
+						<input type='radio' value='1' id='it' v-model='trans' v-on:click='size=300'><label for='it'>Integral Transform</label><br>
+						<input type='radio' value='2' id='dt' v-model='trans' @click='size=4'><label for='dt'>Differential Transform</label><br> <!-- 2018.11 Dif -->
 						<br>
 						<center><button onclick="go()">Go</button></center><br>
-						<input id='inp' placeholder="Type or Click Dropdown" style="position:absolute;width:140px">	<!--	2018.8	width for linux firefox -->
+						<input id='inp' placeholder="Type or Click Dropdown" style="position:absolute;width:140px" value='0'>	<!--	2018.8	width for linux firefox -->
 						<select onchange="$('#inp').val($(this).val())" style="height:23px;width:190px">	<!--	2018.6	width for linux firefox -->
-							<option selected disabled>Choose a option or type</option>
+							<option disabled>Choose a option or type</option>
 							<optgroup label="0 Variable">
-								<option>0</option>
+								<option selected>0</option>
 								<option>1</option>
 								<option>2</option>
 								<option>12/8</option>
@@ -162,9 +163,12 @@
 								<option>sinh(x)</option>
 								<option>cosh(x)</option>
 							</optgroup>
-						</select>
+						</select><br>
+						<br>
+						<!--<input type='range' min='4' max='500' step='36' v-model='size' style><span>{{size}}</span><br>-->
+						<input type='range' min='1' max='9' step='1' v-model='range' title='Complexity'><span title='Complexity'>{{range}}</span>
 					</td>
-					<td width="110px">
+					<td width="120px">
 						<div id="title1" style="text-align:center"></div>
 					</td>
 					<td>
@@ -188,5 +192,11 @@
 				</tr>
 			</table>
 		</center>
+		<script>
+			vm = new Vue({
+				el: '#app',
+				data: { trans: 0, size: 40, range: 5 }
+			});
+		</script>
 	</body>
 </html>
