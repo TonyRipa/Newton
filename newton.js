@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	3/10/2019
+	Date:	4/10/2019
 	Newton:	An A.I. for Math
 */
 
@@ -42,11 +42,11 @@ class Newton {
 	static simplify(input) {
 		var expr, constant;
 		[expr, constant] = input.split('|');
-		expr = infer(expr);
-		assert(expr !== undefined, "Newton.simplify returning undefined")		//	2018.8	Added
-		if (!constant) return [Newton.getpointsreal(), expr];					//	2018.8	Added
-		//	return [Newton.getpoints(), expr, infer(evaluate(expr, constant))];	//	2018.8	Removed
-		return [Newton.getpointsreal(), expr, infer(evaluate(expr, constant))];	//	2018.8	Added
+		expr = infers(expr);
+		assert(expr !== undefined, "Newton.simplify returning undefined")					//	2018.8	Added
+		if (!constant) return [Newton.getpointsreal(), expr];								//	2018.8	Added
+		//return [Newton.getpointsreal(), expr, infer(evaluate(expr, constant))];			//	2018.8	Added	//	2019.4	Removed
+		return [Newton.getpointsreal(), expr, expr.map(e=>infer(evaluate(e, constant)))];	//	2019.4	Added
 		function evaluate(input, val) {
 			return substitute(input, Newton.getvars(input).slice(-1)[0], val);
 		}
@@ -54,8 +54,11 @@ class Newton {
 			if (vari === undefined) return input;
 			return input.replace(new RegExp(vari, 'g'), '(' + val + ')');
 		}
-		function infer(input) {//alert('infer')
-			assert(input !== undefined, "Newton.infer Arg undefined")			//	2018.8	Added
+		function infer(input) {																//	2019.4	Added
+			return infers(input)[0];
+		}
+		function infers(input) {//alert('infer')											//	2019.4	Renamed
+			assert(input !== undefined, "Newton.infer Arg undefined")						//	2018.8	Added
 			var vars = Newton.getvars(input);
 			var xs = makexs(vars);
 			var y = makey(xs, input);
@@ -67,8 +70,8 @@ class Newton {
 			if (vm.trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }
 			console.log(JSON.stringify(xs))
 			console.log(JSON.stringify(y))
-			if (vars.length==2) return inferpolynomial(xs, y, parser32);
-			if (vm.trans==2) return inferdifferential(xs);
+			if (vars.length==2) return [inferpolynomial(xs, y, parser32)];	//	2019.4	list
+			if (vm.trans==2) return [inferdifferential(xs)];				//	2019.4	list
 			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
 			var candidate = []
 			var candidates = [0,1,2,3,4,5,6,7,8]
@@ -79,13 +82,22 @@ class Newton {
 					e[i] = geterrorbypoints(Newton.getrightpoints(), candidate[i]);
 					//alert([candidate[i],_.range(vm.range+1,9).some(x=>candidate[i].replace('^2','').includes(x))])
 					//if (candidate[i].replace('^2','').split('').some(x=>_.range(vm.range+1,9).includes(x))) e[i]=math.fraction(99999);
-					if (_.range(Number(vm.range)+1,9+1).some(x=>candidate[i].includes(x))) e[i]=math.fraction(99999);	//	2019.3	Complexity Control
+					//if (_.range(Number(vm.range)+1,9+1).some(x=>candidate[i].includes(x))) e[i]=math.fraction(99999); // 2019.3 Complexity Control // 2019.4 Removed
+					if (vm.range<9 && new RegExp(`[${Number(vm.range)+1}-9]`).test(candidate[i])) e[i]=math.fraction(99998); // 2019.4 Complexity Control Single Digit
+					if (candidate[i].match(/\d\d/)) e[i]=math.fraction(99999);												 //	2019.4 Complexity Control Double Digit
 					//console.log(['vm.range',vm.range])
 				} catch(e) { console.log(`Candidate[${i}] fails : ${e}`); /* Ignore error because some inference engines must fail */ }
 			}
 			if (e[7]) e[7] = e[7].mul(100);	//	complexity
 			console.log('Infer > Error > ', math.number(e), candidate)
 			//return candidate[0]
+
+			e = math.number(e);												//	2019.4	Return Candidates Sorted
+			var ec = _.zip(e,candidate);									//	2019.4	Return Candidates Sorted
+			ec = ec.filter(x => x[0]!=null && x[1]!=null && !isNaN(x[0]))	//	2019.4	Return Candidates Sorted
+			ec.sort((a,b)=>a[0]-b[0]);										//	2019.4	Return Candidates Sorted
+			return _.unzip(ec)[1];											//	2019.4	Return Candidates Sorted
+
 			for (let i of candidates) {
 				//alert(i)
 				//alert(e)
@@ -290,13 +302,14 @@ class Newton {
 						var points = _.sampleSize(allpoints, 4);
 						var f = (x, p) =>(p[1] + p[3] * x + p[5] * x * x) / (p[0] + p[2] * x + p[4] * x * x);
 						var range = vm.range;
-						if (range>4) range=4;
+						//if (range>4) range=4;			//	2019.4	Removed
 						var bestval = 1000;
 						var besti;
 						var p;
-						for (var n = [0]; n.length<=range; increment(n,6)) {
-							p = [0,0,0,0,0,0];
-							for (var e of n) p[e]++;
+						var ps = binitems(6,range);		//	2019.4	Added
+						for (p of ps) {
+							//p = [0,0,0,0,0,0];		//	2019.4	Removed
+							//for (var e of n) p[e]++;	//	2019.4	Removed
 							//console.log(JSON.stringify([n,p]));
 							if (p[0]+p[2]+p[4]==0) continue;
 							for (var sp=p; sp.some(x=>x>0); sp=incrementsign(sp)) {
@@ -308,21 +321,27 @@ class Newton {
 									bestval = curval;
 								}
 							}
-
-							//for (var sign=0; sign<32; sign++) {
-							//	var bits = [sign%2,(sign>>1)%2,(sign>>2)%2,(sign>>3)%2,(sign>>4)%2,(sign>>5)%2].map(x=>x*2-1).map(x=>-x)
-							//	var sp = _.zip(p,bits).map(pb=>pb[0]*pb[1]);
-							//	//console.log(JSON.stringify([n,p,sp]));
-							//	var curval = diff(f, points, sp);
-							//	//if (JSON.stringify(n)=='[0,0,1,1,1]') alert(JSON.stringify([n,p,sp,curval,f(points[0][0],sp)]))
-							//	if (curval < bestval) {
-							//		besti = sp;
-							//		bestval = curval;
-							//	}
-							//}
 						}
 						//alert(JSON.stringify([n,p,sp,bestval,besti]));
 						return besti;
+						function binitems(numbins,numitems) {
+							var ret = []
+							for (let i = 1 ; i<=numitems ; i++) {
+								var list = binitems1(numbins,i);
+								ret.push(...list)
+							}
+							return ret
+							function binitems1(numbins,numitems) {
+								if (numbins==1) return [[numitems]];
+								var ret = []
+								for (var i=0; i<=numitems; i++) {
+									var rest = binitems1(numbins-1,numitems-i)
+									for (let list of rest)
+										ret.push([i,...list]);
+								}
+								return ret;
+							}
+						}
 						function incrementsign(number) {//console.log(JSON.stringify(['number',number]))
 							if (number.length==0) return [];
 							if (number[0]==0) return [0,...incrementsign(number.slice(1))];

@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	3/10/2019
+	Date:	4/10/2019
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -24,7 +24,6 @@
 		<script>
 			function go() {
 				var input, expr, constant, pointss, points, exprsimp, totalsimp, d;
-				//trans = Number($("input[name='myrad']:checked").val());												//	2018.11
 				input = $('#inp').val() || '0';
 				d = math.max(Newton.getvars(input).length,1) + 1;														//	2018.12
 				if (d==3 && vm.trans!=0) { alert('Error : Attempting to transform a 3D graph.') ; return }				//	2018.12
@@ -33,6 +32,8 @@
 				if (constant && vm.trans!=0) { alert('Error : Attempting to transform a point evaluation.') ; return }	//	2019.3
 				[pointss, exprsimp, totalsimp] = Newton.simplify(input);
 				points = pointss.orig;
+				if (Array.isArray(exprsimp)) exprsimp = exprsimp[0];	//	2019.4	Simplification Array
+				if (Array.isArray(totalsimp)) totalsimp = totalsimp[0];	//	2019.4	Simplification Array
 				$('#td2').toggle(vm.trans==1);
 				if (d == 2) plot1(points, expr); else plot13(points, expr);
 				if (d == 2) plot2(pointss.tran, expr); else plot23(points, expr);
@@ -195,7 +196,7 @@
 		<script>
 			vm = new Vue({
 				el: '#app',
-				data: { trans: 0, size: 40, range: 5 }
+				data: { trans: 0, size: 40, range: 4 }
 			});
 		</script>
 	</body>
