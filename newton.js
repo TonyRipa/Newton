@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	4/10/2019
+	Date:	5/10/2019
 	Newton:	An A.I. for Math
 */
 
@@ -40,13 +40,15 @@ class Newton {
 		return vars;
 	}
 	static simplify(input) {
-		var expr, constant;
+		var expr, constant, best, candidates;
 		[expr, constant] = input.split('|');
-		expr = infers(expr);
-		assert(expr !== undefined, "Newton.simplify returning undefined")					//	2018.8	Added
-		if (!constant) return [Newton.getpointsreal(), expr];								//	2018.8	Added
-		//return [Newton.getpointsreal(), expr, infer(evaluate(expr, constant))];			//	2018.8	Added	//	2019.4	Removed
-		return [Newton.getpointsreal(), expr, expr.map(e=>infer(evaluate(e, constant)))];	//	2019.4	Added
+		//expr = infers(expr);																			//	2019.5	Removed
+		({candidates,best} = infers(expr));																//	2019.5	Added
+		vm.selected = best;																				//	2019.5	Added
+		assert(candidates !== undefined, "Newton.simplify returning undefined")							//	2018.8	Added
+		if (!constant) return [Newton.getpointsreal(), candidates];										//	2018.8	Added
+		//return [Newton.getpointsreal(), expr, infer(evaluate(expr, constant))];						//	2018.8	Added	//	2019.4	Removed
+		return [Newton.getpointsreal(), candidates, candidates.map(e=>infer(evaluate(e, constant)))];	//	2019.4	Added
 		function evaluate(input, val) {
 			return substitute(input, Newton.getvars(input).slice(-1)[0], val);
 		}
@@ -55,14 +57,16 @@ class Newton {
 			return input.replace(new RegExp(vari, 'g'), '(' + val + ')');
 		}
 		function infer(input) {																//	2019.4	Added
-			return infers(input)[0];
+			var candidates,best;															//	2019.5	Added
+			({candidates,best} = infers(input));											//	2019.5	Added
+			return candidates[best];														//	2019.5	Added
+			//return infers(input)[0];														//	2019.5	Removed
 		}
 		function infers(input) {//alert('infer')											//	2019.4	Renamed
 			assert(input !== undefined, "Newton.infer Arg undefined")						//	2018.8	Added
 			var vars = Newton.getvars(input);
 			var xs = makexs(vars);
 			var y = makey(xs, input);
-			//if (vm.trans) return inferrational(xs, y);
 			console.log(JSON.stringify(xs))
 			console.log(y)
 			console.log(JSON.stringify(y))
@@ -70,12 +74,13 @@ class Newton {
 			if (vm.trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }
 			console.log(JSON.stringify(xs))
 			console.log(JSON.stringify(y))
-			if (vars.length==2) return [inferpolynomial(xs, y, parser32)];	//	2019.4	list
-			if (vm.trans==2) return [inferdifferential(xs)];				//	2019.4	list
+			//if (vars.length==2) return [inferpolynomial(xs, y, parser32)];	//	2019.4	list	//	2019.5	Removed
+			if (vars.length==2) return {candidates:[inferpolynomial(xs, y, parser32)],best:0};		//	2019.5	object
+			//if (vm.trans==2) return [inferdifferential(xs)];					//	2019.4	list	//	2019.5	Removed
+			if (vm.trans==2) return {candidates:[inferdifferential(xs)],best:0};					//	2019.5	object
 			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
-			var candidate = []
-			var candidates = [0,1,2,3,4,5,6,7,8]
-			for (let i of candidates) {
+			var candidate = [];
+			for (let i of [0,1,2,3,4,5,6,7,8]) {
 				try {
 					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser51) : inferrational(xs, y, i-2);
 					assert(candidate[i] !== undefined);
@@ -93,28 +98,31 @@ class Newton {
 			//return candidate[0]
 
 			e = math.number(e);												//	2019.4	Return Candidates Sorted
-			var ec = _.zip(e,candidate);									//	2019.4	Return Candidates Sorted
-			ec = ec.filter(x => x[0]!=null && x[1]!=null && !isNaN(x[0]))	//	2019.4	Return Candidates Sorted
-			ec.sort((a,b)=>a[0]-b[0]);										//	2019.4	Return Candidates Sorted
-			return _.unzip(ec)[1];											//	2019.4	Return Candidates Sorted
+			var leasterror = math.min(e);									//	2019.5	Added
+			var best = e.indexOf(leasterror);								//	2019.5	Added
+			return {candidates:candidate,best};								//	2019.5	Added
+			//var ec = _.zip(e,candidate);									//	2019.4	Return Candidates Sorted	//	2019.5	Removed
+			//ec = ec.filter(x => x[0]!=null && x[1]!=null && !isNaN(x[0]))	//	2019.4	Return Candidates Sorted	//	2019.5	Removed
+			//ec.sort((a,b)=>a[0]-b[0]);									//	2019.4	Return Candidates Sorted	//	2019.5	Removed
+			//return _.unzip(ec)[1];										//	2019.4	Return Candidates Sorted	//	2019.5	Removed
 
-			for (let i of candidates) {
-				//alert(i)
-				//alert(e)
-				//alert(e[i])
-				//alert(nanmin(e))
-				if (e[i] == nanmin(e)) {
-					//alert(i)
-					//alert(e)
-					//alert(e[i])
-					//alert(nanmin(e))
-					assert(candidate[i] !== undefined, `Newton.infer returning candidate[${i}]=undefined : candidates=${candidate}`)	//	2018.8
-					return candidate[i];
-				}
-			}
-			
-			alert('No fit');
-			return '0';
+			//for (let i of candidates) {									//	2019.5	Removed
+			//	//alert(i)
+			//	//alert(e)
+			//	//alert(e[i])
+			//	//alert(nanmin(e))
+			//	if (e[i] == nanmin(e)) {
+			//		//alert(i)
+			//		//alert(e)
+			//		//alert(e[i])
+			//		//alert(nanmin(e))
+			//		assert(candidate[i] !== undefined, `Newton.infer returning candidate[${i}]=undefined : candidates=${candidate}`)	//	2018.8
+			//		return candidate[i];
+			//	}
+			//}
+			//
+			//alert('No fit');												//	2019.5	Removed
+			//return '0';													//	2019.5	Removed
 			//return inferpolynomial(xs, y);
 			//return inferrational(xs, y);
 			function nanmin(array) {

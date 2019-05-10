@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	4/10/2019
+	Date:	5/10/2019
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -23,62 +23,67 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js"></script>	<!--	2019.3	Added	-->
 		<script>
 			function go() {
-				var input, expr, constant, pointss, points, exprsimp, totalsimp, d;
+				var input;
 				input = $('#inp').val() || '0';
-				d = math.max(Newton.getvars(input).length,1) + 1;														//	2018.12
-				if (d==3 && vm.trans!=0) { alert('Error : Attempting to transform a 3D graph.') ; return }				//	2018.12
-				expr = input.split('|')[0];
-				constant = input.split('|')[1];
-				if (constant && vm.trans!=0) { alert('Error : Attempting to transform a point evaluation.') ; return }	//	2019.3
-				[pointss, exprsimp, totalsimp] = Newton.simplify(input);
-				points = pointss.orig;
-				if (Array.isArray(exprsimp)) exprsimp = exprsimp[0];	//	2019.4	Simplification Array
-				if (Array.isArray(totalsimp)) totalsimp = totalsimp[0];	//	2019.4	Simplification Array
-				$('#td2').toggle(vm.trans==1);
-				if (d == 2) plot1(points, expr); else plot13(points, expr);
-				if (d == 2) plot2(pointss.tran, expr); else plot23(points, expr);
-				if (d == 2) plot3(exprsimp); else plot33(exprsimp);
-				if (d == 2) plot4(exprsimp, constant, totalsimp); else plot43(exprsimp, constant, totalsimp);
-				//console.log(Newton.x);
+				vm.d = math.max(Newton.getvars(input).length,1) + 1;														//	2018.12
+				if (vm.d==3 && vm.trans!=0) { alert('Error : Attempting to transform a 3D graph.') ; return }				//	2018.12
+				vm.expr = input.split('|')[0];
+				vm.constant = input.split('|')[1];
+				if (vm.constant && vm.trans!=0) { alert('Error : Attempting to transform a point evaluation.') ; return }	//	2019.3
+				[vm.pointss, vm.exprsimp, vm.totalsimp] = Newton.simplify(input);
+				//render();		//	2019.5	Added
 			}
-			function plot1(points, title) {
-				$('#title1').html(title);
+			function render() {	//	2019.5	Added
+				var exprsimp, totalsimp;
+				//exprsimp = vm.exprsimp;									//	2019.5	Removed
+				//totalsimp = vm.totalsimp;									//	2019.5	Removed
+				//if (Array.isArray(exprsimp)) exprsimp = exprsimp[0];		//	2019.4	Simplification Array	//	2019.5	Removed
+				//if (Array.isArray(totalsimp)) totalsimp = totalsimp[0];	//	2019.4	Simplification Array	//	2019.5	Removed
+				exprsimp = vm.exprsimp[vm.selected];						//	2019.5	Added
+				totalsimp = (vm.totalsimp||vm.exprsimp)[vm.selected];		//	2019.5	Added
+				$('#td2').toggle(vm.trans==1);
+				if (vm.d == 2) plot1(vm.pointss.orig); else plot13(vm.pointss.orig, vm.expr);
+				if (vm.d == 2) plot2(vm.pointss.tran); else plot23(vm.pointss.orig, vm.expr);
+				if (vm.d == 2) plot3(exprsimp); else plot33(exprsimp);
+				if (vm.d == 2) plot4(exprsimp, vm.constant, totalsimp); else plot43(exprsimp, vm.constant, totalsimp);
+			}
+			function plot1(points) {
+				//$('#title1').html(title);	//	2019.5	Removed
 				Plot.plot(points, 'graph1');
 			}
 			function plot13(points, title) {
-				$('#title1').html(title);
+				//$('#title1').html(title);	//	2019.5	Removed
 				var vars = Plot.getvars(title);
 				Plot.plot3(points, 'graph1', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
 			}
-			function plot2(points, title) {
-				$('#title2').html(title);
+			function plot2(points) {
+				//$('#title2').html(title);	//	2019.5	Removed
 				Plot.plot(points, 'graph2');
 			}
 			function plot23(points, title) {
-				$('#title2').html(title);
+				//$('#title2').html(title);	//	2019.5	Removed
 				var vars = Plot.getvars(title);
 				Plot.plot3(points, 'graph2', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
 			}
 			function plot3(expr) {
 				if (expr === undefined) { var s = "index.plot3 Arg is undefined" ; alert(s) ; throw new Error(s) }	//	2018.8
 				Plot.graph(expr, 'graph3');
-				$('#title3').html(expr);
+				//$('#title3').html(expr);	//	2019.5	Removed
 			}
 			function plot33(expr) {
 				var vars = Plot.getvars(expr);
 				Plot.graph3(expr, 'graph3', { style: 'surface', xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
-				$('#title3').html(expr);
+				//$('#title3').html(expr);	//	2019.5	Removed
 			}
 			function plot33s(expr) {
 				Plot.graph3s(expr, 'graph3', { style: 'surface' });
-				$('#title3').html(expr);
+				//$('#title3').html(expr);	//	2019.5	Removed
 			}
 			function plot4(expr, x, y) {
 				if (x) {
 					$('#td4').show();
 					$('#tv').show();
 					$('#title4').html(expr + '|' + x);
-					//$('#tv').html(y);
 					//console.log(expr, x, y);
 					var board = Plot.graph(expr, 'graph4');
 					if (x) board.create('point', [x, y], { name: '', size: .1 });
@@ -170,7 +175,8 @@
 						<input type='range' min='1' max='9' step='1' v-model='range' title='Complexity'><span title='Complexity'>{{range}}</span>
 					</td>
 					<td width="120px">
-						<div id="title1" style="text-align:center"></div>
+						<!--<div id="title1" style="text-align:center"></div>	2019.5	Removed-->
+						<div style="text-align:center" v-html='expr'></div>
 					</td>
 					<td>
 						<div id="graph1" style="border:thin solid black; width:400px; height:400px"></div>
@@ -181,8 +187,14 @@
 					<td>
 						<div id="graph3" style="border:thin solid black; width:400px; height:400px"></div>
 					</td>
-					<td width="100px">
-						<div id="title3" style="text-align:center"></div>
+					<td width="160px">
+						<!--<div id="title3" style="text-align:center"></div>	2019.5	Removed-->
+						<details>
+							<summary v-html='exprsimp[selected]'></summary>
+							<select v-if='exprsimp.length>1' v-model="selected" size='9'>
+								<option v-for='(exp,i) in exprsimp' :value='i'>{{exp}}</option>
+							</select>
+						</details>
 					</td>
 					<td id="td4" style="display:none">
 						<div id="title4" style="text-align:center">.</div>
@@ -196,7 +208,8 @@
 		<script>
 			vm = new Vue({
 				el: '#app',
-				data: { trans: 0, size: 40, range: 4 }
+				data: { trans: 0, size: 40, range: 4, expr: '', exprsimp: [], selected: '0' },
+				watch: { exprsimp: render, selected: render }	//	2019.5	Added
 			});
 		</script>
 	</body>
