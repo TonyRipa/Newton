@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	5/10/2019
+	Date:	6/10/2019
 	Newton:	An A.I. for Math
 */
 
@@ -261,12 +261,6 @@ class Newton {
 					var x = math.multiply(Ainv, b);
 					return x.valueOf();
 				}
-				//function solvesquare2(A, b) {											//	2018.9	Removed
-				//	console.log('det2', math.det(A));
-				//	var Ainv = math.divide(math.eye(A[0].length), A);
-				//	var x = math.multiply(Ainv, b);
-				//	return x.valueOf();
-				//}
 			}
 			function stringify(termcoefs, vars, decoder) {
 				console.log('stringify: termcoefs=',termcoefs)
@@ -356,18 +350,18 @@ class Newton {
 							if (number[0]> 0) return [-number[0],...number.slice(1)];
 							if (number[0]< 0) return [-number[0],...incrementsign(number.slice(1))];
 						}
-						function increment(number,base) {//console.log('increment')
-							number[0]++;
-							regroup(number,base);
-							function regroup(number,base) {
-								for (var i = 0; i<number.length; i++) {
-									if (number[i] >= base) {
-										number[i] -= base;
-										if (i==number.length-1) number.push(0); else number[i+1]++;
-									}
-								}
-							}
-						}
+						//function increment(number,base) {//console.log('increment')	//	2019.6	Removed
+						//	number[0]++;
+						//	regroup(number,base);
+						//	function regroup(number,base) {
+						//		for (var i = 0; i<number.length; i++) {
+						//			if (number[i] >= base) {
+						//				number[i] -= base;
+						//				if (i==number.length-1) number.push(0); else number[i+1]++;
+						//			}
+						//		}
+						//	}
+						//}
 						function diff(f, points, p) {
 							var ys = points.map(xy=>[xy[1], f(xy[0], p)])
 							var d0 = ys.map(pair =>1 / pair[0] == 0 && 1 / pair[1] == 0 ? 0 : isNaN(pair[0]) && isNaN(pair[1]) ? 0 : pair[0] - pair[1]);
@@ -383,39 +377,55 @@ class Newton {
 					decoderden: [[0,0],0,[1,0],0,[2,0]]
 				}				
 			}
-			function parserdifferential() {	//	2018.11
+			function parserdifferential() {			//	2018.11
 				return {
-					tovect: function transform(points) {
-						function divide(num,den) {
-							return div(num,den,3).slice(0,4);
-							function div(n,d,c) {
-								if (c<=0) return n;
-								var q = math.divide(n[0],math.fraction(d[0]));
-								var sub = math.multiply(math.fraction(d),math.fraction(q));
-								var r = math.subtract(n,sub);
-								r.shift();
-								r.push(0);
-								var rest = div(r,den,c-1);
-								rest.unshift(q);
-								return rest;
-							}
-						}
-						console.log('here',points.map(x=>math.number(x[1])));
-						var derivatives = [points[0][1],
+					tovect: function transform(points) {			   console.log('parsDiff: points = ',points.map(xy=>math.number(xy[1])));
+						var derivatives = pointstoderivatives(points); console.log('parsDiff: der = ',math.number(derivatives));
+						var {num,den} = seq2frac(derivatives);		   console.log('parsDiff: der = ',math.number(derivatives),' num = ',num,' den = ',math.number(den))
+						return [...num,...den];
+						function pointstoderivatives(points) {
+							return [points[0][1],
 							(points[1][1]-points[0][1])/(points[1][0]-points[0][0]),
 							(points[2][1]-2*points[1][1]+points[0][1])/(points[1][0]-points[0][0])**2,
 							(points[3][1]-3*points[2][1]+3*points[1][1]-points[0][1])/(points[1][0]-points[0][0])**3];
-						if (math.abs(derivatives[3])<.01) return [0,0,...derivatives,1,0,0,0];
-						var num = [0,1,0];
-						if (math.abs(derivatives[0])<.01) {derivatives.push(derivatives.shift()); num=[0,0,1]}
-						var den = divide([1,0,0,0],derivatives);
-						var width = math.abs(den[3])>.15 ? 4 : math.abs(den[2])>.15 ? 3 : 2;
-						if (width==3) num.push(num.shift());
-						den.reverse()
-						while (math.abs(den[0])<.15) den.shift();
-						return [...num,0,0,0,...den];
+						}
+						function seq2frac(seq) {	//	2019.6
+							var terminating = math.abs(seq[3])<.01 ;
+							return terminating ? finiteseq2frac(seq) : infiniteseq2frac(seq);
+							function finiteseq2frac(seq) { return {'num' : [0,0,...seq] , 'den' : [1,0,0,0] } }
+							function infiniteseq2frac(seq) {
+								seq = math.round(math.number(seq))
+								var leading0 = 1;	//	All sequences implicitly have 1 leading0 in 1's place (i.e. start at .1's place) ( e.g. 0.4738 )
+								while (seq[0]==0 || math.abs(seq[0]/seq[1])< 0.5) { leftshift(seq); leading0++}	//	Process leading0's
+								var den = divide([seq[0],0,0,0],seq);
+								den.pop();		//	Least significant number in division is typically error so remove it
+								den.reverse()	//	[…,x³,x²,x¹,x⁰,…] -> […,x⁰,x¹,x²,x³,…]
+								//alert(den)
+								while (den[0]==0 || math.abs(den[0]/den[1]) < 0.5) den.shift(); // Remove Leading0's (Leading0's are negative powers)
+								var width = den.length;					//	Denominator Width			//	e.g. width(101) = 3
+								var pow = width - 1;													//	Highest power of a polynomial is width-1
+								pow -= leading0;
+								num = [0,0,0,0,0,0];
+								num[1-pow] = seq[0];					//	index=1-pow : return API is numerators as [x¹,x⁰,x⁻¹,x⁻²,x⁻³,x⁻⁴]
+								return {num, den}
+								function leftshift(arr) { arr.shift(); arr.push(0); }
+								function divide(num,den) {
+									return div(num,den,3).slice(0,4);
+									function div(n,d,c) {
+										if (c<=0) return n;
+										var q = math.divide(n[0],d[0]);
+										var sub = math.multiply(d,q);
+										var r = math.subtract(n,sub);
+										leftshift(r);
+										var rest = div(r,den,c-1);
+										rest.unshift(q);
+										return rest;
+									}
+								}
+							}
+						}
 					},
-					decodernum: [[1,0],[0,0],[-1,0],[-2,0],[-3,0]],
+					decodernum: [[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]],
 					decoderden: [0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]
 				}
 			}

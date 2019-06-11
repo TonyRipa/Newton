@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	5/10/2019
+	Date:	6/10/2019
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -20,7 +20,7 @@
 		<script src="matrix.js"></script>	<!--	2018.9	Added	-->
 		<script src="newton.js"></script>
 		<script src="plot.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js"></script>	<!--	2019.3	Added	-->
+		<script src='../js/vue.js'></script><script>window.Vue || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js'><" + "/script>")</script>	<!--	2019.6	Added	-->
 		<script>
 			function go() {
 				var input;
@@ -99,7 +99,6 @@
 					$('#tv').show();
 					$('#title4').html(expr + '|' + x);
 					$('#tv').html(totalsimp);
-					//console.log(expr, x, totalsimp);
 					var vars = Plot.getvars(expr);
 					var data = Plot.graph3(totalsimp, 'graph4', { style: 'line', yMin: -5, yMax: 5, xLabel: vars[0], yLabel: vars[1] });
 					$('#tv').html(totalsimp);
