@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	6/10/2019
+	Date:	7/10/2019
 	Newton:	An A.I. for Math
 */
 
@@ -82,6 +82,7 @@ class Newton {
 			var candidate = [];
 			for (let i of [0,1,2,3,4,5,6,7,8]) {
 				try {
+					console.log('Candidate: ' + i);
 					candidate[i] = i==0 ? inferpolynomial(xs, y, parser01) : i==1 ? inferpolynomial(xs, y, parser_21) : i==2 ? inferpolynomial(xs, y, parser51) : inferrational(xs, y, i-2);
 					assert(candidate[i] !== undefined);
 					e[i] = geterrorbypoints(Newton.getrightpoints(), candidate[i]);
@@ -101,30 +102,6 @@ class Newton {
 			var leasterror = math.min(e);									//	2019.5	Added
 			var best = e.indexOf(leasterror);								//	2019.5	Added
 			return {candidates:candidate,best};								//	2019.5	Added
-			//var ec = _.zip(e,candidate);									//	2019.4	Return Candidates Sorted	//	2019.5	Removed
-			//ec = ec.filter(x => x[0]!=null && x[1]!=null && !isNaN(x[0]))	//	2019.4	Return Candidates Sorted	//	2019.5	Removed
-			//ec.sort((a,b)=>a[0]-b[0]);									//	2019.4	Return Candidates Sorted	//	2019.5	Removed
-			//return _.unzip(ec)[1];										//	2019.4	Return Candidates Sorted	//	2019.5	Removed
-
-			//for (let i of candidates) {									//	2019.5	Removed
-			//	//alert(i)
-			//	//alert(e)
-			//	//alert(e[i])
-			//	//alert(nanmin(e))
-			//	if (e[i] == nanmin(e)) {
-			//		//alert(i)
-			//		//alert(e)
-			//		//alert(e[i])
-			//		//alert(nanmin(e))
-			//		assert(candidate[i] !== undefined, `Newton.infer returning candidate[${i}]=undefined : candidates=${candidate}`)	//	2018.8
-			//		return candidate[i];
-			//	}
-			//}
-			//
-			//alert('No fit');												//	2019.5	Removed
-			//return '0';													//	2019.5	Removed
-			//return inferpolynomial(xs, y);
-			//return inferrational(xs, y);
 			function nanmin(array) {
 				if(array.every(isNaN)) return array[0];
 				return Math.min(...array.filter(x=>!isNaN(x)));
@@ -252,15 +229,16 @@ class Newton {
 				var AT = math.transpose(A);
 				var ATA = math.multiply(AT, A);
 				var ATb = math.multiply(AT, b);
-				return solvesquare(ATA, ATb);
-				function solvesquare(A, b) {
-					console.log('Solve > SolveSquare > Determinant', A, math.det(A), math.number(math.det(A)));
-					//if (math.det(A) < .1) return solvesquare2(A, b);
-					if (math.abs(math.det(A)) < .1) { var ret = matrix.solve(A, b) ; if (ret!=undefined) return ret; };	//	2018.9	matrix.
-					var Ainv = math.divide(math.eye(A[0].length), A);
-					var x = math.multiply(Ainv, b);
-					return x.valueOf();
-				}
+				return matrix.solve(ATA, ATb);	//	2019.7	Added
+				//return solvesquare(ATA, ATb);	//	2019.7	Removed
+				//function solvesquare(A, b) {
+				//	console.log('Solve > SolveSquare > Determinant', A, math.det(A), math.number(math.det(A)));
+				//	//if (math.det(A) < .1) return solvesquare2(A, b);
+				//	if (math.abs(math.det(A)) < .1) { var ret = matrix.solve(A, b) ; if (ret!=undefined) return ret; };	//	2018.9	matrix.
+				//	var Ainv = math.divide(math.eye(A[0].length), A);
+				//	var x = math.multiply(Ainv, b);
+				//	return x.valueOf();
+				//}
 			}
 			function stringify(termcoefs, vars, decoder) {
 				console.log('stringify: termcoefs=',termcoefs)
@@ -539,6 +517,10 @@ class Newton {
 				};
 			}
 			function parserrational1() {   //      (a+bx)/(c+1*x)
+				//	Set up problem as Ax=b with					//	2019.7
+				//	A = [1,x,-Y]								//	2019.7
+				//	x = (a,b,c)									//	2019.7
+				//	b = xY										//	2019.7
 				return {
 					tomatrix: function (xs, y) {
 						var A = makeA(xs);
