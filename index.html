@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	6/10/2019
+	Date:	8/10/2019
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -18,6 +18,7 @@
 		<link rel="stylesheet" type="text/css" href="https://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css" />
 		<script src="transform.js"></script>
 		<script src="matrix.js"></script>	<!--	2018.9	Added	-->
+		<script src="fit.js"></script>		<!--	2019.8	Added	-->
 		<script src="newton.js"></script>
 		<script src="plot.js"></script>
 		<script src='../js/vue.js'></script><script>window.Vue || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js'><" + "/script>")</script>	<!--	2019.6	Added	-->
@@ -35,10 +36,6 @@
 			}
 			function render() {	//	2019.5	Added
 				var exprsimp, totalsimp;
-				//exprsimp = vm.exprsimp;									//	2019.5	Removed
-				//totalsimp = vm.totalsimp;									//	2019.5	Removed
-				//if (Array.isArray(exprsimp)) exprsimp = exprsimp[0];		//	2019.4	Simplification Array	//	2019.5	Removed
-				//if (Array.isArray(totalsimp)) totalsimp = totalsimp[0];	//	2019.4	Simplification Array	//	2019.5	Removed
 				exprsimp = vm.exprsimp[vm.selected];						//	2019.5	Added
 				totalsimp = (vm.totalsimp||vm.exprsimp)[vm.selected];		//	2019.5	Added
 				$('#td2').toggle(vm.trans==1);
