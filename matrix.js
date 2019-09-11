@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/10/2019
+	Date:	9/10/2019
 	Matrix:	A matrix library
 */
 
@@ -9,14 +9,15 @@
 class matrix {
 
 	static solve(A, b) {//A=math.round(math.number(A));b=math.round(math.number(b));
-		console.log("Matrix.solve: A="+A+", b="+b);
+		//console.log("Matrix.solve: A="+A+", b="+b);								//	2019.9	Removed
+		console.log("Matrix.solve: A="+JSON.stringify(math.number(A))+", b="+b);	//	2019.9	Added
 		if (math.abs(math.det(A)) > .01) return matrix.solvenotsingular(A,b);	//	2019.7	Added
 		if (b.every(x=>x==0)) return matrix.scaletoint(matrix.homogeneous.solve(A));
 		for(let i = 0;i<A.length;i++) {
 			A[i].push(math.unaryMinus(b[i]));
 			A[i].reverse();
 		}
-		A.push(new Array(A.length+1).fill(0));
+		//A.push(new Array(A.length+1).fill(0));	//	2019.9	Removed
 		var solution = matrix.homogeneous.solve(A);
 		solution.reverse();
 		solution.pop();
@@ -61,35 +62,33 @@ matrix.homogeneous = class {
 
 	static solve(A) {
 		console.log('Matrix.homogeneous.solve: ' + A.length);
-		if (A.length==1) {					//	2019.7	Added
-			if (A[0].length==1) {
+		if (A[0].length==1) {					//	2019.7	Added
+			if (A.length>=1-1) {
 				return [0];
 			}
 		}
-		if (A.length==2) {																	//	2019.7	Added
-			if (A[0].length==2) {
+		if (A[0].length==2) {																	//	2019.7	Added
+			if (A.length>=2-1) {
 				A = matrix.homogeneous.rref(A);console.log(A)
 				var row0 = A[0];
 				var a = row0[1] == 0 ? 0 : math.unaryMinus(math.divide(row0[1],row0[0]));
 				var ret = [a, 1];
-				//return matrix.scaletoint(ret);
 				return ret;
 			}
 		}
-		if (A.length==3) {		//	2018.10	Added
-			if (A[0].length==3) {
+		if (A[0].length==3) {		//	2018.10	Added
+			if (A.length>=3-1) {
 				A = matrix.homogeneous.rref(A);console.log(A)
 				var row0 = A[0];
 				var row1 = A[1];
 				var a = row0[2] == 0 ? 0 : math.unaryMinus(math.divide(row0[2],row0[0]));	//	2019.7	Added
 				var b = row1[2] == 0 ? 0 : math.unaryMinus(math.divide(row1[2],row1[1]));	//	2019.7	Added
 				var ret = [a, b, 1];														//	2019.7	Added
-				//return matrix.scaletoint(ret);
 				return ret;
 			}
 		}
-		if (A.length==4) {		//	2019.7	Added
-			if (A[0].length==4) {
+		if (A[0].length==4) {		//	2019.7	Added
+			if (A.length>=4-1) {
 				A = matrix.homogeneous.rref(A);console.log(A)
 				var row0 = A[0];
 				var row1 = A[1];
@@ -98,7 +97,21 @@ matrix.homogeneous = class {
 				var b = row1[3] == 0 ? 0 : math.unaryMinus(math.divide(row1[3],row1[1]));	//	2019.7	Added
 				var c = row2[3] == 0 ? 0 : math.unaryMinus(math.divide(row2[3],row2[2]));	//	2019.7	Added
 				var ret = [a, b, c, 1];														//	2019.7	Added
-				//return matrix.scaletoint(ret);
+				return ret;
+			}
+		}
+		if (A[0].length==5) {		//	2019.9	Added
+			if (A.length>=5-1) {
+				A = matrix.homogeneous.rref(A);console.log(A)
+				var row0 = A[0];
+				var row1 = A[1];
+				var row2 = A[2];
+				var row3 = A[3];
+				var a = row0[4] == 0 ? 0 : math.unaryMinus(math.divide(row0[4],row0[0]));
+				var b = row1[4] == 0 ? 0 : math.unaryMinus(math.divide(row1[4],row1[1]));
+				var c = row2[4] == 0 ? 0 : math.unaryMinus(math.divide(row2[4],row2[2]));
+				var d = row3[4] == 0 ? 0 : math.unaryMinus(math.divide(row3[4],row3[3]));
+				var ret = [a, b, c, d, 1];
 				return ret;
 			}
 		}

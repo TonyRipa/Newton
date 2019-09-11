@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2019
+	Date:	9/10/2019
 	Newton:	An A.I. for Math
 */
 
@@ -93,7 +93,9 @@ class Newton {
 			if (vm.trans==2) return {candidates:[inferdifferential(xs)],best:0};					//	2019.5	object
 			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
 			var candidates = [];
-			for (let i of [0,1,2,3,4,5,6,7,8]) {
+			var inferers = [0,1,2,3,4,5,6,7,8];		//	2019.9	Added 
+			for (let i of inferers) {				//	2019.9	Added
+			//for (let i of [0,1,2,3,4,5,6,7,8]) {	//	2019.9	Removed
 				try {
 					console.log('Candidate: ' + i);
 					candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent25) : inferrational(xs, y, i-2);
@@ -188,8 +190,9 @@ class Newton {
 			}
 			function makexs(vars) {
 				var xs = [];
-				var numpoints = (vm.trans==1) ? 300 : (vm.trans==0) ? 40 : 4;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)
-				numpoints = Number(vm.size);	//	2019.3
+				//var numpoints = (vm.trans==1) ? 300 : (vm.trans==0) ? 40 : 4;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)		//	2019.9	Removed
+				//numpoints = Number(vm.size);		//	2019.3	//	2019.9	Removed
+				var numpoints = Number(vm.size);	//	2019.3	//	2019.9	Added
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
 				//xs.push([-2, -1, 0, 1]);
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
@@ -234,15 +237,6 @@ class Newton {
 				var ATA = math.multiply(AT, A);
 				var ATb = math.multiply(AT, b);
 				return matrix.solve(ATA, ATb);	//	2019.7	Added
-				//return solvesquare(ATA, ATb);	//	2019.7	Removed
-				//function solvesquare(A, b) {
-				//	console.log('Solve > SolveSquare > Determinant', A, math.det(A), math.number(math.det(A)));
-				//	//if (math.det(A) < .1) return solvesquare2(A, b);
-				//	if (math.abs(math.det(A)) < .1) { var ret = matrix.solve(A, b) ; if (ret!=undefined) return ret; };	//	2018.9	matrix.
-				//	var Ainv = math.divide(math.eye(A[0].length), A);
-				//	var x = math.multiply(Ainv, b);
-				//	return x.valueOf();
-				//}
 			}
 			function stringify(termcoefs, vars, decoder) {
 				console.log('stringify: termcoefs=',termcoefs)
