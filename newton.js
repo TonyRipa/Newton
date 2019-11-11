@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	9/10/2019
+	Date:	11/10/2019
 	Newton:	An A.I. for Math
 */
 
@@ -101,7 +101,6 @@ class Newton {
 					candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent25) : inferrational(xs, y, i-2);
 					assert(candidates[i] !== undefined);
 					e[i] = geterrorbypoints(Newton.getrightpoints(), candidates[i]);
-					//alert([candidate[i],_.range(vm.range+1,9).some(x=>candidate[i].replace('^2','').includes(x))])
 					//if (candidate[i].replace('^2','').split('').some(x=>_.range(vm.range+1,9).includes(x))) e[i]=math.fraction(99999);
 					//if (_.range(Number(vm.range)+1,9+1).some(x=>candidate[i].includes(x))) e[i]=math.fraction(99999); // 2019.3 Complexity Control // 2019.4 Removed
 					if (vm.range<9 && new RegExp(`[${Number(vm.range)+1}-9]`).test(candidates[i])) e[i]=math.fraction(99998); // 2019.4 Complexity Control Single Digit
@@ -133,7 +132,8 @@ class Newton {
 			function inferpolynomial(xs, y, parser) {
 				var tomatrix, decoder;
 				({tomatrix, decoder} = parser());
-				var vect = solve(...tomatrix(xs, y));
+				//var vect = solve(...tomatrix(xs, y));			//	2019.11	Removed
+				var vect = matrix.solve(...tomatrix(xs, y));	//	2019.11	Added
 				var ret = stringify(vect, vars, decoder);
 				console.log('Infer-Polynomial: ', ret);
 				if (ret === undefined) { var s = "Newton.infer.inferpolynomial returning undefined" ; alert(s) ; throw new Error(s) }	//	2018.8
@@ -143,8 +143,9 @@ class Newton {
 				if (arguments.length<3) algo = 0;
 				var tovect, tomatrix, decodernum, decoderden, parser;
 				var parser = [F.rational1_01, F.rational0_0, F.rational0_1, F.rational1_0, F.rational1_01H, F.rational1_02H, F.sparse, F.rationalbrute, F.rationalsearch][algo];
-				({tovect, tomatrix, decodernum, decoderden} = parser());							//	2019.3	Added
-				var vect = tomatrix ? solve(...tomatrix(xs, y)) : tovect(Newton.getpoints().tran);	//	2019.3	Added
+				({tovect, tomatrix, decodernum, decoderden} = parser());									//	2019.3	Added
+				//var vect = tomatrix ? solve(...tomatrix(xs, y)) : tovect(Newton.getpoints().tran);		//	2019.11	Removed
+				var vect = tomatrix ? matrix.solve(...tomatrix(xs, y)) : tovect(Newton.getpoints().tran);	//	2019.11	Added
 				console.log('vect', vect);
 				//console.log(stringify(vect2matrixnum(vect), vars) + ' : ' + stringify(vect2matrixden(vect), vars));
 				var num = stringify(vect, vars, decodernum);
@@ -231,13 +232,13 @@ class Newton {
 				Newton.y = ys;
 				return ys;
 			}
-			function solve(A, b) {
-				console.log('solve',A, b);
-				var AT = math.transpose(A);
-				var ATA = math.multiply(AT, A);
-				var ATb = math.multiply(AT, b);
-				return matrix.solve(ATA, ATb);	//	2019.7	Added
-			}
+			//function solve(A, b) {									//	2019.11	Removed
+			//	console.log('solve',A, b);
+			//	var AT = math.transpose(A);
+			//	var ATA = math.multiply(AT, A);
+			//	var ATb = math.multiply(AT, b);
+			//	return matrix.solve(ATA, ATb);	//	2019.7	Added
+			//}
 			function stringify(termcoefs, vars, decoder) {
 				console.log('stringify: termcoefs=',termcoefs)
 				termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);	//	2018.9

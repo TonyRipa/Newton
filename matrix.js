@@ -1,23 +1,32 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	10/10/2019
+	Date:	11/10/2019
 	Matrix:	A matrix library
 */
 
 
 class matrix {
 
-	static solve(A, b) {
-		//console.log("Matrix.solve: A="+A+", b="+b);								//	2019.9	Removed
-		console.log("Matrix.solve: A="+JSON.stringify(math.number(A))+", b="+b);	//	2019.9	Added
-		if (math.abs(math.det(A)) > .01) return matrix.solvenotsingular(A,b);	//	2019.7	Added
+	static solve(A, b) {																//	2019.11	Added
+		console.log('solve',A, b);
+		var AT = math.transpose(A);
+		var ATA = math.multiply(AT, A);
+		var ATb = math.multiply(AT, b);
+		if (math.abs(math.det(ATA)) > .4) return matrix.solvenotsingular(ATA, ATb);
+		return matrix.solvesingular(ATA, ATb);
+	}
+
+	//static solve(A, b) {																//	2019.11	Removed
+	static solvesingular(A, b) {														//	2019.11	Added
+		//console.log("Matrix.solve: A="+A+", b="+b);									//	2019.11	Removed
+		console.log("Matrix.SolveSingular: A="+JSON.stringify(math.number(A))+", b="+b);//	2019.11	Added
+		//if (math.abs(math.det(A)) > .01) return matrix.solvenotsingular(A,b);			//	2019.11	Removed
 		if (b.every(x=>x==0)) return matrix.scaletoint(matrix.homogeneous.solve(A));
 		for(let i = 0;i<A.length;i++) {
 			A[i].push(math.unaryMinus(b[i]));
 			A[i].reverse();
 		}
-		//A.push(new Array(A.length+1).fill(0));	//	2019.9	Removed
 		var solution = matrix.homogeneous.solve(A);
 		solution.reverse();
 		solution.pop();
@@ -95,10 +104,13 @@ matrix.homogeneous = class {
 					var row0 = A[0];
 					var row1 = A[1];
 					var row2 = A[2];
-					var a = row0[3] == 0 ? 0 : math.unaryMinus(math.divide(row0[3],row0[0]));	//	2019.7	Added
-					var b = row1[3] == 0 ? 0 : math.unaryMinus(math.divide(row1[3],row1[1]));	//	2019.7	Added
-					var c = row2[3] == 0 ? 0 : math.unaryMinus(math.divide(row2[3],row2[2]));	//	2019.7	Added
-					var ret = [a, b, c, 1];														//	2019.7	Added
+					//var a = row0[3] == 0 ? 0 : math.unaryMinus(math.divide(row0[3],row0[0]));					//	2019.11	Removed
+					//var b = row1[3] == 0 ? 0 : math.unaryMinus(math.divide(row1[3],row1[1]));					//	2019.11	Removed
+					//var c = row2[3] == 0 ? 0 : math.unaryMinus(math.divide(row2[3],row2[2]));					//	2019.11	Removed
+					var a = row0[3] == 0 || row0[0] == 0 ? 0 : math.unaryMinus(math.divide(row0[3],row0[0]));	//	2019.11	Added
+					var b = row1[3] == 0 || row1[1] == 0 ? 0 : math.unaryMinus(math.divide(row1[3],row1[1]));	//	2019.11	Added
+					var c = row2[3] == 0 || row2[2] == 0 ? 0 : math.unaryMinus(math.divide(row2[3],row2[2]));	//	2019.11	Added
+					var ret = [a, b, c, 1];																		//	2019.7	Added
 					return ret;
 				}
 			}
@@ -127,8 +139,9 @@ matrix.homogeneous = class {
 		return undefined;
 	}
 
-	static ref(A) {				//	2018.10	Added
+	static ref(A) {													//	2018.10	Added
 		if (A.length==1) return A;
+		if (A[0].length<1) return A;								//	2019.11	Added
 		A = zerosbelow(A);
 		let S = submatrix(A);
 		S = matrix.homogeneous.ref(S);
