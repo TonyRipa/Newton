@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	8/10/2019
+	Date:	12/10/2019
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -23,7 +23,14 @@
 		<script src="plot.js"></script>
 		<script src='../js/vue.js'></script><script>window.Vue || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js'><" + "/script>")</script>	<!--	2019.6	Added	-->
 		<script>
-			function go() {
+			function go() {			//	2019.12	Added
+				[vm.pointss, vm.exprsimp, vm.totalsimp] = simplify();
+			}
+			function validate() {	//	2019.12	Added
+				return simplify()[1][vm.selected] == vm.exprsimp[vm.selected];
+			}
+			//function go() {		//	2019.12	Removed
+			function simplify() {	//	2019.12	Added
 				var input;
 				input = $('#inp').val() || '0';
 				vm.d = math.max(Newton.getvars(input).length,1) + 1;														//	2018.12
@@ -31,7 +38,8 @@
 				vm.expr = input.split('|')[0];
 				vm.constant = input.split('|')[1];
 				if (vm.constant && vm.trans!=0) { alert('Error : Attempting to transform a point evaluation.') ; return }	//	2019.3
-				[vm.pointss, vm.exprsimp, vm.totalsimp] = Newton.simplify(input);
+				//[vm.pointss, vm.exprsimp, vm.totalsimp] = Newton.simplify(input);	//	2019.12	Removed
+				return Newton.simplify(input);										//	2019.12	Added
 				//render();		//	2019.5	Added
 			}
 			function render() {	//	2019.5	Added
@@ -45,7 +53,6 @@
 				if (vm.d == 2) plot4(exprsimp, vm.constant, totalsimp); else plot43(exprsimp, vm.constant, totalsimp);
 			}
 			function plot1(points) {
-				//$('#title1').html(title);	//	2019.5	Removed
 				Plot.plot(points, 'graph1');
 			}
 			function plot13(points, title) {
@@ -130,7 +137,9 @@
 						<input type='radio' value='1' id='it' v-model='trans' v-on:click='size=300'><label for='it'>Integral Transform</label><br>
 						<input type='radio' value='2' id='dt' v-model='trans' @click='size=4'><label for='dt'>Differential Transform</label><br> <!-- 2018.11 Dif -->
 						<br>
-						<center><button onclick="go()">Go</button></center><br>
+						<center><button onclick="go()">Go</button>
+						<button v-show="exprsimp.length" onclick="alert('Simplification is '+(validate()?'':'in')+'valid')">Validate</button>	<!-- 2019.12 Added	-->
+						</center><br>
 						<input id='inp' placeholder="Type or Click Dropdown" style="position:absolute;width:140px" value='0'>	<!--	2018.8	width for linux firefox -->
 						<select onchange="$('#inp').val($(this).val())" style="height:23px;width:190px">	<!--	2018.6	width for linux firefox -->
 							<option disabled>Choose a option or type</option>
@@ -168,7 +177,8 @@
 						</select><br>
 						<br>
 						<!--<input type='range' min='4' max='500' step='36' v-model='size' style><span>{{size}}</span><br>-->
-						<input type='range' min='1' max='9' step='1' v-model='range' title='Complexity'><span title='Complexity'>{{range}}</span>
+						<input type='range' min='1' max='9' step='1' v-model='range' title='Complexity'><span title='Complexity'>{{range}}</span><br>
+						<br>
 					</td>
 					<td width="120px">
 						<!--<div id="title1" style="text-align:center"></div>	2019.5	Removed-->

@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	11/10/2019
+	Date:	12/10/2019
 	Matrix:	A matrix library
 */
 
@@ -70,7 +70,6 @@ class matrix {
 matrix.homogeneous = class {
 
 	static solve(A) {
-		//console.log('Matrix.homogeneous.solve: ' + A.length);			//	2019.10	Removed
 		console.log('Matrix.homogeneous.solve: ' + A[0].length);		//	2019.10	Added
 		try {															//	2019.10	Added
 			if (A[0].length==1) {					//	2019.7	Added
@@ -92,9 +91,11 @@ matrix.homogeneous = class {
 					A = matrix.homogeneous.rref(A);console.log(A)
 					var row0 = A[0];
 					var row1 = A[1];
-					var a = row0[2] == 0 ? 0 : math.unaryMinus(math.divide(row0[2],row0[0]));	//	2019.7	Added
-					var b = row1[2] == 0 ? 0 : math.unaryMinus(math.divide(row1[2],row1[1]));	//	2019.7	Added
-					var ret = [a, b, 1];														//	2019.7	Added
+					//var a = row0[2] == 0 ? 0 : math.unaryMinus(math.divide(row0[2],row0[0]));					//	2019.12	Removed
+					//var b = row1[2] == 0 ? 0 : math.unaryMinus(math.divide(row1[2],row1[1]));					//	2019.12	Removed
+					var a = row0[2] == 0 || row0[0] == 0 ? 0 : math.unaryMinus(math.divide(row0[2],row0[0]));	//	2019.12	Added
+					var b = row1[2] == 0 || row1[1] == 0 ? 0 : math.unaryMinus(math.divide(row1[2],row1[1]));	//	2019.12	Added
+					var ret = [a, b, 1];																		//	2019.7	Added
 					return ret;
 				}
 			}

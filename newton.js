@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	11/10/2019
+	Date:	12/10/2019
 	Newton:	An A.I. for Math
 */
 
@@ -54,7 +54,8 @@ class Newton {
 		//return [Newton.getpointsreal(), candidates, candidates.map(e=>infer(evaluate(e, constant)))];	//	2019.4	Added	//	2019.8	Removed
 		function simplify0pipe(points, candidates, bestindex) {											//	2019.8	Added
 			vm.selected = bestindex;
-			return [points, candidates];
+			//return [points, candidates];																//	2019.12	Removed
+			return [points, candidates, candidates[bestindex]];											//	2019.12	Added
 		}
 		function simplify1pipe(points, candidate, constant) {											//	2019.8	Added
 			vm.selected = 0;
@@ -156,19 +157,19 @@ class Newton {
 				if (den.includes('+') || den.includes('-') || den.includes('*')) den = '(' + den + ')';
 				return num + ' / ' + den;
 			}
-			function validate(inputstring, outputstring, tolerance) {
-				var scope = {};
-				for (let char of 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
-					scope[char] = math.fraction(Math.random() * 10 - 5);
-				var input = math.eval(inputstring, scope);
-				var output = math.eval(outputstring, scope);
-				var error = math.abs(input.sub(output));
-				console.log('Validate > Error', error, inputstring, outputstring)
-				return error < tolerance;
-			}
-			function validatebypoints(points, outputstring, tolerance) {
-				return geterrorbypoints(points, outputstring) < tolerance;
-			}
+			//function validate(inputstring, outputstring, tolerance) {		//	2019.12	Removed
+			//	var scope = {};
+			//	for (let char of 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+			//		scope[char] = math.fraction(Math.random() * 10 - 5);
+			//	var input = math.eval(inputstring, scope);
+			//	var output = math.eval(outputstring, scope);
+			//	var error = math.abs(input.sub(output));
+			//	console.log('Validate > Error', error, inputstring, outputstring)
+			//	return error < tolerance;
+			//}
+			//function validatebypoints(points, outputstring, tolerance) {	//	2019.12	Removed
+			//	return geterrorbypoints(points, outputstring) < tolerance;
+			//}
 			function geterrorbypoints(points, outputstring) {
 				if (outputstring=='0 / 0') return math.fraction(0).add(NaN);									//	2018.9
 				var error = math.fraction(0);
@@ -183,8 +184,8 @@ class Newton {
 						var output = 0;
 					} 
 					var abserror = math.abs(input.sub(output));							//	2018.8	sub
-					if (!isNaN(abserror)) error = error.add(abserror.mul(abserror));	//	2018.8	add&mul		//	2018.9	Removed test
-					//error = error.add(abserror.mul(abserror));						//	2018.8	add&mul		//	2018.9	Removed test
+					if (!isNaN(abserror)) error = error.add(abserror.mul(abserror));	//	2018.8	add&mul		//	2018.9	Added test
+					//error = error.add(abserror.mul(abserror));						//	2018.8	add&mul
 				}
 				console.log('Geterrorbypoints > Error', math.number(error), math.number(points), outputstring)
 				return error;
@@ -226,7 +227,6 @@ class Newton {
 						vals.push(val);
 					}
 					var scope = makescope(vars, vals);
-					//ys.push(math.fraction(math.eval(expression, scope)));								//	2018.8	in case math.eval is not fraction
 					ys.push(math.fraction(0).add(math.eval(expression, scope)));						//	2018.8	in case math.eval is not fraction	//	2018.9	0+ is Robust for NaN
 				}
 				Newton.y = ys;
