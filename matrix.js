@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	12/10/2019
+	Date:	1/10/2020
 	Matrix:	A matrix library
 */
 
@@ -65,6 +65,19 @@ class matrix {
 		}
 	}
 
+	static log(A) {									//	2020.1	Added
+		if (Array.isArray(A[0])) console.log(matrix.m(A));
+		else console.log(matrix.v(A));
+	}
+
+	static m(A) {									//	2020.1	Added
+		return math.number(A).map(row=>matrix.v(row)).join('\n');
+	}
+
+	static v(b) {									//	2020.1	Added
+		return math.number(b).map(x=>x.toFixed(1)).join('\t');
+	}
+
 }
 
 matrix.homogeneous = class {
@@ -88,7 +101,8 @@ matrix.homogeneous = class {
 			}
 			if (A[0].length==3) {		//	2018.10	Added
 				if (A.length>=3-1) {
-					A = matrix.homogeneous.rref(A);console.log(A)
+					//A = matrix.homogeneous.rref(A);console.log(A)		//	2020.1	Removed
+					A = matrix.homogeneous.rref(A);matrix.log(A)		//	2020.1	Added
 					var row0 = A[0];
 					var row1 = A[1];
 					//var a = row0[2] == 0 ? 0 : math.unaryMinus(math.divide(row0[2],row0[0]));					//	2019.12	Removed
@@ -101,7 +115,8 @@ matrix.homogeneous = class {
 			}
 			if (A[0].length==4) {		//	2019.7	Added
 				if (A.length>=4-1) {
-					A = matrix.homogeneous.rref(A);console.log(A)
+					//A = matrix.homogeneous.rref(A);console.log(A)		//	2020.1	Removed
+					A = matrix.homogeneous.rref(A);matrix.log(A)		//	2020.1	Added
 					var row0 = A[0];
 					var row1 = A[1];
 					var row2 = A[2];
@@ -117,15 +132,12 @@ matrix.homogeneous = class {
 			}
 			if (A[0].length==5) {		//	2019.9	Added
 				if (A.length>=5-1) {
-					A = matrix.homogeneous.rref(A);console.log(A)
+					//A = matrix.homogeneous.rref(A);console.log(A)		//	2020.1	Removed
+					A = matrix.homogeneous.rref(A);matrix.log(A)		//	2020.1	Added
 					var row0 = A[0];
 					var row1 = A[1];
 					var row2 = A[2];
 					var row3 = A[3];
-					//var a = row0[4] == 0 ? 0 : math.unaryMinus(math.divide(row0[4],row0[0]));					//	2019.10	Removed
-					//var b = row1[4] == 0 ? 0 : math.unaryMinus(math.divide(row1[4],row1[1]));					//	2019.10	Removed
-					//var c = row2[4] == 0 ? 0 : math.unaryMinus(math.divide(row2[4],row2[2]));					//	2019.10	Removed
-					//var d = row3[4] == 0 ? 0 : math.unaryMinus(math.divide(row3[4],row3[3]));					//	2019.10	Removed
 					var a = row0[4] == 0 || row0[0] == 0 ? 0 : math.unaryMinus(math.divide(row0[4],row0[0]));	//	2019.10	Added
 					var b = row1[4] == 0 || row1[1] == 0 ? 0 : math.unaryMinus(math.divide(row1[4],row1[1]));	//	2019.10	Added
 					var c = row2[4] == 0 || row2[2] == 0 ? 0 : math.unaryMinus(math.divide(row2[4],row2[2]));	//	2019.10	Added
@@ -140,38 +152,81 @@ matrix.homogeneous = class {
 		return undefined;
 	}
 
-	static ref(A) {													//	2018.10	Added
-		if (A.length==1) return A;
-		if (A[0].length<1) return A;								//	2019.11	Added
-		A = zerosbelow(A);
-		let S = submatrix(A);
-		S = matrix.homogeneous.ref(S);
-		A = overlay(A,S);
+	static ref(A,swap) {							//	2020.1	Added
+		for (let i = 0; i < A.length-1; i++) {
+			if (swap) sort(A,i);
+			A = zerosbelow(A,i,i)
+		}
 		return A;
-		function zerosbelow(A) {
-			let row0 = A[0];
-			let ret = [row0];
-			for ( let i = 1 ; i<A.length ; i++ ) {
+		function sort(A,col) {
+			let row = col;
+			for (let i = row; i < A.length; i++) {
+				for (let j = i+1; j < A.length; j++) {
+					if (dist1(A[j][col])<dist1(A[i][col]))
+						[A[i],A[j]] = [A[j],A[i]]				
+				}
+			}
+		}
+		function dist1(x) {
+			x = math.abs(x);
+			if (x>1) return x;
+			return 1/x;
+		}
+		function zerosbelow(A,r,c) {
+			let pivotrow = A[r];
+			let ret = [];
+			for (let i = 0; i <= r; i++ ) ret.push(A[i].slice());	//	Keep rows above pivot (& pivot row)
+			for (let i = r+1 ; i<A.length ; i++) {
 				let row = A[i];
-				if (row[0]!=0 && row0[0]!=0) row = math.subtract(row,math.multiply(math.divide(row[0],row0[0]),row0));
+				if (row[c]!=0 && pivotrow[c]!=0) row = math.subtract(row,math.multiply(math.divide(row[c],pivotrow[c]),pivotrow));
 				ret.push(row);
 			}
 			return ret;
 		}
-		function submatrix(A) {
-			return A.filter((x,i)=>i>0).map(row=>row.filter((x,i)=>i>0))
-		}
-		function overlay(A,S) {
-			return [A[0],...S.map((row,i)=>[A[i+1][0],...row])]
-		}
 	}
 
-	static rref(A) {			//	2018.10	Added
+	static rref(A) {												//	2020.1	Added
 		var ref = matrix.homogeneous.ref;
-		return flip(ref(flip(ref(A))));
-		function flip(A) {
-			return A.slice().reverse();
-		}
+		var flip = matrix.homogeneous.flip;
+		return flip(ref(flip(ref(A,true))));
 	}
+
+	static flip(A) {												//	2020.1	Added
+		return A.slice().reverse().map(row=>row.slice().reverse());
+	}
+
+	//static ref(A) {												//	2018.10	Added	//	2020.1	Removed
+	//	if (A.length==1) return A;
+	//	if (A[0].length<1) return A;								//	2019.11	Added
+	//	A = zerosbelow(A);
+	//	let S = submatrix(A);
+	//	S = matrix.homogeneous.ref(S);
+	//	A = overlay(A,S);
+	//	return A;
+	//	function zerosbelow(A) {
+	//		let row0 = A[0];
+	//		let ret = [row0];
+	//		for ( let i = 1 ; i<A.length ; i++ ) {
+	//			let row = A[i];
+	//			if (row[0]!=0 && row0[0]!=0) row = math.subtract(row,math.multiply(math.divide(row[0],row0[0]),row0));
+	//			ret.push(row);
+	//		}
+	//		return ret;
+	//	}
+	//	function submatrix(A) {
+	//		return A.filter((x,i)=>i>0).map(row=>row.filter((x,i)=>i>0))
+	//	}
+	//	function overlay(A,S) {
+	//		return [A[0],...S.map((row,i)=>[A[i+1][0],...row])]
+	//	}
+	//}
+
+	//static rref(A) {												//	2018.10	Added	//	2020.1	Removed
+	//	var ref = matrix.homogeneous.ref;
+	//	return flip(ref(flip(ref(A))));
+	//	function flip(A) {
+	//		return A.slice().reverse();
+	//	}
+	//}
 
 }
