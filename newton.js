@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	12/10/2019
+	Date:	2/10/2020
 	Newton:	An A.I. for Math
 */
 
@@ -24,8 +24,10 @@ class Newton {
 	static getpointsreal() {													//	2018.8	Added
 		return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.number(xyz)));
 	}
-	static getrightpoints() {
-		if (vm.trans==1) return Newton.getpoints().tran;						//	2019.3	vm.trans
+	//static getrightpoints() {													//	2020.2	Removed
+	static getrightpoints(trans=vm.trans) {										//	2020.2	Added
+		//if (vm.trans==1) return Newton.getpoints().tran;						//	2019.3	vm.trans	//	2020.2	Removed
+		if (trans==1) return Newton.getpoints().tran;													//	2020.2	Added
 		return Newton.getpoints().orig;
 	}
 	static getvars(input) {	//	2018.12
@@ -39,7 +41,8 @@ class Newton {
 		}
 		return vars;
 	}
-	static simplify(input) {
+	//static simplify(input) {																			//	2020.2	Removed
+	static simplify(input,trans=vm.trans) {																//	2020.2	Added
 		var expr, constant, best, candidates;
 		[expr, constant] = input.split('|');
 		//expr = infers(expr);																			//	2019.5	Removed
@@ -85,13 +88,15 @@ class Newton {
 			console.log(y)
 			console.log(JSON.stringify(y))
 			console.log(JSON.stringify(_.unzip(Newton.getpoints().tran)))
-			if (vm.trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }
+			//if (vm.trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }	//	2020.2	Removed
+			if (trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }			//	2020.2	Added
 			console.log(JSON.stringify(xs))
 			console.log(JSON.stringify(y))
 			//if (vars.length==2) return [inferpolynomial(xs, y, F.poly32)];	//	2019.4	list	//	2019.5	Removed
 			if (vars.length==2) return {candidates:[inferpolynomial(xs, y, F.poly32)],best:0};		//	2019.5	object
 			//if (vm.trans==2) return [inferdifferential(xs)];					//	2019.4	list	//	2019.5	Removed
-			if (vm.trans==2) return {candidates:[inferdifferential(xs)],best:0};					//	2019.5	object
+			//if (vm.trans==2) return {candidates:[inferdifferential(xs)],best:0};					//	2019.5	object	//	2020.2	Removed
+			if (trans==2) return {candidates:[inferdifferential(xs)],best:0};											//	2020.2	Added
 			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
 			var candidates = [];
 			var inferers = [0,1,2,3,4,5,6,7,8];		//	2019.9	Added 
@@ -101,8 +106,8 @@ class Newton {
 					console.log('Candidate: ' + i);
 					candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent25) : inferrational(xs, y, i-2);
 					assert(candidates[i] !== undefined);
-					e[i] = geterrorbypoints(Newton.getrightpoints(), candidates[i]);
-					//if (candidate[i].replace('^2','').split('').some(x=>_.range(vm.range+1,9).includes(x))) e[i]=math.fraction(99999);
+					//e[i] = geterrorbypoints(Newton.getrightpoints(), candidates[i]);		//	2020.2	Removed
+					e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i]);	//	2020.2	Added
 					//if (_.range(Number(vm.range)+1,9+1).some(x=>candidate[i].includes(x))) e[i]=math.fraction(99999); // 2019.3 Complexity Control // 2019.4 Removed
 					if (vm.range<9 && new RegExp(`[${Number(vm.range)+1}-9]`).test(candidates[i])) e[i]=math.fraction(99998); // 2019.4 Complexity Control Single Digit
 					if (candidates[i].match(/\d\d/)) e[i]=math.fraction(99999);												 //	2019.4 Complexity Control Double Digit
@@ -199,9 +204,12 @@ class Newton {
 				//xs.push([-2, -1, 0, 1]);
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
 				//	if (!trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random()*8));				//	2018.8	Removed
-				if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added
-				if (vm.trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc
-				if (vm.trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin
+				//if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added	//	2020.2	Removed
+				//if (vm.trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc			//	2020.2	Removed
+				//if (vm.trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin					//	2020.2	Removed
+				if (trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added		//	2020.2	Added
+				if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc				//	2020.2	Added
+				if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin						//	2020.2	Added
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5).map(Math.round));
 				//xs = xs.map(row=>row.map(cell=>Math.round(1000 * cell) / 1000));
 				//xs.ones = Array(10).fill(1);
