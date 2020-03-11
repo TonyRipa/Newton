@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	2/10/2020
+	Date:	3/10/2020
 	Newton:	An A.I. for Math
 */
 
@@ -109,12 +109,13 @@ class Newton {
 					//e[i] = geterrorbypoints(Newton.getrightpoints(), candidates[i]);		//	2020.2	Removed
 					e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i]);	//	2020.2	Added
 					//if (_.range(Number(vm.range)+1,9+1).some(x=>candidate[i].includes(x))) e[i]=math.fraction(99999); // 2019.3 Complexity Control // 2019.4 Removed
-					if (vm.range<9 && new RegExp(`[${Number(vm.range)+1}-9]`).test(candidates[i])) e[i]=math.fraction(99998); // 2019.4 Complexity Control Single Digit
-					if (candidates[i].match(/\d\d/)) e[i]=math.fraction(99999);												 //	2019.4 Complexity Control Double Digit
+					//if (vm.range<9 && new RegExp(`[${Number(vm.range)+1}-9]`).test(candidates[i])) e[i]=math.fraction(99998);	//	2019.4 Complexity Control Single Digit	//	2020.3	Removed
+					//if (candidates[i].match(/\d\d/)) e[i]=math.fraction(99999);												//	2019.4 Complexity Control Double Digit	//	2020.3	Removed
+					e[i] = e[i].mul(complexity(candidates[i]));								//	2020.3	Added
 					//console.log(['vm.range',vm.range])
 				} catch(e) { console.log(`Candidate[${i}] fails : ${e}`); /* Ignore error because some inference engines must fail */ }
 			}
-			if (e[7]) e[7] = e[7].mul(100);	//	complexity
+			//if (e[7]) e[7] = e[7].mul(100);	//	complexity				//	2020.3	Removed
 			console.log('Infer > Error > ', math.number(e), candidates)
 			//return candidates[0]
 
@@ -122,6 +123,13 @@ class Newton {
 			var leasterror = math.min(e);									//	2019.5	Added
 			var best = e.indexOf(leasterror);								//	2019.5	Added
 			return {candidates,best};										//	2019.5	Added
+			function complexity(expression) {								//	2020.3	Added
+				if (expression.match(/\d\d/)) return math.fraction(99999);
+				for (let i = 9; i > 0; i--) {
+					if (new RegExp(`${i}`).test(expression)) return math.fraction(i);
+				}
+				return 1;
+			}
 			function nanmin(array) {
 				if(array.every(isNaN)) return array[0];
 				return Math.min(...array.filter(x=>!isNaN(x)));
@@ -212,7 +220,6 @@ class Newton {
 				if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin						//	2020.2	Added
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5).map(Math.round));
 				//xs = xs.map(row=>row.map(cell=>Math.round(1000 * cell) / 1000));
-				//xs.ones = Array(10).fill(1);
 				Newton.x = xs;
 				return xs;
 			}

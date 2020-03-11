@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	2/10/2020
+	Date:	3/10/2020
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -118,7 +118,6 @@
 					$('#tv').show();
 					$('#title4').html(expr + '|' + x);
 					$('#tv').html(totalsimp);
-					//console.log(expr, x, totalsimp);
 					var data = Plot.graph3s(totalsimp, 'graph4', { style: 'line', yMin: -5, yMax: 5 });
 					$('#tv').html(totalsimp);
 				} else {
@@ -225,7 +224,8 @@
 		<script>
 			vm = new Vue({
 				el: '#app',
-				data: { trans: 0, size: 40, range: 4, expr: '', exprsimp: [], selected: '0' },
+				//data: { trans: 0, size: 40, range: 4, expr: '', exprsimp: [], selected: '0' },	//	2020.3	Removed
+				data: { trans: 0, size: 40, range: 9, expr: '', exprsimp: [], selected: '0' },		//	2020.3	Added
 				watch: { exprsimp: render, selected: render }	//	2019.5	Added
 			});
 		</script>
