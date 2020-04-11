@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	3/10/2020
+	Date:	4/10/2020
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -184,7 +184,6 @@
 							</optgroup>
 						</select><br>
 						<br>
-						<!--<input type='range' min='4' max='500' step='36' v-model='size' style><span>{{size}}</span><br>-->
 						<input type='range' min='1' max='9' step='1' v-model='range' title='Complexity'><span title='Complexity'>{{range}}</span><br>
 						<br>
 					</td>
@@ -206,7 +205,7 @@
 						<details>
 							<summary v-html='exprsimp[selected]'></summary>
 							<select v-if='exprsimp.length>1' v-model="selected" size='9'>
-								<option v-for='(exp,i) in exprsimp' :value='i'>{{exp}}</option>
+								<option v-for='(exp,i) in exprsimp' :value='i' :title="['poly01','laurent21','laurent25','rational0_0','rational0_1','rational1_0','rational1_01H','rational1_02H','sparse'][i]">{{exp}}</option>
 							</select>
 						</details>
 					</td>
@@ -225,7 +224,8 @@
 			vm = new Vue({
 				el: '#app',
 				//data: { trans: 0, size: 40, range: 4, expr: '', exprsimp: [], selected: '0' },	//	2020.3	Removed
-				data: { trans: 0, size: 40, range: 9, expr: '', exprsimp: [], selected: '0' },		//	2020.3	Added
+				//data: { trans: 0, size: 40, range: 9, expr: '', exprsimp: [], selected: '0' },	//	2020.3	Added	//	-2020.4
+				data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0' },		//	+2020.4
 				watch: { exprsimp: render, selected: render }	//	2019.5	Added
 			});
 		</script>

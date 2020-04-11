@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	3/10/2020
+	Date:	4/10/2020
 	Fit:	Infers a function from points
 */
 
@@ -14,7 +14,8 @@ class Fit {
 				var f = (x, p) =>(p[1] + p[3] * x + p[5] * x * x) / (p[0] + p[2] * x + p[4] * x * x);
 				var range = vm.range;
 				//if (range>4) range=4;			//	2019.4	Removed
-				var bestval = 1000;
+				//var bestval = 1000;			//	-2020.4
+				var bestval = 1/0;				//	+2020.4
 				var besti;
 				var p;
 				var ps = binitems(6,range);		//	2019.4	Added
@@ -35,6 +36,7 @@ class Fit {
 					}
 				}
 				//alert(JSON.stringify([n,p,sp,bestval,besti]));
+				if (typeof besti === 'undefined') throw new Error('Error : Fit.sparse.tovect Return Undefined');	//	+2020.4
 				return besti;
 				function complexity(sp) {									//	2020.3	Added
 					var v1 = sp.slice(0,3), v2 = sp.slice(3,6);
@@ -302,7 +304,6 @@ class Fit {
 			},
 			decodernum: [[0,0],[1,0]],
 			decoderden: [0,0,[0,0],[1,0],[2,0,1]]
-			//decoderden: [0,0,[0,0],[2,0,1]]
 		};
 	}
 
@@ -620,6 +621,22 @@ class Fit {
 				}
 			},
 			decoder: [[0,0],[1,0],[2,0]]
+		};
+	}
+
+	static laurent26() {	//	ax^-2+bx^-1+c+dx+ex²+fx^3+gx^4+hx^5+ix^6	//	+2020.4
+		return {
+			tomatrix: function (xs, y) {
+				var A = makeA(xs);
+				var b = y;
+				return [A, b];
+				function makeA(xs) {
+					var AT = [];
+					for (var power = -2; power <= 6; power++) AT.push(xs[0].map(xi=>math.pow(xi, power)));
+					return math.transpose(AT);
+				}
+			},
+			decoder: [[-2,0],[-1,0],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0]]
 		};
 	}
 

@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	3/10/2020
+	Date:	4/10/2020
 	Newton:	An A.I. for Math
 */
 
@@ -104,7 +104,8 @@ class Newton {
 			//for (let i of [0,1,2,3,4,5,6,7,8]) {	//	2019.9	Removed
 				try {
 					console.log('Candidate: ' + i);
-					candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent25) : inferrational(xs, y, i-2);
+					//candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent25) : inferrational(xs, y, i-2);	//	-2020.4
+					candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent26) : inferrational(xs, y, i-2);		//	+2020.4
 					assert(candidates[i] !== undefined);
 					//e[i] = geterrorbypoints(Newton.getrightpoints(), candidates[i]);		//	2020.2	Removed
 					e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i]);	//	2020.2	Added
@@ -160,7 +161,8 @@ class Newton {
 				({tovect, tomatrix, decodernum, decoderden} = parser());									//	2019.3	Added
 				//var vect = tomatrix ? solve(...tomatrix(xs, y)) : tovect(Newton.getpoints().tran);		//	2019.11	Removed
 				var vect = tomatrix ? matrix.solve(...tomatrix(xs, y)) : tovect(Newton.getpoints().tran);	//	2019.11	Added
-				console.log('vect', vect);
+				//console.log('vect', vect);					//	-2020.4
+				console.log('Infer-Rational: vect=', vect);		//	+2020.4
 				//console.log(stringify(vect2matrixnum(vect), vars) + ' : ' + stringify(vect2matrixden(vect), vars));
 				var num = stringify(vect, vars, decodernum);
 				var den = stringify(vect, vars, decoderden);
@@ -209,7 +211,6 @@ class Newton {
 				//numpoints = Number(vm.size);		//	2019.3	//	2019.9	Removed
 				var numpoints = Number(vm.size);	//	2019.3	//	2019.9	Added
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
-				//xs.push([-2, -1, 0, 1]);
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
 				//	if (!trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random()*8));				//	2018.8	Removed
 				//if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added	//	2020.2	Removed
