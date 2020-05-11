@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	4/10/2020
+	Date:	5/10/2020
 	Fit:	Infers a function from points
 */
 
@@ -10,12 +10,13 @@ class Fit {
 	static sparse() {	//	2019.3
 		return {
 			tovect: function brute(allpoints) {
-				var points = _.sampleSize(allpoints, 4);
+				var points = _.sampleSize(allpoints, 16);
 				var f = (x, p) =>(p[1] + p[3] * x + p[5] * x * x) / (p[0] + p[2] * x + p[4] * x * x);
 				var range = vm.range;
 				//if (range>4) range=4;			//	2019.4	Removed
 				//var bestval = 1000;			//	-2020.4
 				var bestval = 1/0;				//	+2020.4
+				var bestcomp = 1/0;				//	+2020.5
 				var besti;
 				var p;
 				var ps = binitems(6,range);		//	2019.4	Added
@@ -26,23 +27,32 @@ class Fit {
 					if (p[0]+p[2]+p[4]==0) continue;
 					for (var sp=p; sp.some(x=>x>0); sp=incrementsign(sp)) {
 						//console.log(JSON.stringify([n,p,sp]));
-						//var curval = diff(f, points, sp);					//	2020.3	Removed
-						var curval = diff(f, points, sp) * complexity(sp);	//	2020.3	Added
-						//if (JSON.stringify(n)=='[0,3]') alert(JSON.stringify([n,p,sp,curval,f(points[0][0],sp)]))
-						if (curval < bestval) {//alert(JSON.stringify([n,p,sp,curval,f(points[0][0],sp)]))
+						//var curval = diff(f, points, sp);						//	2020.3	Removed
+						var curcomp = complexity(sp);							//	+2020.5
+						//var curval = diff(f, points, sp) * complexity(sp);	//	2020.3	Added	//	-2020.5
+						var curval = diff(f, points, sp) * curcomp;				//	+2020.5
+						//if (curval < bestval) {//alert(JSON.stringify([n,p,sp,curval,f(points[0][0],sp)]))	//	-2020.5
+						if ((curval+1e-15 < bestval) || (Math.abs(curval-bestval)<1e-15 && curcomp<bestcomp)) {	//	+2020.5
 							besti = sp;
 							bestval = curval;
+							bestcomp = curcomp;
 						}
 					}
 				}
 				//alert(JSON.stringify([n,p,sp,bestval,besti]));
 				if (typeof besti === 'undefined') throw new Error('Error : Fit.sparse.tovect Return Undefined');	//	+2020.4
 				return besti;
-				function complexity(sp) {									//	2020.3	Added
-					var v1 = sp.slice(0,3), v2 = sp.slice(3,6);
-					var complex = norm2(v1) + 2 * norm2(v2);
-					return math.max(1, complex);
-					function norm2(v) { return math.norm(v)**2; }
+				function complexity(sp) {										//	+2020.5
+					return minmesslen(sp);
+					function minmesslen(sp) {									//	+2020.5
+						return Newton.stringifyfrac(sp,['x'],Fit.sparse().decodernum,Fit.sparse().decoderden).length;
+					}
+					function complexity1(sp) {									//	2020.3	Added
+						var v1 = sp.slice(0,3), v2 = sp.slice(3,6);
+						var complex = norm2(v1) + 2 * norm2(v2);
+						return math.max(1, complex);
+						function norm2(v) { return math.norm(v)**2; }
+					}
 				}
 				function binitems(numbins,numitems) {
 					var ret = []
@@ -347,7 +357,6 @@ class Fit {
 			tovect: function brute(allpoints) {
 				var points = allpoints//_.sample(allpoints, 39);
 				var f = (x, p) =>(p[0] + p[1] * x + p[2] * x * x) / (p[6] + p[7] * x + p[8] * x * x);
-				//var range = 2;
 				var range = vm.range;
 				if (range>2) range=2;
 				var bestval = 1000;

@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	4/10/2020
+	Date:	5/10/2020
 	Newton:	An A.I. for Math
 */
 
@@ -102,7 +102,7 @@ class Newton {
 			var inferers = [0,1,2,3,4,5,6,7,8];		//	2019.9	Added 
 			for (let i of inferers) {				//	2019.9	Added
 			//for (let i of [0,1,2,3,4,5,6,7,8]) {	//	2019.9	Removed
-				try {
+				//try {
 					console.log('Candidate: ' + i);
 					//candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent25) : inferrational(xs, y, i-2);	//	-2020.4
 					candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent26) : inferrational(xs, y, i-2);		//	+2020.4
@@ -114,7 +114,7 @@ class Newton {
 					//if (candidates[i].match(/\d\d/)) e[i]=math.fraction(99999);												//	2019.4 Complexity Control Double Digit	//	2020.3	Removed
 					e[i] = e[i].mul(complexity(candidates[i]));								//	2020.3	Added
 					//console.log(['vm.range',vm.range])
-				} catch(e) { console.log(`Candidate[${i}] fails : ${e}`); /* Ignore error because some inference engines must fail */ }
+				//} catch(e) { console.log(`Candidate[${i}] fails : ${e}`); /* Ignore error because some inference engines must fail */ }
 			}
 			//if (e[7]) e[7] = e[7].mul(100);	//	complexity				//	2020.3	Removed
 			console.log('Infer > Error > ', math.number(e), candidates)
@@ -139,17 +139,18 @@ class Newton {
 				var tovect, decodernum, decoderden;
 				({tovect, decodernum, decoderden} = F.differential());
 				var vect = tovect(Newton.getpoints().orig);//alert(JSON.stringify(vect))
-				var num = stringify(vect, vars, decodernum);
-				var den = stringify(vect, vars, decoderden);
+				return Newton.stringifyfrac(vect, vars, decodernum, decoderden);	//	+2020.5
+				/* var num = Newton.stringify(vect, vars, decodernum);				//	-2020.5
+				var den = Newton.stringify(vect, vars, decoderden);
 				if (den == 1) return num;
-				return num + ' / (' + den + ')';
+				return num + ' / (' + den + ')'; */
 			}
 			function inferpolynomial(xs, y, parser) {
 				var tomatrix, decoder;
 				({tomatrix, decoder} = parser());
 				//var vect = solve(...tomatrix(xs, y));			//	2019.11	Removed
 				var vect = matrix.solve(...tomatrix(xs, y));	//	2019.11	Added
-				var ret = stringify(vect, vars, decoder);
+				var ret = Newton.stringify(vect, vars, decoder);
 				console.log('Infer-Polynomial: ', ret);
 				if (ret === undefined) { var s = "Newton.infer.inferpolynomial returning undefined" ; alert(s) ; throw new Error(s) }	//	2018.8
 				return ret;
@@ -164,13 +165,14 @@ class Newton {
 				//console.log('vect', vect);					//	-2020.4
 				console.log('Infer-Rational: vect=', vect);		//	+2020.4
 				//console.log(stringify(vect2matrixnum(vect), vars) + ' : ' + stringify(vect2matrixden(vect), vars));
-				var num = stringify(vect, vars, decodernum);
-				var den = stringify(vect, vars, decoderden);
+				return Newton.stringifyfrac(vect, vars, decodernum, decoderden);
+				/* var num = Newton.stringify(vect, vars, decodernum);	//	-2020.5
+				var den = Newton.stringify(vect, vars, decoderden);
 				assert(num !== undefined, "Newton.infer.inferrational returning undefined")	//	2018.8
 				if (den == '1') return num;
 				if (num.includes('+') || num.includes('-')) num = '(' + num + ')';
 				if (den.includes('+') || den.includes('-') || den.includes('*')) den = '(' + den + ')';
-				return num + ' / ' + den;
+				return num + ' / ' + den; */
 			}
 			//function validate(inputstring, outputstring, tolerance) {		//	2019.12	Removed
 			//	var scope = {};
@@ -200,7 +202,6 @@ class Newton {
 					} 
 					var abserror = math.abs(input.sub(output));							//	2018.8	sub
 					if (!isNaN(abserror)) error = error.add(abserror.mul(abserror));	//	2018.8	add&mul		//	2018.9	Added test
-					//error = error.add(abserror.mul(abserror));						//	2018.8	add&mul
 				}
 				console.log('Geterrorbypoints > Error', math.number(error), math.number(points), outputstring)
 				return error;
@@ -210,6 +211,7 @@ class Newton {
 				//var numpoints = (vm.trans==1) ? 300 : (vm.trans==0) ? 40 : 4;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)		//	2019.9	Removed
 				//numpoints = Number(vm.size);		//	2019.3	//	2019.9	Removed
 				var numpoints = Number(vm.size);	//	2019.3	//	2019.9	Added
+				if (trans==1) numpoints *= 2;		//	+2020.5	inc numpoints for cosh & sinh
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
 				//	if (!trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random()*8));				//	2018.8	Removed
@@ -255,41 +257,49 @@ class Newton {
 			//	var ATb = math.multiply(AT, b);
 			//	return matrix.solve(ATA, ATb);	//	2019.7	Added
 			//}
-			function stringify(termcoefs, vars, decoder) {
-				console.log('stringify: termcoefs=',termcoefs)
-				termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);	//	2018.9
-				//termcoefs = termcoefs.map(cell=>Math.round(cell * 10.0) / 10.0);	//	2018.9
-				var ret = '';
-				for (var i = 0; i < decoder.length; i++)
-					if (Array.isArray(decoder[i]))
-						if(decoder[i].length==2)
-							ret += term(termcoefs[i] || 0, termvars(decoder[i][0], decoder[i][1], vars))
-						else
-							ret += term(decoder[i][2] || 0, termvars(decoder[i][0], decoder[i][1], vars))
-				if (ret.length == 1) return ret;
-				if (ret[0] == '0') ret = ret.substr(1);
-				if (ret[0] == '+') ret = ret.substr(1);
-				if (ret == '') ret = '0';
-				console.log('stringify: ret=',ret);
-				return ret;
-				function term(termcoef, termvar) {
-					if (termcoef == 0) return '';
-					if ('1'.includes(termvar)) return '+' + termcoef;
-					if (termcoef == 1) return '+' + termvar;
-					return '+' + termcoef + ('1'.includes(termvar) ? '' : '*' + termvar);
-				}
-				function termvars(v1, v2, vars) {
-					if (vars.length == 1) return subterm(vars[0], v1);
-					if (v2 == 0) return subterm(vars[0] || 's', v1);
-					if (v1 == 0) return subterm(vars[1], v2);
-					return subterm(vars[0], v1) + '*' + subterm(vars[1], v2);
-					function subterm(variable, power) {
-						if (power == 0) return '';
-						return variable + (power == 1 ? '' : '^' + power);
-					}
-				}
+		}
+	}
+	static stringifyfrac(termcoefs, vars, decodernum, decoderden) {	//	+2020.5
+		var num = Newton.stringify(termcoefs, vars, decodernum);
+		var den = Newton.stringify(termcoefs, vars, decoderden);
+		assert(num !== undefined, "Newton.infer.inferrational returning undefined")	//	2018.8
+		if (den == '1') return num;
+		if (num.includes('+') || num.includes('-')) num = '(' + num + ')';
+		if (den.includes('+') || den.includes('-') || den.includes('*')) den = '(' + den + ')';
+		return num + ' / ' + den;
+	}
+	static stringify(termcoefs, vars, decoder) {	//	+2020.5
+		//console.log('stringify: termcoefs=',termcoefs)
+		termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);	//	2018.9
+		//termcoefs = termcoefs.map(cell=>Math.round(cell * 10.0) / 10.0);	//	2018.9
+		var ret = '';
+		for (var i = 0; i < decoder.length; i++)
+			if (Array.isArray(decoder[i]))
+				if(decoder[i].length==2)
+					ret += term(termcoefs[i] || 0, termvars(decoder[i][0], decoder[i][1], vars))
+				else
+					ret += term(decoder[i][2] || 0, termvars(decoder[i][0], decoder[i][1], vars))
+		if (ret.length == 1) return ret;
+		if (ret[0] == '0') ret = ret.substr(1);
+		if (ret[0] == '+') ret = ret.substr(1);
+		if (ret == '') ret = '0';
+		//console.log('stringify: ret=',ret);
+		return ret;
+		function term(termcoef, termvar) {
+			if (termcoef == 0) return '';
+			if ('1'.includes(termvar)) return '+' + termcoef;
+			if (termcoef == 1) return '+' + termvar;
+			return '+' + termcoef + ('1'.includes(termvar) ? '' : '*' + termvar);
+		}
+		function termvars(v1, v2, vars) {
+			if (vars.length == 1) return subterm(vars[0], v1);
+			if (v2 == 0) return subterm(vars[0] || 's', v1);
+			if (v1 == 0) return subterm(vars[1], v2);
+			return subterm(vars[0], v1) + '*' + subterm(vars[1], v2);
+			function subterm(variable, power) {
+				if (power == 0) return '';
+				return variable + (power == 1 ? '' : '^' + power);
 			}
-
 		}
 	}
 }
