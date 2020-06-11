@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	5/10/2020
+	Date:	6/10/2020
 	Newton:	An A.I. for Math
 */
 
@@ -16,7 +16,8 @@ class Newton {
 	static getpoints() {
 		var orig = _.zip(...Newton.x, Newton.y);
 		console.log(orig)
-		var t = transform(orig)
+		//var t = transform(orig)												//	-2020.6
+		var t = Transform.transform(orig)										//	+2020.6
 		var tran = t.map(point=>point.map(x=>math.fraction(0).add(x)));			//	2018.8	Fraction	//	2018.9	Added for NaN handling
 		console.log('getpoints',tran);
 		return {orig, tran};													//	2018.6	Added

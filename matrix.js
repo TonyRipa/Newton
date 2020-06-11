@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	1/10/2020
+	Date:	6/10/2020
 	Matrix:	A matrix library
 */
 
@@ -13,8 +13,10 @@ class matrix {
 		var AT = math.transpose(A);
 		var ATA = math.multiply(AT, A);
 		var ATb = math.multiply(AT, b);
-		if (math.abs(math.det(ATA)) > .4) return matrix.solvenotsingular(ATA, ATb);
-		return matrix.solvesingular(ATA, ATb);
+		//if (math.abs(math.det(ATA)) > .4) return matrix.solvenotsingular(ATA, ATb);	//	-2020.6
+		//return matrix.solvesingular(ATA, ATb);										//	-2020.6
+		if (matrix.homogeneous.singular(ATA)) return matrix.solvesingular(ATA, ATb);	//	+2020.6
+		return matrix.solvenotsingular(ATA, ATb);										//	+2020.6
 	}
 
 	//static solve(A, b) {																//	2019.11	Removed
@@ -35,6 +37,8 @@ class matrix {
 
 	static solvenotsingular(A, b) {					//	2019.7	Added
 		console.log('Matrix.solvenotsingular')
+		console.log(JSON.stringify(math.number(A)));
+		console.log(math.number(math.det(A)));
 		var Ainv = math.divide(math.eye(A[0].length), A);
 		var x = math.multiply(Ainv, b);
 		return x.valueOf();
@@ -120,9 +124,6 @@ matrix.homogeneous = class {
 					var row0 = A[0];
 					var row1 = A[1];
 					var row2 = A[2];
-					//var a = row0[3] == 0 ? 0 : math.unaryMinus(math.divide(row0[3],row0[0]));					//	2019.11	Removed
-					//var b = row1[3] == 0 ? 0 : math.unaryMinus(math.divide(row1[3],row1[1]));					//	2019.11	Removed
-					//var c = row2[3] == 0 ? 0 : math.unaryMinus(math.divide(row2[3],row2[2]));					//	2019.11	Removed
 					var a = row0[3] == 0 || row0[0] == 0 ? 0 : math.unaryMinus(math.divide(row0[3],row0[0]));	//	2019.11	Added
 					var b = row1[3] == 0 || row1[1] == 0 ? 0 : math.unaryMinus(math.divide(row1[3],row1[1]));	//	2019.11	Added
 					var c = row2[3] == 0 || row2[2] == 0 ? 0 : math.unaryMinus(math.divide(row2[3],row2[2]));	//	2019.11	Added
@@ -193,6 +194,13 @@ matrix.homogeneous = class {
 
 	static flip(A) {												//	2020.1	Added
 		return A.slice().reverse().map(row=>row.slice().reverse());
+	}
+
+	static singular(A) {											//	+2020.6
+		var R = matrix.homogeneous.ref(A);
+		for (var i=0; i<R.length; i++)
+			if (R[i].every(x=>x==0)) return true;
+		return false;
 	}
 
 	//static ref(A) {												//	2018.10	Added	//	2020.1	Removed
