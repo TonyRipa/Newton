@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	4/10/2020
+	Date:	7/10/2020
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -17,6 +17,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="https://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css" />
 		<script src="transform.js"></script>
+		<script src="render.js"></script>		<!--	2020.7	Added	-->
 		<script src="untransform.js"></script>	<!--	2020.2	Added	-->
 		<script src="matrix.js"></script>		<!--	2018.9	Added	-->
 		<script src="fit.js"></script>			<!--	2019.8	Added	-->
@@ -25,7 +26,8 @@
 		<script src='../js/vue.js'></script><script>window.Vue || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js'><" + "/script>")</script>	<!--	2019.6	Added	-->
 		<script>
 			function go() {			//	2019.12	Added
-				[vm.pointss, vm.exprsimp, vm.totalsimp] = simplify();
+				//[vm.pointss, vm.exprsimp, vm.totalsimp] = simplify();	//	-2020.7
+				[vm.pointss, vm.exprsimp, vm.totalsimp, vm.untransformed] = simplify();	//	-2020.7
 			}
 			function validate() {	//	2019.12	Added
 				return simplify()[1][vm.selected] == vm.exprsimp[vm.selected];
@@ -41,7 +43,6 @@
 				if (vm.constant && vm.trans!=0) { alert('Error : Attempting to transform a point evaluation.') ; return }	//	2019.3
 				//[vm.pointss, vm.exprsimp, vm.totalsimp] = Newton.simplify(input);	//	2019.12	Removed
 				return Newton.simplify(input);										//	2019.12	Added
-				//render();		//	2019.5	Added
 			}
 			function render() {	//	2019.5	Added
 				var exprsimp, totalsimp;
@@ -52,7 +53,8 @@
 				if (vm.d == 2) plot2(vm.pointss.tran); else plot23(vm.pointss.orig, vm.expr);
 				if (vm.d == 2) plot3(exprsimp); else plot33(exprsimp);
 				if (vm.d == 2) plot4(exprsimp, vm.constant, totalsimp); else plot43(exprsimp, vm.constant, totalsimp);
-				if (vm.d == 2) plot5(vm.trans, exprsimp);	//	2020.2	Added
+				//if (vm.d == 2) plot5(vm.trans, exprsimp);	//	2020.2	Added	//	-2020.7
+				if (vm.d == 2) plot5(vm.trans, vm.untransformed[vm.selected]);	//	+2020.7
 			}
 			function plot1(points) {
 				Plot.plot(points, 'graph1');
@@ -125,10 +127,12 @@
 					$('#tv').hide();
 				}
 			}
-			function plot5(trans, totalsimp) {	//	2020.2	Added
+			//function plot5(trans, totalsimp) {	//	2020.2	Added	//	-2020.7
+			function plot5(trans, untransformed) {	//	2020.2	Added	//	+2020.7
 				if (trans>0) {
 					$('#td5').show();
-					$('#td5').html(untransform(totalsimp));
+					//$('#td5').html(untransform(totalsimp));			//	-2020.7
+					$('#td5').html(untransformed);						//	+2020.7
 				} else {
 					$('#td5').hide();
 				}
@@ -205,7 +209,7 @@
 						<details>
 							<summary v-html='exprsimp[selected]'></summary>
 							<select v-if='exprsimp.length>1' v-model="selected" size='9'>
-								<option v-for='(exp,i) in exprsimp' :value='i' :title="['poly01','laurent21','laurent25','rational0_0','rational0_1','rational1_0','rational1_01H','rational1_02H','sparse'][i]">{{exp}}</option>
+								<option v-for='(exp,i) in exprsimp' :value='i' :title="['poly01','laurent21','laurent26','rational0_0','rational0_1','rational1_0','rational1_01H','rational1_02H','sparse'][i]">{{exp}}</option>
 							</select>
 						</details>
 					</td>

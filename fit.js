@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	5/10/2020
+	Date:	7/10/2020
 	Fit:	Infers a function from points
 */
 
@@ -45,7 +45,8 @@ class Fit {
 				function complexity(sp) {										//	+2020.5
 					return minmesslen(sp);
 					function minmesslen(sp) {									//	+2020.5
-						return Newton.stringifyfrac(sp,['x'],Fit.sparse().decodernum,Fit.sparse().decoderden).length;
+						//return Newton.stringifyfrac(sp,['x'],Fit.sparse().decodernum,Fit.sparse().decoderden).length;	//	-2020.7
+						return Render.simple.polynomialratio(sp,['x'],Fit.sparse()).length;								//	+2020.7
 					}
 					function complexity1(sp) {									//	2020.3	Added
 						var v1 = sp.slice(0,3), v2 = sp.slice(3,6);
@@ -173,8 +174,6 @@ class Fit {
 			},
 			decodernum: [[0,0],[1,0]],
 			decoderden: [0,0,[1,0],[2,0],[0,0,1]]
-			//decoderden: [0,0,[0,0],[1,0],[2,0,1]]
-			//decoderden: [0,0,[0,0],[2,0,1]]
 		};
 	}
 

@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	6/10/2020
+	Date:	7/10/2020
 	Newton:	An A.I. for Math
 */
 
@@ -52,8 +52,13 @@ class Newton {
 		assert(candidates !== undefined, "Newton.simplify returning undefined")							//	2018.8	Added
 		//if (!constant) return [Newton.getpointsreal(), candidates];									//	2018.8	Added	//	2019.8	Removed
 		var points = Newton.getpointsreal();															//	2019.8	Added
-		if (!constant) return simplify0pipe(points, candidates, best);									//	2019.8	Added
-		else return simplify1pipe(points, candidates[best], constant);									//	2019.8	Added
+		//if (!constant) return simplify0pipe(points, candidates, best);								//	2019.8	Added	//	-2020.7
+		//else return simplify1pipe(points, candidates[best], constant);								//	2019.8	Added	//	-2020.7
+		var ret;																						//	+2020.7
+		if (!constant) ret = simplify0pipe(points, candidates.map(x=>x[0]), best);						//	+2020.7
+		else ret = simplify1pipe(points, candidates[best], constant);									//	+2020.7
+		ret.push(candidates.map(x=>x[1]));																//	+2020.7
+		return ret;																						//	+2020.7
 		//return [Newton.getpointsreal(), expr, infer(evaluate(expr, constant))];						//	2018.8	Added	//	2019.4	Removed
 		//return [Newton.getpointsreal(), candidates, candidates.map(e=>infer(evaluate(e, constant)))];	//	2019.4	Added	//	2019.8	Removed
 		function simplify0pipe(points, candidates, bestindex) {											//	2019.8	Added
@@ -94,10 +99,12 @@ class Newton {
 			console.log(JSON.stringify(xs))
 			console.log(JSON.stringify(y))
 			//if (vars.length==2) return [inferpolynomial(xs, y, F.poly32)];	//	2019.4	list	//	2019.5	Removed
-			if (vars.length==2) return {candidates:[inferpolynomial(xs, y, F.poly32)],best:0};		//	2019.5	object
+			//if (vars.length==2) return {candidates:[inferpolynomial(xs, y, F.poly32)],best:0};	//	2019.5	object	//	-2020.7
+			if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32))],best:0};		//	+2020.7
 			//if (vm.trans==2) return [inferdifferential(xs)];					//	2019.4	list	//	2019.5	Removed
 			//if (vm.trans==2) return {candidates:[inferdifferential(xs)],best:0};					//	2019.5	object	//	2020.2	Removed
-			if (trans==2) return {candidates:[inferdifferential(xs)],best:0};											//	2020.2	Added
+			//if (trans==2) return {candidates:[inferdifferential(xs)],best:0};											//	2020.2	Added	//	-2020.7
+			if (trans==2) return {candidates:[Render.stringify(inferdifferential(xs))],best:0};												//	+2020.7
 			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
 			var candidates = [];
 			var inferers = [0,1,2,3,4,5,6,7,8];		//	2019.9	Added 
@@ -107,13 +114,16 @@ class Newton {
 					console.log('Candidate: ' + i);
 					//candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent25) : inferrational(xs, y, i-2);	//	-2020.4
 					candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent26) : inferrational(xs, y, i-2);		//	+2020.4
+					candidates[i] = Render.stringify(candidates[i]);	//	+2020.7
 					assert(candidates[i] !== undefined);
 					//e[i] = geterrorbypoints(Newton.getrightpoints(), candidates[i]);		//	2020.2	Removed
-					e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i]);	//	2020.2	Added
+					//e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i]);	//	2020.2	Added	//	-2020.7
+					e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i][0]);//	2020.2	Added	//	+2020.7
 					//if (_.range(Number(vm.range)+1,9+1).some(x=>candidate[i].includes(x))) e[i]=math.fraction(99999); // 2019.3 Complexity Control // 2019.4 Removed
 					//if (vm.range<9 && new RegExp(`[${Number(vm.range)+1}-9]`).test(candidates[i])) e[i]=math.fraction(99998);	//	2019.4 Complexity Control Single Digit	//	2020.3	Removed
 					//if (candidates[i].match(/\d\d/)) e[i]=math.fraction(99999);												//	2019.4 Complexity Control Double Digit	//	2020.3	Removed
-					e[i] = e[i].mul(complexity(candidates[i]));								//	2020.3	Added
+					//e[i] = e[i].mul(complexity(candidates[i]));							//	2020.3	Added	//	-2020.7
+					e[i] = e[i].mul(complexity(candidates[i][0]));												//	+2020.7
 					//console.log(['vm.range',vm.range])
 				//} catch(e) { console.log(`Candidate[${i}] fails : ${e}`); /* Ignore error because some inference engines must fail */ }
 			}
@@ -140,7 +150,8 @@ class Newton {
 				var tovect, decodernum, decoderden;
 				({tovect, decodernum, decoderden} = F.differential());
 				var vect = tovect(Newton.getpoints().orig);//alert(JSON.stringify(vect))
-				return Newton.stringifyfrac(vect, vars, decodernum, decoderden);	//	+2020.5
+				return [vect, vars, {decodernum, decoderden}];									//	+2020.7
+				//return Newton.stringifyfrac(vect, vars, decodernum, decoderden);	//	+2020.5	//	-2020.7
 				/* var num = Newton.stringify(vect, vars, decodernum);				//	-2020.5
 				var den = Newton.stringify(vect, vars, decoderden);
 				if (den == 1) return num;
@@ -151,10 +162,13 @@ class Newton {
 				({tomatrix, decoder} = parser());
 				//var vect = solve(...tomatrix(xs, y));			//	2019.11	Removed
 				var vect = matrix.solve(...tomatrix(xs, y));	//	2019.11	Added
+				return [vect, vars, decoder];						//	+2020.7
+				/*													//	-2020.7
 				var ret = Newton.stringify(vect, vars, decoder);
 				console.log('Infer-Polynomial: ', ret);
 				if (ret === undefined) { var s = "Newton.infer.inferpolynomial returning undefined" ; alert(s) ; throw new Error(s) }	//	2018.8
 				return ret;
+				*/
 			}
 			function inferrational(xs, y, algo) {
 				if (arguments.length<3) algo = 0;
@@ -166,7 +180,8 @@ class Newton {
 				//console.log('vect', vect);					//	-2020.4
 				console.log('Infer-Rational: vect=', vect);		//	+2020.4
 				//console.log(stringify(vect2matrixnum(vect), vars) + ' : ' + stringify(vect2matrixden(vect), vars));
-				return Newton.stringifyfrac(vect, vars, decodernum, decoderden);
+				return [vect, vars, {decodernum, decoderden}];						//	+2020.7
+				//return Newton.stringifyfrac(vect, vars, decodernum, decoderden);	//	-2020.7
 				/* var num = Newton.stringify(vect, vars, decodernum);	//	-2020.5
 				var den = Newton.stringify(vect, vars, decoderden);
 				assert(num !== undefined, "Newton.infer.inferrational returning undefined")	//	2018.8
@@ -215,7 +230,6 @@ class Newton {
 				if (trans==1) numpoints *= 2;		//	+2020.5	inc numpoints for cosh & sinh
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
-				//	if (!trans) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random()*8));				//	2018.8	Removed
 				//if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added	//	2020.2	Removed
 				//if (vm.trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc			//	2020.2	Removed
 				//if (vm.trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin					//	2020.2	Removed
@@ -260,6 +274,7 @@ class Newton {
 			//}
 		}
 	}
+	/*	//	-2020.7
 	static stringifyfrac(termcoefs, vars, decodernum, decoderden) {	//	+2020.5
 		var num = Newton.stringify(termcoefs, vars, decodernum);
 		var den = Newton.stringify(termcoefs, vars, decoderden);
@@ -303,4 +318,5 @@ class Newton {
 			}
 		}
 	}
+	*/
 }
