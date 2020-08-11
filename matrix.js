@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/10/2020
+	Date:	8/10/2020
 	Matrix:	A matrix library
 */
 
@@ -19,19 +19,20 @@ class matrix {
 		return matrix.solvenotsingular(ATA, ATb);										//	+2020.6
 	}
 
-	//static solve(A, b) {																//	2019.11	Removed
 	static solvesingular(A, b) {														//	2019.11	Added
 		//console.log("Matrix.solve: A="+A+", b="+b);									//	2019.11	Removed
 		console.log("Matrix.SolveSingular: A="+JSON.stringify(math.number(A))+", b="+b);//	2019.11	Added
 		//if (math.abs(math.det(A)) > .01) return matrix.solvenotsingular(A,b);			//	2019.11	Removed
 		if (b.every(x=>x==0)) return matrix.scaletoint(matrix.homogeneous.solve(A));
+		console.log('Matrix.SolveSingular: Homogenizing');
 		for(let i = 0;i<A.length;i++) {
 			A[i].push(math.unaryMinus(b[i]));
-			A[i].reverse();
+			//A[i].reverse();	//	-2020.8
 		}
 		var solution = matrix.homogeneous.solve(A);
+		solution.pop();		//	+2020.8
 		solution.reverse();
-		solution.pop();
+		//solution.pop();	//	-2020.8
 		return solution;
 	}
 
@@ -41,6 +42,7 @@ class matrix {
 		console.log(math.number(math.det(A)));
 		var Ainv = math.divide(math.eye(A[0].length), A);
 		var x = math.multiply(Ainv, b);
+		console.log(math.number(x.valueOf()))		//	+2020.8
 		return x.valueOf();
 	}
 
@@ -106,7 +108,8 @@ matrix.homogeneous = class {
 			if (A[0].length==3) {		//	2018.10	Added
 				if (A.length>=3-1) {
 					//A = matrix.homogeneous.rref(A);console.log(A)		//	2020.1	Removed
-					A = matrix.homogeneous.rref(A);matrix.log(A)		//	2020.1	Added
+					A = matrix.homogeneous.rref(A);matrix.log(A);		//	2020.1	Added	//	-2020.8
+					matrix.log(A);A = matrix.homogeneous.rref(A);matrix.log(A);				//	+2020.8
 					var row0 = A[0];
 					var row1 = A[1];
 					//var a = row0[2] == 0 ? 0 : math.unaryMinus(math.divide(row0[2],row0[0]));					//	2019.12	Removed
@@ -120,7 +123,8 @@ matrix.homogeneous = class {
 			if (A[0].length==4) {		//	2019.7	Added
 				if (A.length>=4-1) {
 					//A = matrix.homogeneous.rref(A);console.log(A)		//	2020.1	Removed
-					A = matrix.homogeneous.rref(A);matrix.log(A)		//	2020.1	Added
+					//A = matrix.homogeneous.rref(A);matrix.log(A);		//	2020.1	Added	//	-2020.8
+					matrix.log(A);A = matrix.homogeneous.rref(A);matrix.log(A);				//	+2020.8
 					var row0 = A[0];
 					var row1 = A[1];
 					var row2 = A[2];
@@ -147,6 +151,8 @@ matrix.homogeneous = class {
 					return ret;
 				}
 			}
+			if (A[0].length== 9) return [0,0,0,0,0,0,0,0,0,0];	//	+2020.8
+			if (A[0].length==10) return [0,0,0,0,0,0,0,0,0,0];	//	+2020.8
 		} catch(e) {								//	2019.10	Added
 			alert("matrix.homogeneous : " + e)		//	2019.10	Added
 		}											//	2019.10	Added
@@ -179,27 +185,62 @@ matrix.homogeneous = class {
 			for (let i = 0; i <= r; i++ ) ret.push(A[i].slice());	//	Keep rows above pivot (& pivot row)
 			for (let i = r+1 ; i<A.length ; i++) {
 				let row = A[i];
-				if (row[c]!=0 && pivotrow[c]!=0) row = math.subtract(row,math.multiply(math.divide(row[c],pivotrow[c]),pivotrow));
+				//if (row[c]!=0 && pivotrow[c]!=0) row = math.subtract(row,math.multiply(math.divide(row[c],pivotrow[c]),pivotrow));						//	-2020.8
+				if (math.abs(row[c])>1E-8 && math.abs(pivotrow[c])>1E-8) row = math.subtract(row,math.multiply(math.divide(row[c],pivotrow[c]),pivotrow));	//	+2020.8
 				ret.push(row);
 			}
 			return ret;
 		}
 	}
 
-	static rref(A) {												//	2020.1	Added
-		var ref = matrix.homogeneous.ref;
-		var flip = matrix.homogeneous.flip;
-		return flip(ref(flip(ref(A,true))));
+	static rref(A,swap) {	//	+2020.8
+		for (let i = 0; i < A.length-1; i++) {
+			if (swap) sort(A,i);
+			A = zerosbelowabove(A,i,i)
+		}
+		return A;
+		function sort(A,col) {
+			let row = col;
+			for (let i = row; i < A.length; i++) {
+				for (let j = i+1; j < A.length; j++) {
+					if (dist1(A[j][col])<dist1(A[i][col]))
+						[A[i],A[j]] = [A[j],A[i]]				
+				}
+			}
+		}
+		function dist1(x) {
+			x = math.abs(x);
+			if (x>1) return x;
+			return 1/x;
+		}
+		function zerosbelowabove(A,r,c) {
+			let pivotrow = A[r];
+			let ret = [];
+			for (let i = 0 ; i<A.length ; i++) {
+				let row = A[i];
+				if (i!=r && math.abs(row[c])>1E-3 && math.abs(pivotrow[c])>1E-3) row = math.subtract(row,math.multiply(math.divide(row[c],pivotrow[c]),pivotrow));
+				ret.push(row);
+			}
+			return ret;
+		}
 	}
 
-	static flip(A) {												//	2020.1	Added
-		return A.slice().reverse().map(row=>row.slice().reverse());
-	}
+	//static rref(A) {												//	2020.1	Added	//	-2020.8
+	//	var ref = matrix.homogeneous.ref;
+	//	var flip = matrix.homogeneous.flip;
+	//	return flip(ref(flip(ref(A,true))));
+	//}
+
+	//static flip(A) {												//	2020.1	Added	//	-2020.8
+	//	return A.slice().reverse().map(row=>row.slice().reverse());
+	//}
 
 	static singular(A) {											//	+2020.6
-		var R = matrix.homogeneous.ref(A);
+		var R = matrix.homogeneous.rref(A);
+		console.log('R=',R,math.number(R))
 		for (var i=0; i<R.length; i++)
-			if (R[i].every(x=>x==0)) return true;
+			if (R[i].every(x=>math.abs(x)<1E-3)) return true;		//	+2020.8
+			//if (R[i].every(x=>x==0)) return true;					//	-2020.8
 		return false;
 	}
 

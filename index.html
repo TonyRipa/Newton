@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	7/10/2020
+	Date:	8/10/2020
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -49,8 +49,10 @@
 				exprsimp = vm.exprsimp[vm.selected];						//	2019.5	Added
 				totalsimp = (vm.totalsimp||vm.exprsimp)[vm.selected];		//	2019.5	Added
 				$('#td2').toggle(vm.trans==1);
-				if (vm.d == 2) plot1(vm.pointss.orig); else plot13(vm.pointss.orig, vm.expr);
-				if (vm.d == 2) plot2(vm.pointss.tran); else plot23(vm.pointss.orig, vm.expr);
+				//if (vm.d == 2) plot1(vm.pointss.orig); else plot13(vm.pointss.orig, vm.expr);	//	-2020.8
+				if (vm.d == 2) plot1(vm.pointss.orig); else plot13(vm.pointss.nonan, vm.expr);	//	+2020.8
+				//if (vm.d == 2) plot2(vm.pointss.tran); else plot23(vm.pointss.orig, vm.expr);	//	-2020.8
+				if (vm.d == 2) plot2(vm.pointss.tran); else plot23(vm.pointss.nonan, vm.expr);	//	+2020.8
 				if (vm.d == 2) plot3(exprsimp); else plot33(exprsimp);
 				if (vm.d == 2) plot4(exprsimp, vm.constant, totalsimp); else plot43(exprsimp, vm.constant, totalsimp);
 				//if (vm.d == 2) plot5(vm.trans, exprsimp);	//	2020.2	Added	//	-2020.7
@@ -60,7 +62,6 @@
 				Plot.plot(points, 'graph1');
 			}
 			function plot13(points, title) {
-				//$('#title1').html(title);	//	2019.5	Removed
 				var vars = Plot.getvars(title);
 				Plot.plot3(points, 'graph1', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
 			}
@@ -208,8 +209,8 @@
 						<!--<div id="title3" style="text-align:center"></div>	2019.5	Removed-->
 						<details>
 							<summary v-html='exprsimp[selected]'></summary>
-							<select v-if='exprsimp.length>1' v-model="selected" size='9'>
-								<option v-for='(exp,i) in exprsimp' :value='i' :title="['poly01','laurent21','laurent26','rational0_0','rational0_1','rational1_0','rational1_01H','rational1_02H','sparse'][i]">{{exp}}</option>
+							<select v-if='exprsimp.length>1' v-model="selected" size='10'>
+								<option v-for='(exp,i) in exprsimp' :value='i' :title="['poly01 a','laurent21 ax⁻²+bx⁻¹','laurent26 ax⁻²+bx⁻¹+c+dx+ex²+fx³+gx⁴+hx⁵+ix⁶','rational0_0 a/b','rational0_1 a/(bx)','rational1_0 (a+bx)/c','rational1_01H (a+bx)/(c+1*x)','rational1_02H (a+bx)/(c+dx+x²)','sparse (a+bx+cx²)/(d+ex+fx²)','polynomialratio (a+bx+cx²)/(d+ex+fx²)'][i]">{{exp}}</option>
 							</select>
 						</details>
 					</td>

@@ -1,14 +1,13 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   6/10/2020
+    Date:   8/10/2020
     Transform: A data transformer
 */
 
 
 class Transform {												//	+2020.6
 
-	//function transform(points) {								//	-2020.6
 	static transform(points) {									//	+2020.6
 		//if (!vm.trans) return points;	//	2019.3	vm.trans	//	-2020.6
 		if (vm.trans==0) return points;							//	+2020.6
@@ -36,6 +35,25 @@ class Transform {												//	+2020.6
 			}
 			return ret;
 		}
+	}
+
+	static nonan(points) { return points.filter(xy=>!math.number(xy).includes(NaN)); }	//	+2020.8
+
+	static nonanxy(xs,y) {																//	+2020.8
+		var allpoints = Transform.topoints(xs,y);
+		var allnnanpoints = Transform.nonan(allpoints);
+		return Transform.toxy(allnnanpoints);
+	}
+
+	static toxy(points) {																//	+2020.8
+		var [xs,y] = _.unzip(points.map(r=>[r.slice(0,-1),r.slice(-1)]));
+		xs = _.unzip(xs);
+		y = _.unzip(y)[0];
+		return [xs,y];
+	}
+
+	static topoints(xs,y) {																//	+2020.8
+		return _.zip(...xs,y);
 	}
 
 }

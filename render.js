@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/10/2020
+	Date:	8/10/2020
 	Render:	A toString Class
 */
 
@@ -45,7 +45,8 @@ Render.transform = class {
 			termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);
 			if (termcoefs[2]==0 && termcoefs[3]==0) return Render.simple.polynomial([termcoefs[0]],vars,[[1,0]]);
 		}
-		if (JSON.stringify(decodernum) == '[0,[0,0],0,[1,0],0,[2,0]]' && termcoefs[0]!=1) {
+		//if (JSON.stringify(decodernum) == '[0,[0,0],0,[1,0],0,[2,0]]' && termcoefs[0]!=1) {			//	-2020.8
+		if (JSON.stringify(decodernum) == '[0,[0,0],0,[1,0],0,[2,0]]' && math.abs(termcoefs[0])!=1) {	//	+2020.8
 			if (termcoefs[4]==1) return Render.simple.polynomial([termcoefs[1],termcoefs[3]],vars,[[1,0],[0,0]]);
 			if (termcoefs[2]==1) return termcoefs[1];
 			return termcoefs[1] + '/' + termcoefs[2];

@@ -1,15 +1,33 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/10/2020
+	Date:	8/10/2020
 	Fit:	Infers a function from points
 */
 
 class Fit {
 
-	static sparse() {	//	2019.3
+	static polynomialratio() {	//	+2020.8	//	(a+bx+cx²)/(d+ex+fx²)
 		return {
 			tovect: function brute(allpoints) {
+				var points = allpoints.slice(0,5);
+				points = Transform.nonan(points);
+				var [xs,y] = Transform.toxy(points);
+				var n = y.map(f=>f.n);
+				var d = y.map(f=>f.d);
+				var num = matrix.solve(...Fit.poly21().tomatrix(xs,n));
+				var den = matrix.solve(...Fit.poly21().tomatrix(xs,d));
+				return [...num,...den];
+			},
+			decodernum: [[0,0],[1,0],[2,0]],
+			decoderden: [0,0,0,[0,0],[1,0],[2,0]]
+		}				
+	}
+
+	static sparse() {	//	2019.3	//	(a+bx+cx²)/(d+ex+fx²)
+		return {
+			tovect: function brute(allpoints) {
+				allpoints = Transform.nonan(allpoints);	//	+2020.8
 				var points = _.sampleSize(allpoints, 16);
 				var f = (x, p) =>(p[1] + p[3] * x + p[5] * x * x) / (p[0] + p[2] * x + p[4] * x * x);
 				var range = vm.range;
@@ -183,26 +201,24 @@ class Fit {
 		//	x = (a,b)							//	2018.10
 		//	b = (0,0)							//	2018.10
 		return {
-			tomatrix: function (xs, y) {
-				var A = makeA(xs);
-				//var b = math.dotMultiply(math.dotMultiply(xs[0], xs[0]), y);	//	'xs[0]^2*y'
-				var b = xs.ones.map(q=>0);
-				return [A, b];
-				function makeA(xs) {
-					var c1 = xs.ones;
-					var c2 = math.multiply(-1, y);
-					console.log('xs.ones', c1);
-					console.log('-y', c2);
-					var AT = [];
-					AT.push(c1);
-					AT.push(c2);
-					return math.transpose(AT);
+			tomatrix: function makeAb(xs,y) {
+				var A = [];
+				var b = [];
+				for (let i = 0; i < xs[0].length; i++) {
+					if (isNaN(y[i])) continue;
+					try {
+						var c1 = 1;
+						var c2 = math.multiply(-1, y[i]);
+						var row = [c1,c2];
+						A.push(row);
+						b.push(0);
+					} catch(e) { }
 				}
+				console.log('rational0_0 : ' + JSON.stringify(['A=',A,'b=',b]));
+				return [A, b];
 			},
 			decodernum: [[0,0]],
 			decoderden: [0,[0,0]]
-			//decoderden: [0,0,[0,0],[1,0],[2,0,1]]
-			//decoderden: [0,0,[0,0],[2,0,1]]
 		};
 	}
 
@@ -212,18 +228,21 @@ class Fit {
 		//	x = (a,b)
 		//	b = (0,0)
 		return {
-			tomatrix: function (xs, y) {
-				var A = makeA(xs);
-				var b = xs.ones.map(q=>0);
-				return [A, b];
-				function makeA(xs) {
-					var c1 = xs.ones;
-					var c2 = math.multiply(-1, math.dotMultiply(xs[0], y));
-					var AT = [];
-					AT.push(c1);
-					AT.push(c2);
-					return math.transpose(AT);
+			tomatrix: function makeAb(xs,y) {
+				var A = [];
+				var b = [];
+				for (let i = 0; i < xs[0].length; i++) {
+					if (isNaN(y[i])) continue;
+					try {
+						var c1 = 1;
+						var c2 = math.multiply(-1, math.multiply(xs[0][i], y[i]));
+						var row = [c1,c2];
+						A.push(row);
+						b.push(0);
+					} catch(e) { }
 				}
+				console.log('rational0_1 : ' + JSON.stringify(['A=',A,'b=',b]));
+				return [A, b];
 			},
 			decodernum: [[0,0]],
 			decoderden: [0,[1,0]]
@@ -236,23 +255,22 @@ class Fit {
 		//	x = (a,b,c)									//	2018.10
 		//	b = (0,0,0)									//	2018.10
 		return {
-			tomatrix: function (xs, y) {
-				var A = makeA(xs);
-				var b = xs.ones.map(q=>0);
-				return [A, b];
-				function makeA(xs) {
-					var c1 = xs.ones;
-					var c2 = xs[0];
-					var c3 = math.multiply(-1, y);
-					console.log('xs.ones', c1);
-					console.log('xs[0]', c2);
-					console.log('-y', c3);
-					var AT = [];
-					AT.push(c1);
-					AT.push(c2);
-					AT.push(c3);
-					return math.transpose(AT);
+			tomatrix: function makeAb(xs,y) {
+				var A = [];
+				var b = [];
+				for (let i = 0; i < xs[0].length; i++) {
+					if (isNaN(y[i])) continue;
+					try {
+						var c1 = 1;
+						var c2 = xs[0][i];
+						var c3 = math.multiply(-1, y[i]);
+						var row = [c1,c2,c3];
+						A.push(row);
+						b.push(0);
+					} catch(e) { }
 				}
+				console.log('rational0_1 : ' + JSON.stringify(['A=',A,'b=',b]));
+				return [A, b];
 			},
 			decodernum: [[0,0],[1,0]],
 			decoderden: [0,0,[0,0]]
@@ -265,51 +283,47 @@ class Fit {
 		//	x = (a,b,c)									//	2019.7
 		//	b = xY										//	2019.7
 		return {
-			tomatrix: function (xs, y) {
-				var A = makeA(xs);
-				var b = math.dotMultiply(xs[0], y);	//	'xs[0]*y'
-				return [A, b];
-				function makeA(xs) {
-					var c1 = xs.ones;
-					var c2 = xs[0];
-					var c3 = math.multiply(-1, y);
-					console.log('xs.ones', c1);
-					console.log('xs[0]', c2);
-					console.log('-y', c3);
-					var AT = [];
-					AT.push(c1);
-					AT.push(c2);
-					AT.push(c3);
-					return math.transpose(AT);
+			tomatrix: function makeAb(xs,y) {
+				var A = [];
+				var b = [];
+				for (let i = 0; i < xs[0].length; i++) {
+					if (isNaN(y[i])) continue;
+					try {
+						var c1 = 1;
+						var c2 = xs[0][i];
+						var c3 = math.multiply(-1, y[i]);
+						var row = [c1,c2,c3];
+						A.push(row);
+						b.push(math.multiply(xs[0][i], y[i]));	//	'xs[0]*y'
+					} catch(e) { }
 				}
+				console.log('rational1_01H : ' + JSON.stringify(['A=',A,'b=',b]));
+				return [A, b];
 			},
 			decodernum: [[0,0],[1,0]],
 			decoderden: [0,0,[0,0],[1,0,1]]
 		};
 	}
 
-	static rational1_02H() {	//	(a+bx)/(c+dx+x^2)
+	static rational1_02H() {	//	(a+bx)/(c+dx+x²)
 		return {
-			tomatrix: function (xs, y) {
-				var A = makeA(xs);
-				var b = math.dotMultiply(math.dotMultiply(xs[0], xs[0]), y);	//	'xs[0]^2*y'
-				return [A, b];
-				function makeA(xs) {
-					var c1 = xs.ones;
-					var c2 = xs[0];
-					var c3 = math.multiply(-1, y);
-					var c4 = math.multiply(-1, math.dotMultiply(xs[0], y));
-					console.log('xs.ones', c1);
-					console.log('xs[0]', c2);
-					console.log('-y', c3);
-					console.log('-xs[0]*y', c4);
-					var AT = [];
-					AT.push(c1);
-					AT.push(c2);
-					AT.push(c3);
-					AT.push(c4);
-					return math.transpose(AT);
+			tomatrix: function makeAb(xs,y) {
+				var A = [];
+				var b = [];
+				for (let i = 0; i < xs[0].length; i++) {
+					if (isNaN(y[i])) continue;
+					try {
+						var c1 = 1;
+						var c2 = xs[0][i];
+						var c3 = math.multiply(-1, y[i]);
+						var c4 = math.multiply(-1, math.multiply(xs[0][i], y[i]));
+						var row = [c1,c2,c3,c4];
+						A.push(row);
+						b.push(math.multiply(math.multiply(xs[0][i], xs[0][i]), y[i]));	//	'xs[0]²*y'
+					} catch(e) { }
 				}
+				console.log('rational1_02H : ' + JSON.stringify(['A=',A,'b=',b]));
+				return [A, b];
 			},
 			decodernum: [[0,0],[1,0]],
 			decoderden: [0,0,[0,0],[1,0],[2,0,1]]
@@ -532,6 +546,7 @@ class Fit {
 		var power = 3;
 		return {
 			tomatrix: function (xs, y) {
+				[xs,y] = Transform.nonanxy(xs,y);	//	+2020.8
 				var A = makeA(xs);
 				var b = y;
 				return [A, b];
@@ -632,17 +647,22 @@ class Fit {
 		};
 	}
 
-	static laurent26() {	//	ax^-2+bx^-1+c+dx+ex²+fx^3+gx^4+hx^5+ix^6	//	+2020.4
+	static laurent26() {	//	ax⁻²+bx⁻¹+c+dx+ex²+fx³+gx⁴+hx⁵+ix⁶
 		return {
-			tomatrix: function (xs, y) {
-				var A = makeA(xs);
-				var b = y;
-				return [A, b];
-				function makeA(xs) {
-					var AT = [];
-					for (var power = -2; power <= 6; power++) AT.push(xs[0].map(xi=>math.pow(xi, power)));
-					return math.transpose(AT);
+			tomatrix: function makeAb(xs,y) {
+				var A = [];
+				var b = [];
+				for (let i = 0; i < xs[0].length; i++) {
+					if (isNaN(y[i])) continue;
+					try {
+						var row = [];
+						for (var power = -2; power <= 6; power++) row.push(math.pow(xs[0][i],power));
+						A.push(row);
+						b.push(y[i]);
+					} catch(e) { }
 				}
+				console.log('laurent26 : ' + JSON.stringify([A,b]));
+				return [A, b];
 			},
 			decoder: [[-2,0],[-1,0],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0]]
 		};
@@ -664,7 +684,53 @@ class Fit {
 		};
 	}
 
-	static laurent21() {	//	ax^-2+bx^-1
+	static laurent21() {	//	ax⁻²+bx⁻¹
+		return {
+			tomatrix: function makeAb(xs,y) {
+				var A = [];
+				var b = [];
+				for (let i = 0; i < xs[0].length; i++) {
+					if (isNaN(y[i])) continue;
+					try {
+						var row = [];
+						for (var power = -2; power <= -1; power++) row.push(math.pow(xs[0][i],power));
+						A.push(row);
+						b.push(y[i]);
+					} catch(e) { }
+				}
+				console.log('laurent21 : ' + JSON.stringify([A,b]));
+				return [A, b];
+			},
+			decoder: [[-2,0],[-1,0]]
+		};
+	}
+
+	static poly01() {	//	a
+		return {
+			tomatrix: function makeAb(xs,y) {
+				var A = [];
+				var b = [];
+				for (let i = 0; i < xs[0].length; i++) {
+					if (isNaN(y[i])) continue;
+					try {
+						var row = [];
+						for (var power = 0; power <= 0; power++) row.push(math.pow(xs[0][i],power));
+						A.push(row);
+						b.push(y[i]);
+					} catch(e) { }
+				}
+				console.log('poly01 : ' + JSON.stringify(['A=',A,'b=',b]));
+				return [A, b];
+			},
+			decoder: [[0,0]]
+		};
+	}
+
+}
+
+Fit.unsafe = class {	//	+2020.8
+
+	static laurent21() {	//	ax⁻²+bx⁻¹
 		return {
 			tomatrix: function (xs, y) {
 				var A = makeA(xs);
@@ -673,10 +739,26 @@ class Fit {
 				function makeA(xs) {
 					var AT = [];
 					for (var power = -2; power <= -1; power++) AT.push(xs[0].map(xi=>math.pow(xi, power)));
-					return math.transpose(AT);
+					return math.transpose(AT);					
 				}
 			},
 			decoder: [[-2,0],[-1,0]]
+		};
+	}
+
+	static laurent26() {	//	ax⁻²+bx⁻¹+c+dx+ex²+fx³+gx⁴+hx⁵+ix⁶	//	+2020.4
+		return {
+			tomatrix: function (xs, y) {
+				var A = makeA(xs);
+				var b = y;
+				return [A, b];
+				function makeA(xs) {
+					var AT = [];
+					for (var power = -2; power <= 6; power++) AT.push(xs[0].map(xi=>math.pow(xi, power)));
+					return math.transpose(AT);
+				}
+			},
+			decoder: [[-2,0],[-1,0],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0]]
 		};
 	}
 
@@ -693,6 +775,145 @@ class Fit {
 				}
 			},
 			decoder: [[0,0]]
+		};
+	}
+
+	static rational0_0() {		//	a/b			//	2018.9
+		//	Set up problem as Ax=b with			//	2018.10
+		//	A = [1,-Y]							//	2018.10
+		//	x = (a,b)							//	2018.10
+		//	b = (0,0)							//	2018.10
+		return {
+			tomatrix: function (xs, y) {
+				var A = makeA(xs);
+				//var b = math.dotMultiply(math.dotMultiply(xs[0], xs[0]), y);	//	'xs[0]²*y'
+				var b = xs.ones.map(q=>0);
+				return [A, b];
+				function makeA(xs) {
+					var c1 = xs.ones;
+					var c2 = math.multiply(-1, y);
+					console.log('xs.ones', c1);
+					console.log('-y', c2);
+					var AT = [];
+					AT.push(c1);
+					AT.push(c2);
+					return math.transpose(AT);
+				}
+			},
+			decodernum: [[0,0]],
+			decoderden: [0,[0,0]]
+			//decoderden: [0,0,[0,0],[1,0],[2,0,1]]
+			//decoderden: [0,0,[0,0],[2,0,1]]
+		};
+	}
+
+	static rational0_1() {		//		a/(bx)			//	2019.1
+		//	Set up problem as Ax=b with
+		//	A = [1,-xy]
+		//	x = (a,b)
+		//	b = (0,0)
+		return {
+			tomatrix: function (xs, y) {
+				var A = makeA(xs);
+				var b = xs.ones.map(q=>0);
+				return [A, b];
+				function makeA(xs) {
+					var c1 = xs.ones;
+					var c2 = math.multiply(-1, math.dotMultiply(xs[0], y));
+					var AT = [];
+					AT.push(c1);
+					AT.push(c2);
+					return math.transpose(AT);
+				}
+			},
+			decodernum: [[0,0]],
+			decoderden: [0,[1,0]]
+		};
+	}
+
+	static rational1_0() {		//		(a+bx)/c		//	2018.10
+		//	Set up problem as Ax=b with					//	2018.10
+		//	A = [1,x,-Y]								//	2018.10
+		//	x = (a,b,c)									//	2018.10
+		//	b = (0,0,0)									//	2018.10
+		return {
+			tomatrix: function (xs, y) {
+				var A = makeA(xs);
+				var b = xs.ones.map(q=>0);
+				return [A, b];
+				function makeA(xs) {
+					var c1 = xs.ones;
+					var c2 = xs[0];
+					var c3 = math.multiply(-1, y);
+					console.log('xs.ones', c1);
+					console.log('xs[0]', c2);
+					console.log('-y', c3);
+					var AT = [];
+					AT.push(c1);
+					AT.push(c2);
+					AT.push(c3);
+					return math.transpose(AT);
+				}
+			},
+			decodernum: [[0,0],[1,0]],
+			decoderden: [0,0,[0,0]]
+		};
+	}
+
+	static rational1_01H() {	//	(a+bx)/(c+1*x)
+		//	Set up problem as Ax=b with					//	2019.7
+		//	A = [1,x,-Y]								//	2019.7
+		//	x = (a,b,c)									//	2019.7
+		//	b = xY										//	2019.7
+		return {
+			tomatrix: function (xs, y) {
+				var A = makeA(xs);
+				var b = math.dotMultiply(xs[0], y);	//	'xs[0]*y'
+				return [A, b];
+				function makeA(xs) {
+					var c1 = xs.ones;
+					var c2 = xs[0];
+					var c3 = math.multiply(-1, y);
+					console.log('xs.ones', c1);
+					console.log('xs[0]', c2);
+					console.log('-y', c3);
+					var AT = [];
+					AT.push(c1);
+					AT.push(c2);
+					AT.push(c3);
+					return math.transpose(AT);
+				}
+			},
+			decodernum: [[0,0],[1,0]],
+			decoderden: [0,0,[0,0],[1,0,1]]
+		};
+	}
+
+	static rational1_02H() {	//	(a+bx)/(c+dx+x²)
+		return {
+			tomatrix: function (xs, y) {
+				var A = makeA(xs);
+				var b = math.dotMultiply(math.dotMultiply(xs[0], xs[0]), y);	//	'xs[0]²*y'
+				return [A, b];
+				function makeA(xs) {
+					var c1 = xs.ones;
+					var c2 = xs[0];
+					var c3 = math.multiply(-1, y);
+					var c4 = math.multiply(-1, math.dotMultiply(xs[0], y));
+					console.log('xs.ones', c1);
+					console.log('xs[0]', c2);
+					console.log('-y', c3);
+					console.log('-xs[0]*y', c4);
+					var AT = [];
+					AT.push(c1);
+					AT.push(c2);
+					AT.push(c3);
+					AT.push(c4);
+					return math.transpose(AT);
+				}
+			},
+			decodernum: [[0,0],[1,0]],
+			decoderden: [0,0,[0,0],[1,0],[2,0,1]]
 		};
 	}
 
