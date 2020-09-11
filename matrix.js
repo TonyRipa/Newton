@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2020
+	Date:	9/10/2020
 	Matrix:	A matrix library
 */
 
@@ -9,20 +9,20 @@
 class matrix {
 
 	static solve(A, b) {																//	2019.11	Added
-		console.log('solve',A, b);
+		console.log('solve', A, b);
 		var AT = math.transpose(A);
 		var ATA = math.multiply(AT, A);
 		var ATb = math.multiply(AT, b);
+		if (!matrix.homogeneous.fullrank(A)) return matrix.solvesingular(ATA, ATb);		//			+2020.9
+		//if (matrix.homogeneous.singular(ATA)) return matrix.solvesingular(ATA, ATb);	//	+2020.6	-2020.9
+		return matrix.solvenotsingular(ATA, ATb);										//	+2020.6
 		//if (math.abs(math.det(ATA)) > .4) return matrix.solvenotsingular(ATA, ATb);	//	-2020.6
 		//return matrix.solvesingular(ATA, ATb);										//	-2020.6
-		if (matrix.homogeneous.singular(ATA)) return matrix.solvesingular(ATA, ATb);	//	+2020.6
-		return matrix.solvenotsingular(ATA, ATb);										//	+2020.6
 	}
 
 	static solvesingular(A, b) {														//	2019.11	Added
 		//console.log("Matrix.solve: A="+A+", b="+b);									//	2019.11	Removed
 		console.log("Matrix.SolveSingular: A="+JSON.stringify(math.number(A))+", b="+b);//	2019.11	Added
-		//if (math.abs(math.det(A)) > .01) return matrix.solvenotsingular(A,b);			//	2019.11	Removed
 		if (b.every(x=>x==0)) return matrix.scaletoint(matrix.homogeneous.solve(A));
 		console.log('Matrix.SolveSingular: Homogenizing');
 		for(let i = 0;i<A.length;i++) {
@@ -30,15 +30,16 @@ class matrix {
 			//A[i].reverse();	//	-2020.8
 		}
 		var solution = matrix.homogeneous.solve(A);
-		solution.pop();		//	+2020.8
-		solution.reverse();
-		//solution.pop();	//	-2020.8
+		solution.pop();			//	+2020.8
+		//solution.reverse();	//	-2020.9
+		//solution.pop();		//	-2020.8
+		console.log("Matrix.SolveSingular: sol.="+JSON.stringify(math.number(solution)));//	+2020.9
 		return solution;
 	}
 
 	static solvenotsingular(A, b) {					//	2019.7	Added
 		console.log('Matrix.solvenotsingular')
-		console.log(JSON.stringify(math.number(A)));
+		console.log(JSON.stringify(math.number(A)),JSON.stringify(math.number(b)));
 		console.log(math.number(math.det(A)));
 		var Ainv = math.divide(math.eye(A[0].length), A);
 		var x = math.multiply(Ainv, b);
@@ -194,7 +195,9 @@ matrix.homogeneous = class {
 	}
 
 	static rref(A,swap) {	//	+2020.8
-		for (let i = 0; i < A.length-1; i++) {
+		//for (let i = 0; i < A.length-1; i++) {	//	-2020.9
+		var size = math.min(A.length,A[0].length);	//	+2020.9
+		for (let i = 0; i < size; i++) {			//	+2020.9
 			if (swap) sort(A,i);
 			A = zerosbelowabove(A,i,i)
 		}
@@ -235,14 +238,26 @@ matrix.homogeneous = class {
 	//	return A.slice().reverse().map(row=>row.slice().reverse());
 	//}
 
-	static singular(A) {											//	+2020.6
+	static fullrank(A) {																//	+2020.9
+		if (A.length > A[0].length) A = math.transpose(A);
 		var R = matrix.homogeneous.rref(A);
 		console.log('R=',R,math.number(R))
-		for (var i=0; i<R.length; i++)
-			if (R[i].every(x=>math.abs(x)<1E-3)) return true;		//	+2020.8
-			//if (R[i].every(x=>x==0)) return true;					//	-2020.8
-		return false;
+		for (var i=0; i<R.length; i++) {
+			if (R[i].every(x=>math.abs(x)<1E-1)) return false;
+		}
+		return true;
 	}
+
+	//static singular(A) {											//	+2020.6			//	-2020.9
+	//	var R = matrix.homogeneous.rref(A);
+	//	console.log('R=',R,math.number(R))
+	//	for (var i=0; i<R.length; i++) {
+	//		//if (R[i].every(x=>math.abs(x)<1E-3) && !R[i].every(x=>math.abs(x)<1E-4)) {matrix.log(A);alert(A)};
+	//		if (R[i].every(x=>math.abs(x)<1E-3)) return true;		//	+2020.8
+	//	}
+	//	//if (R[i].every(x=>x==0)) return true;						//	-2020.8
+	//	return false;
+	//}
 
 	//static ref(A) {												//	2018.10	Added	//	2020.1	Removed
 	//	if (A.length==1) return A;
