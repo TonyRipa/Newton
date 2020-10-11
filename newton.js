@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2020
+	Date:	10/10/2020
 	Newton:	An A.I. for Math
 */
 
@@ -46,10 +46,12 @@ class Newton {
 	}
 	//static simplify(input) {																			//	2020.2	Removed
 	static simplify(input,trans=vm.trans) {																//	2020.2	Added
-		var expr, constant, best, candidates;
+		//var expr, constant, best, candidates;															//	-2020.10
+		var expr, constant, best, candidates, e;														//	+2020.10
 		[expr, constant] = input.split('|');
 		//expr = infers(expr);																			//	2019.5	Removed
-		({candidates,best} = infers(expr));																//	2019.5	Added
+		//({candidates,best} = infers(expr));															//	2019.5	Added	//	-2020.10
+		({candidates,best,e} = infers(expr));																				//	+2020.10
 		//vm.selected = best;																			//	2019.5	Added	//	2019.8	Removed
 		assert(candidates !== undefined, "Newton.simplify returning undefined")							//	2018.8	Added
 		//if (!constant) return [Newton.getpointsreal(), candidates];									//	2018.8	Added	//	2019.8	Removed
@@ -57,23 +59,28 @@ class Newton {
 		//if (!constant) return simplify0pipe(points, candidates, best);								//	2019.8	Added	//	-2020.7
 		//else return simplify1pipe(points, candidates[best], constant);								//	2019.8	Added	//	-2020.7
 		var ret;																						//	+2020.7
-		if (!constant) ret = simplify0pipe(points, candidates.map(x=>x[0]), best);						//	+2020.7
-		//else ret = simplify1pipe(points, candidates[best], constant);									//	+2020.7	//	-2020.8
-		else ret = simplify1pipe(points, candidates[best][0], constant);											//	+2020.8
+		//if (!constant) ret = simplify0pipe(points, candidates.map(x=>x[0]), best);					//	+2020.7			//	-2020.10
+		if (!constant) ret = simplify0pipe(points, candidates.map(x=>x[0]), best, e);					//	+2020.7			//	-2020.10
+		//else ret = simplify1pipe(points, candidates[best], constant);									//	+2020.7			//	-2020.8
+		//else ret = simplify1pipe(points, candidates[best][0], constant);													//	+2020.8		//	-2020.10
+		else ret = simplify1pipe(points, candidates[best][0], constant, e);																	//	+2020.10
 		ret.push(candidates.map(x=>x[1]));																//	+2020.7
 		return ret;																						//	+2020.7
-		//return [Newton.getpointsreal(), expr, infer(evaluate(expr, constant))];						//	2018.8	Added	//	2019.4	Removed
 		//return [Newton.getpointsreal(), candidates, candidates.map(e=>infer(evaluate(e, constant)))];	//	2019.4	Added	//	2019.8	Removed
-		function simplify0pipe(points, candidates, bestindex) {											//	2019.8	Added
+		//function simplify0pipe(points, candidates, bestindex) {										//	2019.8	Added	//	-2020.10
+		function simplify0pipe(points, candidates, bestindex, e) {															//	+2020.10
 			vm.selected = bestindex;
 			//return [points, candidates];																//	2019.12	Removed
-			return [points, candidates, candidates[bestindex]];											//	2019.12	Added
+			//return [points, candidates, candidates[bestindex]];										//	2019.12	Added	//	-2020.10
+			return [points, candidates, candidates[bestindex], e];															//	+2020.10
 		}
-		function simplify1pipe(points, candidate, constant) {											//	2019.8	Added
+		//function simplify1pipe(points, candidate, constant) {											//	2019.8	Added	//	-2020.10
+		function simplify1pipe(points, candidate, constant, e) {															//	+2020.10
 			vm.selected = 0;
 			//var evalu = infer(evaluate(candidate,constant));											//	-2020.8
 			var evalu = infer(evaluate(candidate,constant))[0];											//	+2020.8
-			return [points, [candidate], [evalu]];
+			//return [points, [candidate], [evalu]];													//	-2020.10
+			return [points, [candidate], [evalu], e];													//	+2020.10
 		}
 		function evaluate(input, val) {
 			return substitute(input, Newton.getvars(input).slice(-1)[0], val);
@@ -138,7 +145,8 @@ class Newton {
 			e = math.number(e);												//	2019.4	Return Candidates Sorted
 			var leasterror = math.min(e);									//	2019.5	Added
 			var best = e.indexOf(leasterror);								//	2019.5	Added
-			return {candidates,best};										//	2019.5	Added
+			//return {candidates,best};										//	2019.5	Added	//	-2020.10
+			return {candidates,best,e};															//	+2020.10
 			function makexs(vars) {
 				var xs = [];
 				//var numpoints = (vm.trans==1) ? 300 : (vm.trans==0) ? 40 : 4;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)		//	2019.9	Removed

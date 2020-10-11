@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	8/10/2020
+	Date:	10/10/2020
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -26,8 +26,9 @@
 		<script src='../js/vue.js'></script><script>window.Vue || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js'><" + "/script>")</script>	<!--	2019.6	Added	-->
 		<script>
 			function go() {			//	2019.12	Added
-				//[vm.pointss, vm.exprsimp, vm.totalsimp] = simplify();	//	-2020.7
-				[vm.pointss, vm.exprsimp, vm.totalsimp, vm.untransformed] = simplify();	//	-2020.7
+				//[vm.pointss, vm.exprsimp, vm.totalsimp] = simplify();							//	-2020.7
+				//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.untransformed] = simplify();		//	+2020.7	//	-2020.10
+				[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();				//	+2020.10
 			}
 			function validate() {	//	2019.12	Added
 				return simplify()[1][vm.selected] == vm.exprsimp[vm.selected];
@@ -66,7 +67,6 @@
 				Plot.plot3(points, 'graph1', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
 			}
 			function plot2(points) {
-				//$('#title2').html(title);	//	2019.5	Removed
 				Plot.plot(points, 'graph2');
 			}
 			function plot23(points, title) {
@@ -191,6 +191,7 @@
 						<br>
 						<input type='range' min='1' max='9' step='1' v-model='range' title='Complexity'><span title='Complexity'>{{range}}</span><br>
 						<br>
+						<center v-if='e'>Error: {{e[selected]}}</center>	<!--	+2020.10	-->
 					</td>
 					<td width="120px">
 						<!--<div id="title1" style="text-align:center"></div>	2019.5	Removed-->
@@ -228,9 +229,10 @@
 		<script>
 			vm = new Vue({
 				el: '#app',
-				//data: { trans: 0, size: 40, range: 4, expr: '', exprsimp: [], selected: '0' },	//	2020.3	Removed
-				//data: { trans: 0, size: 40, range: 9, expr: '', exprsimp: [], selected: '0' },	//	2020.3	Added	//	-2020.4
-				data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0' },		//	+2020.4
+				//data: { trans: 0, size: 40, range: 4, expr: '', exprsimp: [], selected: '0' },		//	2020.3	Removed
+				//data: { trans: 0, size: 40, range: 9, expr: '', exprsimp: [], selected: '0' },		//	2020.3	Added	//	-2020.4
+				//data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0' },		//	+2020.4			//	-2020.10
+				data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0', e: '' },						//	+2020.10
 				watch: { exprsimp: render, selected: render }	//	2019.5	Added
 			});
 		</script>
