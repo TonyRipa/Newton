@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	9/10/2020
+	Date:	11/10/2020
 	Matrix:	A matrix library
 */
 
@@ -13,15 +13,24 @@ class matrix {
 		var AT = math.transpose(A);
 		var ATA = math.multiply(AT, A);
 		var ATb = math.multiply(AT, b);
-		if (!matrix.homogeneous.fullrank(A)) return matrix.solvesingular(ATA, ATb);		//			+2020.9
+		if (!matrix.homogeneous.fullrank(A)) {											//						+2020.11
+			if (matrix.tall(A))
+				return matrix.solvesingular(ATA, ATb);
+			else
+				return matrix.solvesingular(A, b);
+		}
+		//if (!matrix.homogeneous.fullrank(A)) return matrix.solvesingular(ATA, ATb);	//			+2020.9		-2020.11
 		//if (matrix.homogeneous.singular(ATA)) return matrix.solvesingular(ATA, ATb);	//	+2020.6	-2020.9
 		return matrix.solvenotsingular(ATA, ATb);										//	+2020.6
 		//if (math.abs(math.det(ATA)) > .4) return matrix.solvenotsingular(ATA, ATb);	//	-2020.6
 		//return matrix.solvesingular(ATA, ATb);										//	-2020.6
 	}
 
+	static tall(A) {																	//	+2020.11
+		return A.length > A[0].length;
+	}
+
 	static solvesingular(A, b) {														//	2019.11	Added
-		//console.log("Matrix.solve: A="+A+", b="+b);									//	2019.11	Removed
 		console.log("Matrix.SolveSingular: A="+JSON.stringify(math.number(A))+", b="+b);//	2019.11	Added
 		if (b.every(x=>x==0)) return matrix.scaletoint(matrix.homogeneous.solve(A));
 		console.log('Matrix.SolveSingular: Homogenizing');
@@ -98,7 +107,8 @@ matrix.homogeneous = class {
 				}
 			}
 			if (A[0].length==2) {																	//	2019.7	Added
-				if (A.length>=2-1) {
+				//if (A.length>=2-1) {																//	-2020.11
+				if (A.length==2) {																	//	+2020.11
 					A = matrix.homogeneous.rref(A);console.log(A)
 					var row0 = A[0];
 					var a = row0[1] == 0 ? 0 : math.unaryMinus(math.divide(row0[1],row0[0]));

@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	10/10/2020
+	Date:	11/10/2020
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -12,10 +12,14 @@
 		<meta charset="utf-8" />
 		<script src='../js/jquery.js'></script><script>window.jQuery || document.write("<script src='https://code.jquery.com/jquery-latest.js'><" + "/script>")</script>
 		<script src='../js/math3.js'></script><script>window.math || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js'><" + "/script>")</script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.6/jsxgraphcore.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="https://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css" />
+		<script src='../js/lodash.js'></script><script>window._ || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min.js'><" + "/script>")</script>
+		<script src='../js/jsxgraphcore.js'></script>
+		<script>
+			window.JXG || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.99.6/jsxgraphcore.js'><" + "/script>");
+			window.JXG || document.write("<link rel='stylesheet' type='text/css' href='https://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css' />");
+		</script>
+		<script src='../js/vis.js'></script><script>window.vis || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js'><" + "/script>")</script>
+		<link rel="stylesheet" type="text/css" href="../css/jsxgraph.css" />
 		<script src="transform.js"></script>
 		<script src="render.js"></script>		<!--	2020.7	Added	-->
 		<script src="untransform.js"></script>	<!--	2020.2	Added	-->
@@ -25,14 +29,24 @@
 		<script src="plot.js"></script>
 		<script src='../js/vue.js'></script><script>window.Vue || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js'><" + "/script>")</script>	<!--	2019.6	Added	-->
 		<script>
-			function go() {			//	2019.12	Added
-				//[vm.pointss, vm.exprsimp, vm.totalsimp] = simplify();							//	-2020.7
-				//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.untransformed] = simplify();		//	+2020.7	//	-2020.10
-				[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();				//	+2020.10
+			function go() {
+				if ($('details')[0].open) go1();
+				else cascade();
 			}
-			function validate() {	//	2019.12	Added
-				return simplify()[1][vm.selected] == vm.exprsimp[vm.selected];
+			function go1() {																	//	+2019.12	//	2020.11 Renamed
+				//[vm.pointss, vm.exprsimp, vm.totalsimp] = simplify();							//	-2020.07
+				//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.untransformed] = simplify();		//	+2020.07	//	-2020.10
+				[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();					//	+2020.10
 			}
+			function cascade() {			//	+2020.11
+				for (vm.range=1; vm.range<9; vm.range++) {
+					[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();
+					if (vm.e && vm.e[vm.selected]<.00001) break;
+				}
+			}
+			//function validate() {	//	2019.12	Added	//	-2020.11
+			//	return simplify()[1][vm.selected] == vm.exprsimp[vm.selected];
+			//}
 			//function go() {		//	2019.12	Removed
 			function simplify() {	//	2019.12	Added
 				var input;
@@ -70,7 +84,6 @@
 				Plot.plot(points, 'graph2');
 			}
 			function plot23(points, title) {
-				//$('#title2').html(title);	//	2019.5	Removed
 				var vars = Plot.getvars(title);
 				Plot.plot3(points, 'graph2', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
 			}
@@ -151,9 +164,9 @@
 						<input type='radio' value='2' id='dt' v-model='trans' @click='size=4'><label for='dt'>Differential Transform</label><br> <!-- 2018.11 Dif -->
 						<br>
 						<center><button onclick="go()">Go</button>
-						<button v-show="exprsimp.length" onclick="alert('Simplification is '+(validate()?'':'in')+'valid')">Validate</button>	<!-- 2019.12 Added	-->
+						<!--<button v-show="exprsimp.length" onclick="alert('Simplification is '+(validate()?'':'in')+'valid')">Validate</button>-->	<!-- 2019.12 Added	-->	<!-- -2020.11 -->
 						</center><br>
-						<input id='inp' placeholder="Type or Click Dropdown" style="position:absolute;width:140px" value='0'>	<!--	2018.8	width for linux firefox -->
+						<input id='inp' placeholder="Type or Click Dropdown" style="position:absolute;width:140px;" value='0'>	<!--	2018.8	width for linux firefox -->
 						<select onchange="$('#inp').val($(this).val())" style="height:23px;width:190px">	<!--	2018.6	width for linux firefox -->
 							<option disabled>Choose a option or type</option>
 							<optgroup label="0 Variable">
@@ -181,17 +194,31 @@
 								<option>((x+h)^2-x^2)/h|0</option>
 							</optgroup>
 							<optgroup label="Exponential">
-								<option>2.718^-x</option>
+								<option>exp(-x)</option>
 								<option>sin(x)</option>
+								<option>sin(2x)</option>
 								<option>cos(x)</option>
 								<option>sinh(x)</option>
 								<option>cosh(x)</option>
 							</optgroup>
 						</select><br>
 						<br>
-						<input type='range' min='1' max='9' step='1' v-model='range' title='Complexity'><span title='Complexity'>{{range}}</span><br>
+						<details>	<!--	+2020.11	-->
+							<summary>Advanced</summary>
+							<div style='border: thin solid black'>
+								<input type='range' min='1' max='9' step='1' v-model='range' title='Complexity'><span title='Complexity'>{{range}}</span><br>
+								<br>
+								<center v-if='e'>Complexity: {{range}}</center>				<!-- +2020.11 -->
+								<!--<center v-if='e'>Error: {{e[selected]}}</center>-->		<!-- +2020.10 -->	<!-- -2020.11 -->
+								<center v-if='e'>Error: {{e[selected].toExponential(0)}}</center>				<!-- +2020.11 -->
+							</div>
+						</details>
 						<br>
-						<center v-if='e'>Error: {{e[selected]}}</center>	<!--	+2020.10	-->
+						<center v-if='e'>																				<!--	+2020.11	-->
+							<span v-if='e[selected]>.0001' style='color:red'>Simplification isn't valid</span>
+							<span v-else-if='e[selected]<.00001' style='color:green'>Simplification is valid</span>
+							<span v-else style='color:orange'>Simplification maybe valid</span>
+						</center>
 					</td>
 					<td width="120px">
 						<!--<div id="title1" style="text-align:center"></div>	2019.5	Removed-->
@@ -232,7 +259,8 @@
 				//data: { trans: 0, size: 40, range: 4, expr: '', exprsimp: [], selected: '0' },		//	2020.3	Removed
 				//data: { trans: 0, size: 40, range: 9, expr: '', exprsimp: [], selected: '0' },		//	2020.3	Added	//	-2020.4
 				//data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0' },		//	+2020.4			//	-2020.10
-				data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0', e: '' },						//	+2020.10
+				//data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0', e: '' },						//	+2020.10	//	-2020.11
+				data: { trans: 0, size: 40, range: 1, expr: '', exprsimp: [], selected: '0', e: '' },										//	+2020.11
 				watch: { exprsimp: render, selected: render }	//	2019.5	Added
 			});
 		</script>

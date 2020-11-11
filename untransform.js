@@ -1,18 +1,18 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   7/10/2020
+    Date:   11/10/2020
     UnTransform: A data untransformer
 */
 
 class Untransform {				//	+2020.7
 
-	//function untransform(s) {	//	-2020.7
 	static str(s) {				//	+2020.7
 		s = s.replace(new RegExp('x','g'),'s');
 		if (s == '0') return '0';
 		if (s == '1 / s') return '1';
 		if (s == 's^-1') return '1';
+		if (s == '1 / s^2') return 'x';					//	+2020.11
 		if (s == 's^-2') return 'x';
 		if (s == 'h^-1') return '1';
 		if (s == 'h^-2') return 'h';

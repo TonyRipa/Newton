@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	10/10/2020
+	Date:	11/10/2020
 	Newton:	An A.I. for Math
 */
 
@@ -63,7 +63,8 @@ class Newton {
 		if (!constant) ret = simplify0pipe(points, candidates.map(x=>x[0]), best, e);					//	+2020.7			//	-2020.10
 		//else ret = simplify1pipe(points, candidates[best], constant);									//	+2020.7			//	-2020.8
 		//else ret = simplify1pipe(points, candidates[best][0], constant);													//	+2020.8		//	-2020.10
-		else ret = simplify1pipe(points, candidates[best][0], constant, e);																	//	+2020.10
+		//else ret = simplify1pipe(points, candidates[best][0], constant, e);																//	+2020.10	//	-2020.11
+		else ret = simplify1pipe(points, candidates[best][0], constant, [e[best]]);																			//	+2020.11
 		ret.push(candidates.map(x=>x[1]));																//	+2020.7
 		return ret;																						//	+2020.7
 		//return [Newton.getpointsreal(), candidates, candidates.map(e=>infer(evaluate(e, constant)))];	//	2019.4	Added	//	2019.8	Removed
@@ -111,12 +112,14 @@ class Newton {
 			console.log(JSON.stringify(y))
 			//if (vars.length==2) return [inferpolynomial(xs, y, F.poly32)];	//	2019.4	list	//	2019.5	Removed
 			//if (vars.length==2) return {candidates:[inferpolynomial(xs, y, F.poly32)],best:0};	//	2019.5	object	//	-2020.7
-			if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32))],best:0};		//	+2020.7
+			//if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32))],best:0};		//	+2020.7			//	-2020.11
+			if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32))],best:0,e:[0]};						//	+2020.11
 			//if (vm.trans==2) return [inferdifferential(xs)];					//	2019.4	list	//	2019.5	Removed
 			//if (vm.trans==2) return {candidates:[inferdifferential(xs)],best:0};					//	2019.5	object	//	2020.2	Removed
 			//if (trans==2) return {candidates:[inferdifferential(xs)],best:0};											//	2020.2	Added	//	-2020.7
 			if (trans==2) return {candidates:[Render.stringify(inferdifferential(xs))],best:0};												//	+2020.7
-			var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction
+			//var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction		//	-2020.11
+			var e = math.fraction([1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20]);													//	+2020.11
 			var candidates = [];
 			//var inferers = [0,1,2,3,4,5,6,7,8];	//	2019.9	Added	//	-2020.8 
 			var inferers = [0,1,2,3,4,5,6,7,8,9];						//	+2020.8
@@ -152,15 +155,26 @@ class Newton {
 				//var numpoints = (vm.trans==1) ? 300 : (vm.trans==0) ? 40 : 4;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)		//	2019.9	Removed
 				//numpoints = Number(vm.size);		//	2019.3	//	2019.9	Removed
 				var numpoints = Number(vm.size);	//	2019.3	//	2019.9	Added
-				if (trans==1) numpoints *= 2;		//	+2020.5	inc numpoints for cosh & sinh
+				//if (trans==1) numpoints *= 2;		//	+2020.5	inc numpoints for cosh & sinh	//	-2020.11
+				var gaussx = { 3 : [0.7745966692414834,  0,  -0.7745966692414834] ,
+					4 : [-0.3399810435848563,0.3399810435848563,-0.8611363115940526,0.8611363115940526] ,
+					10 : [-0.1488743389816312,0.1488743389816312,-0.4333953941292472,0.4333953941292472,-0.6794095682990244,0.6794095682990244,-0.8650633666889845,0.8650633666889845,-0.9739065285171717,0.9739065285171717] ,
+					20 : [-0.0765265211334973,0.0765265211334973,-0.2277858511416451,0.2277858511416451,-0.3737060887154195,0.3737060887154195,-0.5108670019508271,0.5108670019508271,-0.6360536807265150,0.6360536807265150,-0.7463319064601508,0.7463319064601508,-0.8391169718222188,0.8391169718222188,-0.9122344282513259,0.9122344282513259,-0.9639719272779138,0.9639719272779138,-0.9931285991850949,0.9931285991850949] ,
+					40 : [-0.0387724175060508,0.0387724175060508,-0.1160840706752552,0.1160840706752552,-0.1926975807013711,0.1926975807013711,-0.2681521850072537,0.2681521850072537,-0.3419940908257585,0.3419940908257585,-0.4137792043716050,0.4137792043716050,-0.4830758016861787,0.4830758016861787,-0.5494671250951282,0.5494671250951282,-0.6125538896679802,0.6125538896679802,-0.6719566846141796,0.6719566846141796,-0.7273182551899271,0.7273182551899271,-0.7783056514265194,0.7783056514265194,-0.8246122308333117,0.8246122308333117,-0.8659595032122595,0.8659595032122595,-0.9020988069688743,0.9020988069688743,-0.9328128082786765,0.9328128082786765,-0.9579168192137917,0.9579168192137917,-0.9772599499837743,0.9772599499837743,-0.9907262386994570,0.9907262386994570,-0.9982377097105593,0.9982377097105593] ,
+					64 : [-0.0243502926634244,0.0243502926634244,-0.0729931217877990,0.0729931217877990,-0.1214628192961206,0.1214628192961206,-0.1696444204239928,0.1696444204239928,-0.2174236437400071,0.2174236437400071,-0.2646871622087674,0.2646871622087674,-0.3113228719902110,0.3113228719902110,-0.3572201583376681,0.3572201583376681,-0.4022701579639916,0.4022701579639916,-0.4463660172534641,0.4463660172534641,-0.4894031457070530,0.4894031457070530,-0.5312794640198946,0.5312794640198946,-0.5718956462026340,0.5718956462026340,-0.6111553551723933,0.6111553551723933,-0.6489654712546573,0.6489654712546573,-0.6852363130542333,0.6852363130542333,-0.7198818501716109,0.7198818501716109,-0.7528199072605319,0.7528199072605319,-0.7839723589433414,0.7839723589433414,-0.8132653151227975,0.8132653151227975,-0.8406292962525803,0.8406292962525803,-0.8659993981540928,0.8659993981540928,-0.8893154459951141,0.8893154459951141,-0.9105221370785028,0.9105221370785028,-0.9295691721319396,0.9295691721319396,-0.9464113748584028,0.9464113748584028,-0.9610087996520538,0.9610087996520538,-0.9733268277899110,0.9733268277899110,-0.9833362538846260,0.9833362538846260,-0.9910133714767443,0.9910133714767443,-0.9963401167719553,0.9963401167719553,-0.9993050417357722,0.9993050417357722] };
+				gaussx = gaussx[64];
+				if (trans==1) numpoints = gaussx.length;
+				var b = 10;
+				var a = 0;
+				gaussx = gaussx.map(x => x*(b-a)/2 + (b+a)/2);
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
-				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5));
 				//if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added	//	2020.2	Removed
 				//if (vm.trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc			//	2020.2	Removed
 				//if (vm.trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin					//	2020.2	Removed
 				//if (trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*(Math.random()*8))/100000)));//	2018.8	Added		//	2020.2	Added	//	-2020.8
 				if (trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map((x,k)=>math.fraction(k<9?k:math.round(100000*(Math.random()*32-16))/100000)));								//	+2020.8
-				if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc				//	2020.2	Added
+				//if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc			//	2020.2	Added	//	-2020.11
+				if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(gaussx);																													//	+2020.11
 				if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin						//	2020.2	Added
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5).map(Math.round));
 				//xs = xs.map(row=>row.map(cell=>Math.round(1000 * cell) / 1000));
@@ -168,7 +182,8 @@ class Newton {
 				return xs;
 			}
 			function makey(xs, input) {             //  2018.8  Added
-				var nofrac = input.includes('2.718') || input.includes('sin') || input.includes('cos');	//	2018.8	math.eval can't do fractions
+				//var nofrac = input.includes('2.718') || input.includes('sin') || input.includes('cos');	//	2018.8	math.eval can't do fractions	//	-2020.11
+				var nofrac = input.includes('2.718') || input.includes('sin') || input.includes('cos') || input.includes('exp');						//	+2020.11
 				var ys = [];
 				//for (var datai = 0; datai < xs.ones.length; datai++) {	//	-2020.8
 				for (var datai = 0; datai < xs[0].length; datai++) {		//	+2020.8
