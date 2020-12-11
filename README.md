@@ -4,7 +4,7 @@ Newton: An A.I. for Math
 
 Author : Anthony John Ripa
 
-Date : 2020.06.10
+Date : 2020.12.10
 
 Live Demo at <a target='_blank' href='http://tonyripa.github.io/Newton/'>http://tonyripa.github.io/Newton/</a>
 
@@ -61,6 +61,12 @@ Say that I want to simplify h/h at h=0. We write h/h|0. One way would be to dist
 
 Numerical stability and backtracking have seen widespread adoption in Linear Algebra, due in part to Linear Algebra being a lively field of active research. The idea that if something is inconclusive on one path, then it is objectively inconclusive on all paths, has been replaced in Linear Algebra with Numerical stability and backtracking. On the other hand, Elementary Algebra has changed little over the centuries, due in part to the belief that it was completed. This has led to its stagnation, and other fields like Calculus making up for its short-comings. We may allow Numerical stability and backtracking in Elementary Algebra, just as we do with Linear Algebra. Expressions like h/h|0 can be well-defined. This is more explicit fundamental and less contrived, than the hidden implicit Numerical Stability with Backtracking, found in Calculus law's like L'Hopital's Rule and limit laws in general.
 
-Dependencies
-------------
+## Complexity Control
+
+To fit a dataset of size n, we can always create a model of size n (e.g. a lookup table). Models of this kind have low predictive power outside of the answers that they have memorized. This is called over-learning. A dataset can be well-learned by a model whose complexity is smaller than the data itself. If the model is too small this is called under-learning, where the model cannot even well-model the data it was given. We want to control the complexity of the model. Not too much. Not too little. Just right. This is like Occam's Razor.
+
+In Advanced-Mode, `Newton` has a scalable complexity control in the user interface. The user can scale the complexity to the desired amount, to control over-fitting and under-fitting. In Basic-Mode, the complexity is controlled automatically. It starts with simple models, and tries to fit the data. If it validates, then `Newton` returns that as the answer. If it does not, then `Newton` increments the complexity. And the cycle repeats. If too many cycles progress, and nothing validates, `Newton` returns the best answer it has, and a message about the validation status.
+
+## Dependencies
+
 <a href='http://jquery.com'>jQuery</a> , <a href='http://mathjs.org'>math.js</a> , <a href='http://lodash.com'>Lodash</a> , <a href='http://visjs.org'>vis.js</a> and <a href='http://vuejs.org'>Vue.js</a>

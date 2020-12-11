@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	11/10/2020
+	Date:	12/10/2020
 	Newton:	An A.I. for Math
 */
 
@@ -16,6 +16,7 @@ class Newton {
 	static getpoints() {
 		var orig = _.zip(...Newton.x, Newton.y);
 		console.log(orig)
+		if (math.typeof(Newton.x[0][0])=="Complex")return{orig,tran:[],nonan:[]}//	+2020.12
 		//var t = transform(orig)												//	-2020.6
 		var t = Transform.transform(orig)										//	+2020.6
 		var tran = t.map(point=>point.map(x=>math.fraction(0).add(x)));			//	2018.8	Fraction	//	2018.9	Added for NaN handling
@@ -25,7 +26,8 @@ class Newton {
 		return {orig, tran, nonan};												//	+2020.8
 	}
 	static getpointsreal() {													//	2018.8	Added
-		return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.number(xyz)));
+		//return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.number(xyz)));											//	-2020.12
+		return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.typeof(xyz[0])=="Complex"?math.re(xyz):math.number(xyz)));	//	+2020.12
 	}
 	//static getrightpoints() {													//	2020.2	Removed
 	static getrightpoints(trans=vm.trans) {										//	2020.2	Added
@@ -49,7 +51,6 @@ class Newton {
 		//var expr, constant, best, candidates;															//	-2020.10
 		var expr, constant, best, candidates, e;														//	+2020.10
 		[expr, constant] = input.split('|');
-		//expr = infers(expr);																			//	2019.5	Removed
 		//({candidates,best} = infers(expr));															//	2019.5	Added	//	-2020.10
 		({candidates,best,e} = infers(expr));																				//	+2020.10
 		//vm.selected = best;																			//	2019.5	Added	//	2019.8	Removed
@@ -113,7 +114,8 @@ class Newton {
 			//if (vars.length==2) return [inferpolynomial(xs, y, F.poly32)];	//	2019.4	list	//	2019.5	Removed
 			//if (vars.length==2) return {candidates:[inferpolynomial(xs, y, F.poly32)],best:0};	//	2019.5	object	//	-2020.7
 			//if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32))],best:0};		//	+2020.7			//	-2020.11
-			if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32))],best:0,e:[0]};						//	+2020.11
+			//if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32))],best:0,e:[0]};					//	+2020.11	//	-2020.12
+			if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32()))],best:0,e:[0]};					//	+2020.11	//	+2020.12
 			//if (vm.trans==2) return [inferdifferential(xs)];					//	2019.4	list	//	2019.5	Removed
 			//if (vm.trans==2) return {candidates:[inferdifferential(xs)],best:0};					//	2019.5	object	//	2020.2	Removed
 			//if (trans==2) return {candidates:[inferdifferential(xs)],best:0};											//	2020.2	Added	//	-2020.7
@@ -128,7 +130,8 @@ class Newton {
 				//try {
 					console.log('Candidate: ' + i);
 					//candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent25) : inferrational(xs, y, i-2);	//	-2020.4
-					candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent26) : inferrational(xs, y, i-2);		//	+2020.4
+					//candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent26) : inferrational(xs, y, i-2);	//	+2020.4	//	-2020.12
+					candidates[i] = i==0 ? inferpolynomial(xs, y, F.polyn1(vm.range)) : i==1 ? inferpolynomial(xs, y, F.laurent21()) : i==2 ? inferpolynomial(xs, y, F.laurent26()) : inferrational(xs, y, i-2);//	+2020.4	//	+2020.12
 					candidates[i] = Render.stringify(candidates[i]);	//	+2020.7
 					assert(candidates[i] !== undefined);
 					//e[i] = geterrorbypoints(Newton.getrightpoints(), candidates[i]);		//	2020.2	Removed
@@ -167,6 +170,11 @@ class Newton {
 				var b = 10;
 				var a = 0;
 				gaussx = gaussx.map(x => x*(b-a)/2 + (b+a)/2);
+				var fourierx = { 4 : [math.complex(1,1E-99),math.complex(0,1),math.complex(-1,0),math.complex(0,-1)] ,
+					8: [math.complex(+1,0),math.complex(+.7071067811865475,+.7071067811865475),math.complex(0,+1),math.complex(-.7071067811865475,+.7071067811865475),math.complex(-1,0),math.complex(-.7071067811865475,-.7071067811865475),math.complex(0,-1),math.complex(+.7071067811865475,-.7071067811865475)] };	//	+2020.12
+				fourierx = fourierx[4];									//	+2020.12
+				var originx = _.range(1, numpoints+1).map(x=>x/175);	//	+2020.12
+				var neighborhoodx = true ? originx : fourierx;			//	+2020.12
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
 				//if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added	//	2020.2	Removed
 				//if (vm.trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc			//	2020.2	Removed
@@ -175,32 +183,59 @@ class Newton {
 				if (trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map((x,k)=>math.fraction(k<9?k:math.round(100000*(Math.random()*32-16))/100000)));								//	+2020.8
 				//if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc			//	2020.2	Added	//	-2020.11
 				if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(gaussx);																													//	+2020.11
-				if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin						//	2020.2	Added
+				//if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin						//	2020.2	Added	//	-2020.12
+				if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(neighborhoodx);	//	+2020.12
 				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5).map(Math.round));
 				//xs = xs.map(row=>row.map(cell=>Math.round(1000 * cell) / 1000));
 				Newton.x = xs;
 				return xs;
 			}
-			function makey(xs, input) {             //  2018.8  Added
-				//var nofrac = input.includes('2.718') || input.includes('sin') || input.includes('cos');	//	2018.8	math.eval can't do fractions	//	-2020.11
-				var nofrac = input.includes('2.718') || input.includes('sin') || input.includes('cos') || input.includes('exp');						//	+2020.11
-				var ys = [];
-				//for (var datai = 0; datai < xs.ones.length; datai++) {	//	-2020.8
-				for (var datai = 0; datai < xs[0].length; datai++) {		//	+2020.8
-					var expression = input;
-					var vals = [];
-					for (var varj = 0; varj < vars.length; varj++) {
-						var val = xs[varj][datai];
-						if (nofrac) val = math.number(val);												//	2018.8	math.eval can't do fractions
-						vals.push(val);
-					}
-					var scope = makescope(vars, vals);
-					try {											//	+2020.8
-						ys.push(math.fraction(0).add(math.eval(expression, scope)));						//	2018.8	in case math.eval is not fraction	//	2018.9	0+ is Robust for NaN
-					} catch {ys.push(math.fraction(0).add(NaN))}	//	+2020.8
-				}
+			//function makey(xs, input) {             //  2018.8  Added	//	-2020.12
+			//	//var nofrac = input.includes('2.718') || input.includes('sin') || input.includes('cos');	//	2018.8	math.eval can't do fractions	//	-2020.11
+			//	var nofrac = input.includes('2.718') || input.includes('sin') || input.includes('cos') || input.includes('exp');		//	+2020.11
+			//	var ys = [];
+			//	//for (var datai = 0; datai < xs.ones.length; datai++) {	//	-2020.8
+			//	for (var datai = 0; datai < xs[0].length; datai++) {		//	+2020.8
+			//		var expression = input;
+			//		var vals = [];
+			//		for (var varj = 0; varj < vars.length; varj++) {
+			//			var val = xs[varj][datai];
+			//			if (nofrac) val = math.number(val);												//	2018.8	math.eval can't do fractions
+			//			vals.push(val);
+			//		}
+			//		var scope = makescope(vars, vals);
+			//		try {											//	+2020.8
+			//			ys.push(math.fraction(0).add(math.eval(expression, scope)));						//	2018.8	in case math.eval is not fraction	//	2018.9	0+ is Robust for NaN
+			//		} catch {ys.push(math.fraction(0).add(NaN))}	//	+2020.8
+			//	}
+			//	Newton.y = ys;
+			//	return ys;
+			//}
+			function makey(xs, input) {	//	+2020.12
+				if (math.typeof(xs[0][0]) == "Complex")
+					var ys = makeyraw(xs, input);
+				else if (input.includes('2.718') || input.includes('sin') || input.includes('cos') || input.includes('exp'))
+					var ys = makeyraw(xs.map(x=>math.number(x)), input).map(y=>math.fraction(0).add(y));
+				else
+					var ys = makeyraw(xs, input).map(y=>math.fraction(0).add(y));
 				Newton.y = ys;
 				return ys;
+				function makeyraw(xs, input) {
+					var ys = [];
+					for (var datai = 0; datai < xs[0].length; datai++) {
+						var expression = input;
+						var vals = [];
+						for (var varj = 0; varj < vars.length; varj++) {
+							var val = xs[varj][datai];
+							vals.push(val);
+						}
+						var scope = makescope(vars, vals);
+						try {
+							ys.push(math.eval(expression, scope));
+						} catch { ys.push(NaN); }
+					}
+					return ys;
+				}
 			}
 			function complexity(expression) {								//	2020.3	Added
 				if (expression.match(/\d\d/)) return math.fraction(99999);
@@ -226,7 +261,8 @@ class Newton {
 			}
 			function inferpolynomial(xs, y, parser) {
 				var tomatrix, decoder;
-				({tomatrix, decoder} = parser());
+				//({tomatrix, decoder} = parser());				//	-2020.12
+				({tomatrix, decoder} = parser);					//	+2020.12
 				//var vect = solve(...tomatrix(xs, y));			//	2019.11	Removed
 				var ab = tomatrix(xs, y)
 				console.log(ab)

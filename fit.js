@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2020
+	Date:	12/10/2020
 	Fit:	Infers a function from points
 */
 
@@ -31,7 +31,6 @@ class Fit {
 				var points = _.sampleSize(allpoints, 16);
 				var f = (x, p) =>(p[1] + p[3] * x + p[5] * x * x) / (p[0] + p[2] * x + p[4] * x * x);
 				var range = vm.range;
-				//if (range>4) range=4;			//	2019.4	Removed
 				//var bestval = 1000;			//	-2020.4
 				var bestval = 1/0;				//	+2020.4
 				var bestcomp = 1/0;				//	+2020.5
@@ -115,24 +114,34 @@ class Fit {
 
 	static differential() {			//	2018.11
 		return {
-			tovect: function transform(points) {			   console.log('parsDiff: points = ',points.map(xy=>math.number(xy[1])));
-				var derivatives = pointstoderivatives(points); console.log('parsDiff: der = ',math.number(derivatives));
-				var {num,den} = seq2frac(derivatives);		   console.log('parsDiff: der = ',math.number(derivatives),' num = ',num,' den = ',math.number(den))
+			tovect: function transform(points) {			   console.log('parsDiff: points = ',points.map(xy=>math.format(xy[1])));
+				var comp = math.typeof(points[0][0]) == "Complex";	//	+2020.12
+				var derivatives = pointstoderivatives(points); console.log('parsDiff: der = ',math.format(derivatives));
+				var {num,den} = seq2frac(derivatives);		   console.log('parsDiff: der = ',math.format(derivatives),' num = ',num,' den = ',math.format(den))
 				return [...num,...den];
-				function pointstoderivatives(points) {
-					return [points[0][1],
-					(points[1][1]-points[0][1])/(points[1][0]-points[0][0]),
-					(points[2][1]-2*points[1][1]+points[0][1])/(points[1][0]-points[0][0])**2,
-					(points[3][1]-3*points[2][1]+3*points[1][1]-points[0][1])/(points[1][0]-points[0][0])**3];
+				function pointstoderivatives(points) {				//	+2020.12
+					return (comp) ? complexpointstoderivatives(points) : realpointstoderivatives(points) ;
+					function complexpointstoderivatives(points) {
+						var y = points.map(xy=>xy[1]);
+						return math.re(matrix.dft(y)).map((x,i)=>math.multiply(x,math.factorial(i))).slice(0,4);
+					}
+					function realpointstoderivatives(points) {		//	~2020.12
+						return [points[0][1],
+						(points[1][1]-points[0][1])/(points[1][0]-points[0][0]),
+						(points[2][1]-2*points[1][1]+points[0][1])/(points[1][0]-points[0][0])**2,
+						(points[3][1]-3*points[2][1]+3*points[1][1]-points[0][1])/(points[1][0]-points[0][0])**3];
+					}
 				}
 				function seq2frac(seq) {	//	2019.6
-					var terminating = math.abs(seq[3])<.01 ;
+					if (comp) var terminating = math.abs((math.round(seq[3])-seq[3]))<1E-5 && math.abs((math.round(seq[2])-seq[2]))<1E-5; else	//	+2020.12
+					var terminating = math.abs(seq[3])<.01;
 					return terminating ? finiteseq2frac(seq) : infiniteseq2frac(seq);
 					function finiteseq2frac(seq) { return {'num' : [0,0,...seq] , 'den' : [1,0,0,0] } }
 					function infiniteseq2frac(seq) {
 						seq = math.round(math.number(seq))
 						var leading0 = 1;	//	All sequences implicitly have 1 leading0 in 1's place (i.e. start at .1's place) ( e.g. 0.4738 )
-						while (seq[0]==0 || math.abs(seq[0]/seq[1])< 0.5) { leftshift(seq); leading0++}	//	Process leading0's
+						//while (seq[0]==0 || math.abs(seq[0]/seq[1])< 0.5) { leftshift(seq); leading0++}	//	Process leading0's	//	-2020.12
+						while (seq[0]==0) { leftshift(seq); leading0++ }									//	Process leading0's	//	+2020.12
 						var den = divide([seq[0],0,0,0],seq);
 						den.pop();		//	Least significant number in division is typically error so remove it
 						den.reverse()	//	[…,x³,x²,x¹,x⁰,…] -> […,x⁰,x¹,x²,x³,…]
@@ -723,6 +732,27 @@ class Fit {
 				return [A, b];
 			},
 			decoder: [[0,0]]
+		};
+	}
+
+	static polyn1(n) {	//	a₀+a₁x+…+aₙxⁿ	//	+2020.12
+		return {
+			tomatrix: function makeAb(xs,y) {
+				var A = [];
+				var b = [];
+				for (let i = 0; i < xs[0].length; i++) {
+					if (isNaN(y[i])) continue;
+					try {
+						var row = [];
+						for (var power = 0; power <= n; power++) row.push(math.pow(xs[0][i],power));
+						A.push(row);
+						b.push(y[i]);
+					} catch(e) { }
+				}
+				console.log('polyn1 : ' + JSON.stringify(['n=',n,'A=',A,'b=',b]));
+				return [A, b];
+			},
+			decoder: _.range(n+1).map(x=>[x,0])
 		};
 	}
 

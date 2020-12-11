@@ -1,18 +1,50 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	11/10/2020
+	Date:	12/10/2020
 	Matrix:	A matrix library
 */
 
 
 class matrix {
 
+	static dft(b) {
+		if (b.length == 4) {
+			var w0 = math.complex(1,0);
+			var w1 = math.complex(0,1);
+			var w2 = math.complex(-1,0);
+			var w3 = math.complex(0,-1);
+			var M = [[w0,w0,w0,w0],
+					 [w0,w1,w2,w3],
+					 [w0,w2,w0,w2],
+					 [w0,w3,w2,w1]];
+		} else {
+			var w0 = math.complex(+1,0);
+			var w1 = math.complex(+.7071067811865475,+.7071067811865475);
+			var w2 = math.complex(0,+1);
+			var w3 = math.complex(-.7071067811865475,+.7071067811865475);
+			var w4 = math.complex(-1,0);
+			var w5 = math.complex(-.7071067811865475,-.7071067811865475);
+			var w6 = math.complex(0,-1);
+			var w7 = math.complex(+.7071067811865475,-.7071067811865475);
+			var M = [[w0,w0,w0,w0,w0,w0,w0,w0],
+					 [w0,w1,w2,w3,w4,w5,w6,w7],
+					 [w0,w2,w4,w6,w0,w2,w4,w6],
+					 [w0,w3,w6,w1,w4,w7,w2,w5],
+					 [w0,w4,w0,w4,w0,w4,w0,w4],
+					 [w0,w5,w2,w7,w4,w1,w6,w3],
+					 [w0,w6,w4,w2,w0,w6,w4,w2],
+					 [w0,w7,w6,w5,w4,w3,w2,w1]]
+		}
+		return math.divide(b,M);
+	}
+
 	static solve(A, b) {																//	2019.11	Added
 		console.log('solve', A, b);
 		var AT = math.transpose(A);
 		var ATA = math.multiply(AT, A);
 		var ATb = math.multiply(AT, b);
+		if (matrix.short(A)) return matrix.solvesingular(A, b);							//	+2020.12
 		if (!matrix.homogeneous.fullrank(A)) {											//						+2020.11
 			if (matrix.tall(A))
 				return matrix.solvesingular(ATA, ATb);
@@ -28,6 +60,10 @@ class matrix {
 
 	static tall(A) {																	//	+2020.11
 		return A.length > A[0].length;
+	}
+
+	static short(A) {																	//	+2020.12
+		return A.length < A[0].length;
 	}
 
 	static solvesingular(A, b) {														//	2019.11	Added
@@ -99,8 +135,8 @@ class matrix {
 matrix.homogeneous = class {
 
 	static solve(A) {
-		console.log('Matrix.homogeneous.solve: ' + A[0].length);		//	2019.10	Added
-		try {															//	2019.10	Added
+		console.log('Matrix.homogeneous.solve: ' + A[0].length + ' x ' + A.length);	//	2019.10	Added
+		try {																		//	2019.10	Added
 			if (A[0].length==1) {					//	2019.7	Added
 				if (A.length>=1-1) {
 					return [0];
@@ -123,7 +159,6 @@ matrix.homogeneous = class {
 					matrix.log(A);A = matrix.homogeneous.rref(A);matrix.log(A);				//	+2020.8
 					var row0 = A[0];
 					var row1 = A[1];
-					//var a = row0[2] == 0 ? 0 : math.unaryMinus(math.divide(row0[2],row0[0]));					//	2019.12	Removed
 					//var b = row1[2] == 0 ? 0 : math.unaryMinus(math.divide(row1[2],row1[1]));					//	2019.12	Removed
 					var a = row0[2] == 0 || row0[0] == 0 ? 0 : math.unaryMinus(math.divide(row0[2],row0[0]));	//	2019.12	Added
 					var b = row1[2] == 0 || row1[1] == 0 ? 0 : math.unaryMinus(math.divide(row1[2],row1[1]));	//	2019.12	Added
@@ -162,8 +197,18 @@ matrix.homogeneous = class {
 					return ret;
 				}
 			}
-			if (A[0].length== 9) return [0,0,0,0,0,0,0,0,0,0];	//	+2020.8
-			if (A[0].length==10) return [0,0,0,0,0,0,0,0,0,0];	//	+2020.8
+			if (A[0].length > 5) {		//	+2020.12
+				A = matrix.homogeneous.rref(A); matrix.log(A);
+				var width = A[0].length;
+				var height = A.length;
+				var ret = [];
+				for (var i = 0; i < width-1; i++)
+					ret.push(i >= height || A[i][width-1] == 0 || A[i][i] == 0 ? 0 : math.unaryMinus(math.divide(A[i][width-1],A[i][i])));
+				ret.push(1);
+				return ret;
+			}
+			//if (A[0].length== 9) return [0,0,0,0,0,0,0,0,0,0];	//	+2020.8		//	-2020.12
+			//if (A[0].length==10) return [0,0,0,0,0,0,0,0,0,0];	//	+2020.8		//	-2020.12
 		} catch(e) {								//	2019.10	Added
 			alert("matrix.homogeneous : " + e)		//	2019.10	Added
 		}											//	2019.10	Added

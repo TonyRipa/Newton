@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	11/10/2020
+	Date:	12/10/2020
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -39,7 +39,8 @@
 				[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();					//	+2020.10
 			}
 			function cascade() {			//	+2020.11
-				for (vm.range=1; vm.range<9; vm.range++) {
+				//for (vm.range=1; vm.range<9; vm.range++) {	//	-2020.12
+				for (vm.range=1; vm.range<=9; vm.range++) {		//	+2020.12
 					[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();
 					if (vm.e && vm.e[vm.selected]<.00001) break;
 				}
@@ -90,7 +91,6 @@
 			function plot3(expr) {
 				if (expr === undefined) { var s = "index.plot3 Arg is undefined" ; alert(s) ; throw new Error(s) }	//	2018.8
 				Plot.graph(expr, 'graph3');
-				//$('#title3').html(expr);	//	2019.5	Removed
 			}
 			function plot33(expr) {
 				var vars = Plot.getvars(expr);
@@ -194,12 +194,16 @@
 								<option>((x+h)^2-x^2)/h|0</option>
 							</optgroup>
 							<optgroup label="Exponential">
-								<option>exp(-x)</option>
+								<option>exp(x)</option>
+								<option>exp(2x)</option>
 								<option>sin(x)</option>
-								<option>sin(2x)</option>
+								<option>sin(3x)</option>
 								<option>cos(x)</option>
+								<option>cos(4x)</option>
 								<option>sinh(x)</option>
+								<option>sinh(5x)</option>
 								<option>cosh(x)</option>
+								<option>cosh(6x)</option>
 							</optgroup>
 						</select><br>
 						<br>
@@ -215,7 +219,8 @@
 						</details>
 						<br>
 						<center v-if='e'>																				<!--	+2020.11	-->
-							<span v-if='e[selected]>.0001' style='color:red'>Simplification isn't valid</span>
+							<!--<span v-if='e[selected]>.0001' style='color:red'>Simplification isn't valid</span>-->	<!--	-2020.12	-->
+							<span v-if='e[selected]>.0002' style='color:red'>Simplification isn't valid</span>			<!--	+2020.12	-->
 							<span v-else-if='e[selected]<.00001' style='color:green'>Simplification is valid</span>
 							<span v-else style='color:orange'>Simplification maybe valid</span>
 						</center>
@@ -238,7 +243,7 @@
 						<details>
 							<summary v-html='exprsimp[selected]'></summary>
 							<select v-if='exprsimp.length>1' v-model="selected" size='10'>
-								<option v-for='(exp,i) in exprsimp' :value='i' :title="['poly01 a','laurent21 ax⁻²+bx⁻¹','laurent26 ax⁻²+bx⁻¹+c+dx+ex²+fx³+gx⁴+hx⁵+ix⁶','rational0_0 a/b','rational0_1 a/(bx)','rational1_0 (a+bx)/c','rational1_01H (a+bx)/(c+1*x)','rational1_02H (a+bx)/(c+dx+x²)','sparse (a+bx+cx²)/(d+ex+fx²)','polynomialratio (a+bx+cx²)/(d+ex+fx²)'][i]">{{exp}}</option>
+								<option v-for='(exp,i) in exprsimp' :value='i' :title="['polyn1 a₀+a₁x+…+aₙxⁿ','laurent21 ax⁻²+bx⁻¹','laurent26 ax⁻²+bx⁻¹+c+dx+ex²+fx³+gx⁴+hx⁵+ix⁶','rational0_0 a/b','rational0_1 a/(bx)','rational1_0 (a+bx)/c','rational1_01H (a+bx)/(c+1*x)','rational1_02H (a+bx)/(c+dx+x²)','sparse (a+bx+cx²)/(d+ex+fx²)','polynomialratio (a+bx+cx²)/(d+ex+fx²)'][i]">{{exp}}</option>
 							</select>
 						</details>
 					</td>

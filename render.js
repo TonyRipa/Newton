@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	11/10/2020
+	Date:	12/10/2020
 	Render:	A toString Class
 */
 
@@ -51,9 +51,8 @@ Render.transform = class {
 		}
 		//if (JSON.stringify(decodernum) == '[0,[0,0],0,[1,0],0,[2,0]]' && termcoefs[0]!=1) {												//	-2020.8
 		if (JSON.stringify(decodernum) == '[0,[0,0],0,[1,0],0,[2,0]]' && math.abs(termcoefs[0])!=1) {	//	Sparse (b+dx+fx²)/(a+cx+ex²)	//	+2020.8
-			//alert(4)
+			if (termcoefs[5]==0) return Render.transform.polynomialratio([termcoefs[3],termcoefs[1],0,0,0,0,termcoefs[0],termcoefs[2],termcoefs[4],0],vars,{decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]],decoderden:[0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]},simp);	//	+2020.12
 			if (termcoefs[4]==1) return Render.transform.polynomialratio([termcoefs[3],termcoefs[1],0,0,0,0,termcoefs[0],termcoefs[2],termcoefs[4],0],vars,{decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]],decoderden:[0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]},simp);	//	+2020.11
-			//if (termcoefs[4]==1) return Render.simple.polynomial([termcoefs[1],termcoefs[3]],vars,[[1,0],[0,0]]);							//	-2020.11
 			if (termcoefs[2]==1) return termcoefs[1];
 			return termcoefs[1] + '/' + termcoefs[2];
 		}
@@ -62,6 +61,7 @@ Render.transform = class {
 			var num = termcoefs.slice(0,6);
 			var den = termcoefs.slice(6);
 			if (JSON.stringify(den)=='[1,0,0,0]') return Render.simple.polynomial(num.map((v,i)=>i>1?v/math.factorial(i-2):v),vars,decodernum.map(xy=>[-1-xy[0],xy[1]]));
+			if (JSON.stringify(num)=='[0,1,0,0,0,0]' && (den.length<3 || den[2]==0)) return `exp(${coef(-den[0])}${vars[0]})`;	//	+2020.12
 			var h = (den[0]<0) ? 'h' : '';									//	+2020.11
 			if (den[0] && den[1]==0 && num[0]) return `cos${h}(${coef(math.sqrt(math.abs(den[0])))}${vars[0]})`;	//	+2020.11
 			if (den[0] && den[1]==0 && num[1]) return `sin${h}(${coef(math.sqrt(math.abs(den[0])))}${vars[0]})`;	//	+2020.11
@@ -70,6 +70,7 @@ Render.transform = class {
 		return Untransform.str(simp);//Rational0_1 a/bx, Rational1_O1H (a+bx)/(c+x), Rational1_O2H (a+bx)/(c+dx+x²), sparse (a+bx+cx²)/(d+ex+fx²), PolyRat (a+bx+cx²)/(d+ex+fx²)
 		function coef(c) {																							//	+2020.11
 			if (c==1) return '';
+			if (c==-1) return '-';	//	+2020.12
 			return c;
 		}
 	}
