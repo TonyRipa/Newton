@@ -1,7 +1,7 @@
 ﻿
 /*
 	Author:	Anthony John Ripa
-	Date:	12/10/2020
+	Date:	1/10/2021
 	Newton:	An A.I. for Math
 */
 
@@ -65,7 +65,9 @@ class Newton {
 		//else ret = simplify1pipe(points, candidates[best], constant);									//	+2020.7			//	-2020.8
 		//else ret = simplify1pipe(points, candidates[best][0], constant);													//	+2020.8		//	-2020.10
 		//else ret = simplify1pipe(points, candidates[best][0], constant, e);																//	+2020.10	//	-2020.11
-		else ret = simplify1pipe(points, candidates[best][0], constant, [e[best]]);																			//	+2020.11
+		//else ret = simplify1pipe(points, candidates[best][0], constant, [e[best]]);																		//	+2020.11	//	-2021.1
+		else ret = simplify1pipe(points, candidates[best], constant, [e[best]]);																							//	+2021.1
+		if (constant) {ret.push([candidates.map(x=>x[1])[best]])} else									//	+2021.1
 		ret.push(candidates.map(x=>x[1]));																//	+2020.7
 		return ret;																						//	+2020.7
 		//return [Newton.getpointsreal(), candidates, candidates.map(e=>infer(evaluate(e, constant)))];	//	2019.4	Added	//	2019.8	Removed
@@ -80,9 +82,11 @@ class Newton {
 		function simplify1pipe(points, candidate, constant, e) {															//	+2020.10
 			vm.selected = 0;
 			//var evalu = infer(evaluate(candidate,constant));											//	-2020.8
-			var evalu = infer(evaluate(candidate,constant))[0];											//	+2020.8
+			//var evalu = infer(evaluate(candidate,constant))[0];										//	+2020.8			//	-2021.1
+			var evalu = infer(evaluate(candidate[trans==0?0:1],constant))[trans==0?0:1];									//	+2021.1
 			//return [points, [candidate], [evalu]];													//	-2020.10
-			return [points, [candidate], [evalu], e];													//	+2020.10
+			//return [points, [candidate], [evalu], e];													//	+2020.10		//	-2020.1
+			return [points, [candidate[0]], [evalu], e];																	//	+2020.1
 		}
 		function evaluate(input, val) {
 			return substitute(input, Newton.getvars(input).slice(-1)[0], val);
@@ -119,7 +123,13 @@ class Newton {
 			//if (vm.trans==2) return [inferdifferential(xs)];					//	2019.4	list	//	2019.5	Removed
 			//if (vm.trans==2) return {candidates:[inferdifferential(xs)],best:0};					//	2019.5	object	//	2020.2	Removed
 			//if (trans==2) return {candidates:[inferdifferential(xs)],best:0};											//	2020.2	Added	//	-2020.7
-			if (trans==2) return {candidates:[Render.stringify(inferdifferential(xs))],best:0};												//	+2020.7
+			//if (trans==2) return {candidates:[Render.stringify(inferdifferential(xs))],best:0};											//	+2020.7	//	-2021.1
+			if (trans==2) {																																//	+2021.1
+				var candidate = Render.stringify(inferdifferential(xs));
+				var points = Newton.getrightpoints(trans);
+				var err = math.number(geterrorbypoints(points, candidate[1]));
+				return {candidates:[candidate],best:0,e:[err]};
+			}
 			//var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction		//	-2020.11
 			var e = math.fraction([1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20]);													//	+2020.11
 			var candidates = [];
@@ -155,9 +165,9 @@ class Newton {
 			return {candidates,best,e};															//	+2020.10
 			function makexs(vars) {
 				var xs = [];
-				//var numpoints = (vm.trans==1) ? 300 : (vm.trans==0) ? 40 : 4;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)		//	2019.9	Removed
+				var numpoints = (vm.trans==1) ? 300 : (vm.trans==0) ? 40 : 4;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)	//	2019.9	Removed	//	--2021.1
 				//numpoints = Number(vm.size);		//	2019.3	//	2019.9	Removed
-				var numpoints = Number(vm.size);	//	2019.3	//	2019.9	Added
+				//var numpoints = Number(vm.size);	//	2019.3	//	2019.9	Added	//	-2021.1
 				//if (trans==1) numpoints *= 2;		//	+2020.5	inc numpoints for cosh & sinh	//	-2020.11
 				var gaussx = { 3 : [0.7745966692414834,  0,  -0.7745966692414834] ,
 					4 : [-0.3399810435848563,0.3399810435848563,-0.8611363115940526,0.8611363115940526] ,

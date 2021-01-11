@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	12/10/2020
+	Date:	1/10/2021
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -39,11 +39,14 @@
 				[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();					//	+2020.10
 			}
 			function cascade() {			//	+2020.11
-				//for (vm.range=1; vm.range<9; vm.range++) {	//	-2020.12
-				for (vm.range=1; vm.range<=9; vm.range++) {		//	+2020.12
-					[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();
-					if (vm.e && vm.e[vm.selected]<.00001) break;
-				}
+				//for (vm.range=1; vm.range<9; vm.range++) {		//	-2020.12
+					for (vm.range=1; vm.range<=9; vm.range++) {		//	+2020.12
+						for (vm.trans=0; vm.trans<=2; vm.trans++) {	//	+2021.1
+							[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();
+							//if (vm.e && vm.e[vm.selected]<.00001) break;	//	-2021.1
+							if (vm.e && vm.e[vm.selected]<.00001) return;	//	+2021.1
+						}
+					}
 			}
 			//function validate() {	//	2019.12	Added	//	-2020.11
 			//	return simplify()[1][vm.selected] == vm.exprsimp[vm.selected];
@@ -56,7 +59,7 @@
 				if (vm.d==3 && vm.trans!=0) { alert('Error : Attempting to transform a 3D graph.') ; return }				//	2018.12
 				vm.expr = input.split('|')[0];
 				vm.constant = input.split('|')[1];
-				if (vm.constant && vm.trans!=0) { alert('Error : Attempting to transform a point evaluation.') ; return }	//	2019.3
+				//if (vm.constant && vm.trans!=0) { alert('Error : Attempting to transform a point evaluation.') ; return }	//	2019.3	//	-2021.1
 				//[vm.pointss, vm.exprsimp, vm.totalsimp] = Newton.simplify(input);	//	2019.12	Removed
 				return Newton.simplify(input);										//	2019.12	Added
 			}
@@ -70,7 +73,8 @@
 				//if (vm.d == 2) plot2(vm.pointss.tran); else plot23(vm.pointss.orig, vm.expr);	//	-2020.8
 				if (vm.d == 2) plot2(vm.pointss.tran); else plot23(vm.pointss.nonan, vm.expr);	//	+2020.8
 				if (vm.d == 2) plot3(exprsimp); else plot33(exprsimp);
-				if (vm.d == 2) plot4(exprsimp, vm.constant, totalsimp); else plot43(exprsimp, vm.constant, totalsimp);
+				//if (vm.d == 2) plot4(exprsimp, vm.constant, totalsimp); else plot43(exprsimp, vm.constant, totalsimp);	//	-2021.1
+				if (vm.d == 2) plot4(vm.trans==0?exprsimp:vm.untransformed[vm.selected], vm.constant, totalsimp);else plot43(exprsimp, vm.constant, totalsimp);//+2021.1
 				//if (vm.d == 2) plot5(vm.trans, exprsimp);	//	2020.2	Added	//	-2020.7
 				if (vm.d == 2) plot5(vm.trans, vm.untransformed[vm.selected]);	//	+2020.7
 			}
@@ -95,7 +99,6 @@
 			function plot33(expr) {
 				var vars = Plot.getvars(expr);
 				Plot.graph3(expr, 'graph3', { style: 'surface', xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
-				//$('#title3').html(expr);	//	2019.5	Removed
 			}
 			function plot33s(expr) {
 				Plot.graph3s(expr, 'graph3', { style: 'surface' });
@@ -159,10 +162,6 @@
 			<table border="1">
 				<tr>
 					<td>
-						<input type='radio' value='0' id='ut' v-model='trans' onclick='vm.size=40'><label for='ut'>Untransformed</label><br>
-						<input type='radio' value='1' id='it' v-model='trans' v-on:click='size=300'><label for='it'>Integral Transform</label><br>
-						<input type='radio' value='2' id='dt' v-model='trans' @click='size=4'><label for='dt'>Differential Transform</label><br> <!-- 2018.11 Dif -->
-						<br>
 						<center><button onclick="go()">Go</button>
 						<!--<button v-show="exprsimp.length" onclick="alert('Simplification is '+(validate()?'':'in')+'valid')">Validate</button>-->	<!-- 2019.12 Added	-->	<!-- -2020.11 -->
 						</center><br>
@@ -209,6 +208,9 @@
 						<br>
 						<details>	<!--	+2020.11	-->
 							<summary>Advanced</summary>
+							<input type='radio' value='0' id='ut' v-model='trans' onclick='vm.size=40'><label for='ut'>Untransformed</label><br>
+							<input type='radio' value='1' id='it' v-model='trans' v-on:click='size=300'><label for='it'>Integral Transform</label><br>
+							<input type='radio' value='2' id='dt' v-model='trans' @click='size=4'><label for='dt'>Differential Transform</label><br> <!--2018.11 Dif -->
 							<div style='border: thin solid black'>
 								<input type='range' min='1' max='9' step='1' v-model='range' title='Complexity'><span title='Complexity'>{{range}}</span><br>
 								<br>
@@ -247,13 +249,13 @@
 							</select>
 						</details>
 					</td>
+					<td id="td5" style="text-align:center;display:none" width="200px">	<!--	2020.2	Added	-->	<!--	~2021.1	-->
+					</td>
 					<td id="td4" style="display:none">
 						<div id="title4" style="text-align:center">.</div>
 						<div id="graph4" style="border:thin solid black; width:400px; height:400px"></div>
 					</td>
 					<td style="text-align:center;display:none" id="tv" width="100px">
-					</td>
-					<td id="td5" style="text-align:center;display:none" width="200px">	<!--	2020.2	Added	-->
 					</td>
 				</tr>
 			</table>

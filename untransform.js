@@ -1,7 +1,7 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   11/10/2020
+    Date:   1/10/2021
     UnTransform: A data untransformer
 */
 
@@ -14,6 +14,8 @@ class Untransform {				//	+2020.7
 		if (s == 's^-1') return '1';
 		if (s == '1 / s^2') return 'x';					//	+2020.11
 		if (s == 's^-2') return 'x';
+		if (s == 'h') return "δ'(h)";					//	+2021.1
+		if (s == '4') return '4*δ(h)';					//	+2021.1
 		if (s == 'h^-1') return '1';
 		if (s == 'h^-2') return 'h';
 		if (s == 'h^-3') return 'h^2/2';
@@ -23,7 +25,10 @@ class Untransform {				//	+2020.7
 		if (s == 's / (1+s^2)') return 'cos(x)';
 		if (s == '1 / (-1+s^2)') return 'sinh(x)';
 		if (s == 's / (-1+s^2)') return 'cosh(x)';
-		//if (s.includes('+')) {						//	-2020.7
+		if (s.includes('-') && !s.includes(' / ') && !s.includes('^-')) {	//	+2021.1
+			var arr = s.split('-');
+			return arr.map(Untransform.str).join('-');
+		}
 		if (s.includes('+') && !s.includes(' / ')) {	//	+2020.7
 			var arr = s.split('+');
 			//return arr.map(untransform).join('+');	//	-2020.7

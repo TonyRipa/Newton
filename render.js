@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	12/10/2020
+	Date:	1/10/2021
 	Render:	A toString Class
 */
 
@@ -49,7 +49,6 @@ Render.transform = class {
 			termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);
 			if (termcoefs[2]==0 && termcoefs[3]==0) return Render.simple.polynomial([termcoefs[0]],vars,[[1,0]]);
 		}
-		//if (JSON.stringify(decodernum) == '[0,[0,0],0,[1,0],0,[2,0]]' && termcoefs[0]!=1) {												//	-2020.8
 		if (JSON.stringify(decodernum) == '[0,[0,0],0,[1,0],0,[2,0]]' && math.abs(termcoefs[0])!=1) {	//	Sparse (b+dx+fx²)/(a+cx+ex²)	//	+2020.8
 			if (termcoefs[5]==0) return Render.transform.polynomialratio([termcoefs[3],termcoefs[1],0,0,0,0,termcoefs[0],termcoefs[2],termcoefs[4],0],vars,{decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]],decoderden:[0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]},simp);	//	+2020.12
 			if (termcoefs[4]==1) return Render.transform.polynomialratio([termcoefs[3],termcoefs[1],0,0,0,0,termcoefs[0],termcoefs[2],termcoefs[4],0],vars,{decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]],decoderden:[0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]},simp);	//	+2020.11
@@ -107,6 +106,7 @@ Render.simple = class {
 			if (termcoef == 0) return '';
 			if ('1'.includes(termvar)) return '+' + termcoef;
 			if (termcoef == 1) return '+' + termvar;
+			if (termcoef == -1) return '-' + termvar;	//	+2021.1
 			return '+' + termcoef + ('1'.includes(termvar) ? '' : '*' + termvar);
 		}
 		function termvars(v1, v2, vars) {

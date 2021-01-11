@@ -1,7 +1,7 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   11/10/2020
+    Date:   1/10/2021
     Transform: A data transformer
 */
 
@@ -12,7 +12,6 @@ class Transform {												//	+2020.6
 		if (vm.trans==0) return points;							//	+2020.6
 		var ret, ret2, sum;
 		ret = points.slice();
-		//ret.sort((xy1,xy2)=>xy1[0]-xy2[0]);					//	-2020.11
 		return laplace(ret);
 
 		function laplace(points) {
@@ -24,11 +23,12 @@ class Transform {												//	+2020.6
 		function integratedef(points) {
 			return integrate(points).slice(-1)[0][1];
 		}
-		function integrate(points) {							//	-2020.11
+		function integrate(points) {							//	+2020.11
 			var ret = [];
 			var sum = 0;
 			for(var i = 0; i<points.length; i++) {
-				var y = (isNaN(points[i][1])) ? points[i+1][1] : points[i][1]
+				//var y = (isNaN(points[i][1])) ? points[i+1][1] : points[i][1]								//	-2021.1
+				var y = (isNaN(points[i][1])) ? (i==0) ? points[i+1][1] : points[i-1][1] : points[i][1];	//	+2021.1
 				sum += y * c(i,points);
 				ret.push([points[i][0], sum]);
 			}
