@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	12/10/2020
+	Date:	2/10/2021
 	Matrix:	A matrix library
 */
 
@@ -95,25 +95,108 @@ class matrix {
 	static scaletoint(vect) {								//	2019.7	Added
 		console.log('Matrix.scaletoint');
 		if (vect.length==1) return vect;
+		if (vect.length==2) return scaletoint2(vect);	//	+2021.2
 		var ret = math.multiply(vect,2*3*4*5*6*7*8*9*10*11*12*13);
 		ret = math.round(ret);
 		var gcd = ret.reduce((x,y)=>math.gcd(x,y))
 		if (gcd==0) return ret;
-		if (vect.length==2 && math.norm(ret.map(x=>math.divide(x,gcd)))>1000) return scaletoint2(ret);
+		//if (vect.length==2 && math.norm(ret.map(x=>math.divide(x,gcd)))>1000) return scaletoint2(ret);	//	-2021.2
 		return ret.map(x=>math.divide(x,gcd))
-		function scaletoint2(vect) {
-			console.log('Matrix.scaletoint2');
-			var candidates = [];
-			var scores = [];
-			for (var i = 0; i<=10; i++) {
-				for (var j = 1; j<=10; j++) {
-					candidates.push([i,j]);
-					scores.push(math.abs(math.subtract(math.divide(i,j),math.divide(vect[0],vect[1]))));
+		//function scaletoint2(vect) {	//	-2021.2
+		//	console.log('Matrix.scaletoint2');
+		//	var candidates = [];
+		//	var scores = [];
+		//	for (var i = 0; i<=10; i++) {
+		//		for (var j = 1; j<=10; j++) {
+		//			candidates.push([i,j]);
+		//			scores.push(math.abs(math.subtract(math.divide(i,j),math.divide(vect[0],vect[1]))));
+		//		}
+		//	}
+		//	var bestscore = math.min(scores);
+		//	var bestindex = scores.indexOf(bestscore);
+		//	return candidates[bestindex];
+		//}
+		function scaletoint2(vect) {	//	+2021.2
+			var f = vect[0];
+			var d = math.number(f);
+			f = dec2frac(d);
+			console.log('Matrix.scaletoint2 : vect = ' + JSON.stringify(vect) + ' = ' + math.number(vect));
+			return [f.n,f.d];
+			function dec2frac(decimal) {
+				if (decimal<0) return dec2frac(-decimal).neg();
+				decimal = standard(decimal);
+				var radix = decimal.indexOf('.');
+				var [terminend,rest] = split(decimal);
+				var shift = terminend.length - radix - 1;
+				terminend = terminend2frac(terminend);
+				rest = rest2frac(rest);
+				rest = math.divide(rest,10**shift);
+				return math.add(terminend,rest);
+				function standard(decimal) {
+					decimal = String(decimal);
+					decimal = unpad(decimal);
+					decimal = ensureradix(decimal);
+					return decimal;
+					function unpad(decimal) {
+						while (decimal[0]=='0')
+							decimal = decimal.substring(1);
+						return decimal;
+					}
+					function ensureradix(decimal) {
+						if (decimal.includes('.')) return decimal;
+						return decimal + '.';
+					}
+				}
+				function split(decimal) {
+					if (!decimal.includes('.')) return [decimal,''];
+					var start = repeatstart(decimal);
+					var terminend = decimal.substring(0,start);
+					var rest = decimal.substring(start);
+					return [terminend,rest];
+					function repeatstart(decimal) {
+						decimal = String(decimal);
+						for (let h = 0; h <= decimal.length; h++)
+							for (let i = decimal.indexOf('.'); i < decimal.length; i++)
+								for (let j = i+1; j < Math.min(h,decimal.length); j++)
+									if (decimal[i] == decimal[j]) return i;
+						return decimal.length;
+					}
+				}
+				function terminend2frac(terminend) {
+					if (terminend == '') terminend = '0';
+					if (terminend == '.') terminend = '0';
+					return math.fraction(terminend);
+				}
+				function rest2frac(rest) {
+					if (rest == '') rest = '0';
+					if (rest == '.') rest = '0';
+					var proper = '.' + rest;
+					var repetend = dtor(proper);
+					var frac = rtof(repetend);
+					frac = reduce(frac);
+					frac = math.fraction(...frac);
+					return frac;
+					function dtor(d) {
+						d = d.substring(1);	// remove dot
+						var start = d[0];
+						for (var i = 1; i < d.length; i++)
+							if (d[i] == start) break;
+						var repetend = d.substring(0,i);
+						return repetend;
+					}
+					function rtof(repetend) {
+						var len = repetend.length;
+						var den = math.bignumber('9'.repeat(len));
+						var num = math.bignumber(repetend);
+						return [num,den];
+					}
+					function reduce(frac) {
+						var g = math.gcd(...frac);
+						frac = frac.map(e=>e/g);
+						return frac;
+					}
 				}
 			}
-			var bestscore = math.min(scores);
-			var bestindex = scores.indexOf(bestscore);
-			return candidates[bestindex];
 		}
 	}
 
@@ -154,7 +237,6 @@ matrix.homogeneous = class {
 			}
 			if (A[0].length==3) {		//	2018.10	Added
 				if (A.length>=3-1) {
-					//A = matrix.homogeneous.rref(A);console.log(A)		//	2020.1	Removed
 					A = matrix.homogeneous.rref(A);matrix.log(A);		//	2020.1	Added	//	-2020.8
 					matrix.log(A);A = matrix.homogeneous.rref(A);matrix.log(A);				//	+2020.8
 					var row0 = A[0];
