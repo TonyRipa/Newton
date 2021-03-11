@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	12/10/2020
+	Date:	3/10/2021
 	Fit:	Infers a function from points
 */
 
@@ -38,7 +38,6 @@ class Fit {
 				var p;
 				var ps = binitems(6,range);		//	2019.4	Added
 				for (p of ps) {
-					//p = [0,0,0,0,0,0];		//	2019.4	Removed
 					//for (var e of n) p[e]++;	//	2019.4	Removed
 					//console.log(JSON.stringify([n,p]));
 					if (p[0]+p[2]+p[4]==0) continue;
@@ -125,18 +124,36 @@ class Fit {
 						var y = points.map(xy=>xy[1]);
 						return math.re(matrix.dft(y)).map((x,i)=>math.multiply(x,math.factorial(i))).slice(0,4);
 					}
-					function realpointstoderivatives(points) {		//	~2020.12
-						return [points[0][1],
-						(points[1][1]-points[0][1])/(points[1][0]-points[0][0]),
-						(points[2][1]-2*points[1][1]+points[0][1])/(points[1][0]-points[0][0])**2,
-						(points[3][1]-3*points[2][1]+3*points[1][1]-points[0][1])/(points[1][0]-points[0][0])**3];
+					function realpointstoderivatives(points) {		//	~2021.3
+						return center();
+						function center() {
+							return [(points[1][1]+points[2][1])/2,
+							(points[2][1]-points[1][1])/(points[2][0]-points[1][0]),
+							(points[3][1]-points[2][1]-points[1][1]+points[0][1])/2/(points[1][0]-points[0][0])**2,
+							(points[3][1]-3*points[2][1]+3*points[1][1]-points[0][1])/(points[1][0]-points[0][0])**3];
+						}
+						function righthanded() {
+							return [points[0][1],
+							(points[1][1]-points[0][1])/(points[1][0]-points[0][0]),
+							(points[2][1]-2*points[1][1]+points[0][1])/(points[1][0]-points[0][0])**2,
+							(points[3][1]-3*points[2][1]+3*points[1][1]-points[0][1])/(points[1][0]-points[0][0])**3];
+						}
 					}
 				}
 				function seq2frac(seq) {	//	2019.6
 					if (comp) var terminating = math.abs((math.round(seq[3])-seq[3]))<1E-5 && math.abs((math.round(seq[2])-seq[2]))<1E-5; else	//	+2020.12
-					var terminating = math.abs(seq[3])<.01;
+					//var terminating = math.abs(seq[3])<.01;													//	-2021.3
+					var terminating = math.abs(seq[3])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01);	//	+2021.3
 					return terminating ? finiteseq2frac(seq) : infiniteseq2frac(seq);
-					function finiteseq2frac(seq) { return {'num' : [0,0,...seq] , 'den' : [1,0,0,0] } }
+					//function finiteseq2frac(seq) { return {'num' : [0,0,...seq] , 'den' : [1,0,0,0] } }		//	-2021.3
+					function finiteseq2frac(seq) {																//	+2021.3
+						seq = math.number(seq);
+						seq = seq.map(matrix.dec2frac);
+						var dens = seq.map(x=>x.d);
+						var lcm = math.lcm(...dens);
+						seq = seq.map(x=>x.mul(lcm));
+						return {'num' : [0,0,...seq] , 'den' : [lcm,0,0,0] }
+					}
 					function infiniteseq2frac(seq) {
 						seq = math.round(math.number(seq))
 						var leading0 = 1;	//	All sequences implicitly have 1 leading0 in 1's place (i.e. start at .1's place) ( e.g. 0.4738 )
@@ -752,7 +769,8 @@ class Fit {
 				console.log('polyn1 : ' + JSON.stringify(['n=',n,'A=',A,'b=',b]));
 				return [A, b];
 			},
-			decoder: _.range(n+1).map(x=>[x,0])
+			//decoder: _.range(n+1).map(x=>[x,0])		//	-2021.3
+			decoder: _.range(Number(n)+1).map(x=>[x,0])	//	+2021.3
 		};
 	}
 

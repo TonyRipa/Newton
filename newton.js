@@ -1,7 +1,7 @@
-﻿
+
 /*
 	Author:	Anthony John Ripa
-	Date:	1/10/2021
+	Date:	3/10/2021
 	Newton:	An A.I. for Math
 */
 
@@ -99,7 +99,6 @@ class Newton {
 			var candidates,best;													//	2019.5	Added
 			({candidates,best} = infers(input));									//	2019.5	Added
 			return candidates[best];												//	2019.5	Added
-			//return infers(input)[0];												//	2019.5	Removed
 		}
 		function infers(input) {//alert('infer')									//	2019.4	Renamed
 			assert(input !== undefined, "Newton.infer Arg undefined")				//	2018.8	Added
@@ -133,7 +132,7 @@ class Newton {
 			//var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction		//	-2020.11
 			var e = math.fraction([1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20]);													//	+2020.11
 			var candidates = [];
-			//var inferers = [0,1,2,3,4,5,6,7,8];	//	2019.9	Added	//	-2020.8 
+			//var inferers = [0,1,2,3,4,5,6,7,8];	//	2019.9	Added	//	-2020.8
 			var inferers = [0,1,2,3,4,5,6,7,8,9];						//	+2020.8
 			for (let i of inferers) {				//	2019.9	Added
 			//for (let i of [0,1,2,3,4,5,6,7,8]) {	//	2019.9	Removed
@@ -183,7 +182,8 @@ class Newton {
 				var fourierx = { 4 : [math.complex(1,1E-99),math.complex(0,1),math.complex(-1,0),math.complex(0,-1)] ,
 					8: [math.complex(+1,0),math.complex(+.7071067811865475,+.7071067811865475),math.complex(0,+1),math.complex(-.7071067811865475,+.7071067811865475),math.complex(-1,0),math.complex(-.7071067811865475,-.7071067811865475),math.complex(0,-1),math.complex(+.7071067811865475,-.7071067811865475)] };	//	+2020.12
 				fourierx = fourierx[4];									//	+2020.12
-				var originx = _.range(1, numpoints+1).map(x=>x/175);	//	+2020.12
+				//var originx = _.range(1, numpoints+1).map(x=>x/175);	//	+2020.12	//	-2021.3
+				var originx = [-1.5/175,-.5/175,.5/175,1.5/175];						//	+2021.3
 				var neighborhoodx = true ? originx : fourierx;			//	+2020.12
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
 				//if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added	//	2020.2	Removed
@@ -330,7 +330,7 @@ class Newton {
 						var output = math.eval(outputstring, scope);
 					} catch(e) {
 						var output = 0;
-					} 
+					}
 					var abserror = math.abs(input.sub(output));							//	2018.8	sub
 					if (!isNaN(abserror)) error = error.add(abserror.mul(abserror));	//	2018.8	add&mul		//	2018.9	Added test
 				}

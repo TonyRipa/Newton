@@ -1,10 +1,9 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2/10/2021
+	Date:	3/10/2021
 	Matrix:	A matrix library
 */
-
 
 class matrix {
 
@@ -119,83 +118,88 @@ class matrix {
 		function scaletoint2(vect) {	//	+2021.2
 			var f = vect[0];
 			var d = math.number(f);
-			f = dec2frac(d);
+			//f = dec2frac(d);		//	-2021.3
+			f = matrix.dec2frac(d);	//	+2021.3
 			console.log('Matrix.scaletoint2 : vect = ' + JSON.stringify(vect) + ' = ' + math.number(vect));
 			return [f.n,f.d];
-			function dec2frac(decimal) {
-				if (decimal<0) return dec2frac(-decimal).neg();
-				decimal = standard(decimal);
-				var radix = decimal.indexOf('.');
-				var [terminend,rest] = split(decimal);
-				var shift = terminend.length - radix - 1;
-				terminend = terminend2frac(terminend);
-				rest = rest2frac(rest);
-				rest = math.divide(rest,10**shift);
-				return math.add(terminend,rest);
-				function standard(decimal) {
-					decimal = String(decimal);
-					decimal = unpad(decimal);
-					decimal = ensureradix(decimal);
-					return decimal;
-					function unpad(decimal) {
-						while (decimal[0]=='0')
-							decimal = decimal.substring(1);
-						return decimal;
-					}
-					function ensureradix(decimal) {
-						if (decimal.includes('.')) return decimal;
-						return decimal + '.';
-					}
-				}
-				function split(decimal) {
-					if (!decimal.includes('.')) return [decimal,''];
-					var start = repeatstart(decimal);
-					var terminend = decimal.substring(0,start);
-					var rest = decimal.substring(start);
-					return [terminend,rest];
-					function repeatstart(decimal) {
-						decimal = String(decimal);
-						for (let h = 0; h <= decimal.length; h++)
-							for (let i = decimal.indexOf('.'); i < decimal.length; i++)
-								for (let j = i+1; j < Math.min(h,decimal.length); j++)
-									if (decimal[i] == decimal[j]) return i;
-						return decimal.length;
-					}
-				}
-				function terminend2frac(terminend) {
-					if (terminend == '') terminend = '0';
-					if (terminend == '.') terminend = '0';
-					return math.fraction(terminend);
-				}
-				function rest2frac(rest) {
-					if (rest == '') rest = '0';
-					if (rest == '.') rest = '0';
-					var proper = '.' + rest;
-					var repetend = dtor(proper);
-					var frac = rtof(repetend);
-					frac = reduce(frac);
-					frac = math.fraction(...frac);
-					return frac;
-					function dtor(d) {
-						d = d.substring(1);	// remove dot
-						var start = d[0];
-						for (var i = 1; i < d.length; i++)
-							if (d[i] == start) break;
-						var repetend = d.substring(0,i);
-						return repetend;
-					}
-					function rtof(repetend) {
-						var len = repetend.length;
-						var den = math.bignumber('9'.repeat(len));
-						var num = math.bignumber(repetend);
-						return [num,den];
-					}
-					function reduce(frac) {
-						var g = math.gcd(...frac);
-						frac = frac.map(e=>e/g);
-						return frac;
-					}
-				}
+		}
+	}
+
+	static dec2frac(decimal) {			//	~2021.3
+		//if (decimal<0) return dec2frac(-decimal).neg();		//	-2021.3
+		if (decimal<0) return matrix.dec2frac(-decimal).neg();	//	+2021.3
+		decimal = standard(decimal);
+		var radix = decimal.indexOf('.');
+		var [terminend,rest] = split(decimal);
+		var shift = terminend.length - radix - 1;
+		terminend = terminend2frac(terminend);
+		rest = rest2frac(rest);
+		rest = math.divide(rest,10**shift);
+		return math.add(terminend,rest);
+		function standard(decimal) {
+			//decimal = String(decimal);								//	-2021.3
+			decimal = decimal.toFixed(16);								//	+2021.3
+			while (decimal.slice(-1)==0) decimal = decimal.slice(0,-1)	//	+2021.3
+			decimal = unpad(decimal);
+			decimal = ensureradix(decimal);
+			return decimal;
+			function unpad(decimal) {
+				while (decimal[0]=='0')
+					decimal = decimal.substring(1);
+				return decimal;
+			}
+			function ensureradix(decimal) {
+				if (decimal.includes('.')) return decimal;
+				return decimal + '.';
+			}
+		}
+		function split(decimal) {
+			if (!decimal.includes('.')) return [decimal,''];
+			var start = repeatstart(decimal);
+			var terminend = decimal.substring(0,start);
+			var rest = decimal.substring(start);
+			return [terminend,rest];
+			function repeatstart(decimal) {
+				decimal = String(decimal);
+				for (let h = 0; h <= decimal.length; h++)
+					for (let i = decimal.indexOf('.'); i < decimal.length; i++)
+						for (let j = i+1; j < Math.min(h,decimal.length); j++)
+							if (decimal[i] == decimal[j]) return i;
+				return decimal.length;
+			}
+		}
+		function terminend2frac(terminend) {
+			if (terminend == '') terminend = '0';
+			if (terminend == '.') terminend = '0';
+			return math.fraction(terminend);
+		}
+		function rest2frac(rest) {
+			if (rest == '') rest = '0';
+			if (rest == '.') rest = '0';
+			var proper = '.' + rest;
+			var repetend = dtor(proper);
+			var frac = rtof(repetend);
+			frac = reduce(frac);
+			frac = math.fraction(...frac);
+			return frac;
+			function dtor(d) {
+				d = d.substring(1);	// remove dot
+				var start = d[0];
+				for (var i = 1; i < d.length; i++)
+					if (d[i] == start) break;
+				var repetend = d.substring(0,i);
+				return repetend;
+			}
+			function rtof(repetend) {
+				var len = repetend.length;
+				var den = math.bignumber('9'.repeat(len));
+				var num = math.bignumber(repetend);
+				return [num,den];
+			}
+			function reduce(frac) {
+				var g = math.gcd(...frac);
+				frac = frac.map(e=>e/g);
+				return frac;
 			}
 		}
 	}
@@ -265,7 +269,6 @@ matrix.homogeneous = class {
 			}
 			if (A[0].length==5) {		//	2019.9	Added
 				if (A.length>=5-1) {
-					//A = matrix.homogeneous.rref(A);console.log(A)		//	2020.1	Removed
 					A = matrix.homogeneous.rref(A);matrix.log(A)		//	2020.1	Added
 					var row0 = A[0];
 					var row1 = A[1];

@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	1/10/2021
+	Date:	3/10/2021
 	Render:	A toString Class
 */
 
@@ -60,6 +60,7 @@ Render.transform = class {
 			var num = termcoefs.slice(0,6);
 			var den = termcoefs.slice(6);
 			if (JSON.stringify(den)=='[1,0,0,0]') return Render.simple.polynomial(num.map((v,i)=>i>1?v/math.factorial(i-2):v),vars,decodernum.map(xy=>[-1-xy[0],xy[1]]));
+			if (JSON.stringify(den.slice(1))=='[0,0,0]') return Render.simple.polynomial(num.map((v,i)=>i>1?v/math.factorial(i-2):v),vars,decodernum.map(xy=>[-1-xy[0],xy[1]])) + ' / ' + den[0];	//	+2021.3
 			if (JSON.stringify(num)=='[0,1,0,0,0,0]' && (den.length<3 || den[2]==0)) return `exp(${coef(-den[0])}${vars[0]})`;	//	+2020.12
 			var h = (den[0]<0) ? 'h' : '';									//	+2020.11
 			if (den[0] && den[1]==0 && num[0]) return `cos${h}(${coef(math.sqrt(math.abs(den[0])))}${vars[0]})`;	//	+2020.11
@@ -137,6 +138,7 @@ Render.dense = class {
 					if (code[0]==exp) ret[exp+4] = (code.length==3) ? code[2] : termcoefs[i];
 				}
 			return ret;
+
 		}
 	}
 
