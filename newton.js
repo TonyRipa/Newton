@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	3/10/2021
+	Date:	4/10/2021
 	Newton:	An A.I. for Math
 */
 
@@ -126,7 +126,8 @@ class Newton {
 			if (trans==2) {																																//	+2021.1
 				var candidate = Render.stringify(inferdifferential(xs));
 				var points = Newton.getrightpoints(trans);
-				var err = math.number(geterrorbypoints(points, candidate[1]));
+				//var err = math.number(geterrorbypoints(points, candidate[1]));	//	-2021.4
+				var err = math.number(geterrorbyinput(input, candidate[1]));		//	+2021.4
 				return {candidates:[candidate],best:0,e:[err]};
 			}
 			//var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction		//	-2020.11
@@ -145,7 +146,8 @@ class Newton {
 					assert(candidates[i] !== undefined);
 					//e[i] = geterrorbypoints(Newton.getrightpoints(), candidates[i]);		//	2020.2	Removed
 					//e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i]);	//	2020.2	Added	//	-2020.7
-					e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i][0]);//	2020.2	Added	//	+2020.7
+					//e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i][0]);					//	+2020.7	//	-2021.4
+					e[i] = geterrorbyinput(input, candidates[i][trans]);													//	+2021.4
 					//if (vm.range<9 && new RegExp(`[${Number(vm.range)+1}-9]`).test(candidates[i])) e[i]=math.fraction(99998);	//	2019.4 Complexity Control Single Digit	//	2020.3	Removed
 					//if (candidates[i].match(/\d\d/)) e[i]=math.fraction(99999);												//	2019.4 Complexity Control Double Digit	//	2020.3	Removed
 					//e[i] = e[i].mul(complexity(candidates[i]));							//	2020.3	Added	//	-2020.7
@@ -155,7 +157,6 @@ class Newton {
 			}
 			//if (e[7]) e[7] = e[7].mul(100);	//	complexity				//	2020.3	Removed
 			console.log('Infer > Error > ', math.number(e), candidates)
-			//return candidates[0]
 
 			e = math.number(e);												//	2019.4	Return Candidates Sorted
 			var leasterror = math.min(e);									//	2019.5	Added
@@ -318,6 +319,15 @@ class Newton {
 			//function validatebypoints(points, outputstring, tolerance) {	//	2019.12	Removed
 			//	return geterrorbypoints(points, outputstring) < tolerance;
 			//}
+			function geterrorbyinput(inputstring, outputstring) {	//	+2021.4
+				var x = 0.540302306;
+				var scope = {};
+				for (let char of 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+					scope[char] = x;
+				var y = math.eval(inputstring,scope);
+				points = [[x,math.fraction(y)]];
+				return geterrorbypoints(points, outputstring);
+			}
 			function geterrorbypoints(points, outputstring) {
 				if (outputstring=='0 / 0') return math.fraction(0).add(NaN);									//	2018.9
 				var error = math.fraction(0);
