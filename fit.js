@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	3/10/2021
+	Date:	5/10/2021
 	Fit:	Infers a function from points
 */
 
@@ -122,7 +122,8 @@ class Fit {
 					return (comp) ? complexpointstoderivatives(points) : realpointstoderivatives(points) ;
 					function complexpointstoderivatives(points) {
 						var y = points.map(xy=>xy[1]);
-						return math.re(matrix.dft(y)).map((x,i)=>math.multiply(x,math.factorial(i))).slice(0,4);
+						//return math.re(matrix.dft(y)).map((x,i)=>math.multiply(x,math.factorial(i))).slice(0,4);							//	-2021.5
+						return math.re(matrix.idft(y)).map((x,i)=>math.prod(x,math.factorial(i),math.pow(points[0][0].re,-i))).slice(0,4);	//	+2021.5
 					}
 					function realpointstoderivatives(points) {		//	~2021.3
 						return center();
@@ -141,10 +142,14 @@ class Fit {
 					}
 				}
 				function seq2frac(seq) {	//	2019.6
-					if (comp) var terminating = math.abs((math.round(seq[3])-seq[3]))<1E-5 && math.abs((math.round(seq[2])-seq[2]))<1E-5; else	//	+2020.12
+					//if (comp) var terminating = math.abs((math.round(seq[3])-seq[3]))<1E-5 && math.abs((math.round(seq[2])-seq[2]))<1E-5; else // +2020.12 // -2021.5
 					//var terminating = math.abs(seq[3])<.01;													//	-2021.3
-					var terminating = math.abs(seq[3])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01);	//	+2021.3
-					return terminating ? finiteseq2frac(seq) : infiniteseq2frac(seq);
+					//var terminating = math.abs(seq[3])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01);	//	+2021.3				//	-2021.5
+					var terminating = math.abs(seq[3])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01 || math.abs(seq[0])<.01);	//	+2021.5
+					var geometric = math.abs(seq[0]*seq[3]-seq[1]*seq[2])<.01;									//	+2021.5
+					if (!terminating && geometric) return infiniteseq2frac(seq);								//	+2021.5
+					return finiteseq2frac(seq);																	//	+2021.5
+					//return terminating ? finiteseq2frac(seq) : infiniteseq2frac(seq);							//	-2021.5
 					//function finiteseq2frac(seq) { return {'num' : [0,0,...seq] , 'den' : [1,0,0,0] } }		//	-2021.3
 					function finiteseq2frac(seq) {																//	+2021.3
 						seq = math.number(seq);
@@ -169,6 +174,7 @@ class Fit {
 						pow -= leading0;
 						num = [0,0,0,0,0,0];
 						num[1-pow] = seq[0];					//	index=1-pow : return API is numerators as [x¹,x⁰,x⁻¹,x⁻²,x⁻³,x⁻⁴]
+						while (den.length<4) den.push(0);		//	+2021.5
 						return {num, den}
 						function leftshift(arr) { arr.shift(); arr.push(0); }
 						function divide(num,den) {
@@ -196,7 +202,6 @@ class Fit {
 		return {
 			tomatrix: function (xs, y) {
 				var A = makeA(xs);
-				//var b = math.dotMultiply(math.dotMultiply(xs[0], xs[0]), y);	//	'xs[0]^2*y'
 				var b = y;
 				return [A, b];
 				function makeA(xs) {

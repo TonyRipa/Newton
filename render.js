@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	3/10/2021
+	Date:	5/10/2021
 	Render:	A toString Class
 */
 
@@ -49,7 +49,7 @@ Render.transform = class {
 			termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);
 			if (termcoefs[2]==0 && termcoefs[3]==0) return Render.simple.polynomial([termcoefs[0]],vars,[[1,0]]);
 		}
-		if (JSON.stringify(decodernum) == '[0,[0,0],0,[1,0],0,[2,0]]' && math.abs(termcoefs[0])!=1) {	//	Sparse (b+dx+fx²)/(a+cx+ex²)	//	+2020.8
+		if (JSON.stringify(decodernum) == '[0,[0,0],0,[1,0],0,[2,0]]' && math.abs(termcoefs[0])!=1) {//alert(4)	//	Sparse (b+dx+fx²)/(a+cx+ex²)	//	+2020.8
 			if (termcoefs[5]==0) return Render.transform.polynomialratio([termcoefs[3],termcoefs[1],0,0,0,0,termcoefs[0],termcoefs[2],termcoefs[4],0],vars,{decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]],decoderden:[0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]},simp);	//	+2020.12
 			if (termcoefs[4]==1) return Render.transform.polynomialratio([termcoefs[3],termcoefs[1],0,0,0,0,termcoefs[0],termcoefs[2],termcoefs[4],0],vars,{decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]],decoderden:[0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]},simp);	//	+2020.11
 			if (termcoefs[2]==1) return termcoefs[1];
@@ -59,7 +59,8 @@ Render.transform = class {
 			termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);
 			var num = termcoefs.slice(0,6);
 			var den = termcoefs.slice(6);
-			if (JSON.stringify(den)=='[1,0,0,0]') return Render.simple.polynomial(num.map((v,i)=>i>1?v/math.factorial(i-2):v),vars,decodernum.map(xy=>[-1-xy[0],xy[1]]));
+			//if (JSON.stringify(den)=='[1,0,0,0]') return Render.simple.polynomial(num.map((v,i)=>i>1?v/math.factorial(i-2):v),vars,decodernum.map(xy=>[-1-xy[0],xy[1]]));					//	-2021.5
+			if (['[1]','[1,0,0,0]'].includes(JSON.stringify(den))) return Render.simple.polynomial(num.map((v,i)=>i>1?v/math.factorial(i-2):v),vars,decodernum.map(xy=>[-1-xy[0],xy[1]]));	//	+2021.5
 			if (JSON.stringify(den.slice(1))=='[0,0,0]') return Render.simple.polynomial(num.map((v,i)=>i>1?v/math.factorial(i-2):v),vars,decodernum.map(xy=>[-1-xy[0],xy[1]])) + ' / ' + den[0];	//	+2021.3
 			if (JSON.stringify(num)=='[0,1,0,0,0,0]' && (den.length<3 || den[2]==0)) return `exp(${coef(-den[0])}${vars[0]})`;	//	+2020.12
 			var h = (den[0]<0) ? 'h' : '';									//	+2020.11

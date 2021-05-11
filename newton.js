@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	4/10/2021
+	Date:	5/10/2021
 	Newton:	An A.I. for Math
 */
 
@@ -180,12 +180,14 @@ class Newton {
 				var b = 10;
 				var a = 0;
 				gaussx = gaussx.map(x => x*(b-a)/2 + (b+a)/2);
-				var fourierx = { 4 : [math.complex(1,1E-99),math.complex(0,1),math.complex(-1,0),math.complex(0,-1)] ,
+				//var fourierx = { 4 : [math.complex(1,1E-99),math.complex(0,1),math.complex(-1,0),math.complex(0,-1)] ,	//	-2021.5
+				var fourierx = { 4 : [math.complex(1,0),math.complex(0,1),math.complex(-1,0),math.complex(0,-1)] ,			//	+2021.5
 					8: [math.complex(+1,0),math.complex(+.7071067811865475,+.7071067811865475),math.complex(0,+1),math.complex(-.7071067811865475,+.7071067811865475),math.complex(-1,0),math.complex(-.7071067811865475,-.7071067811865475),math.complex(0,-1),math.complex(+.7071067811865475,-.7071067811865475)] };	//	+2020.12
 				fourierx = fourierx[4];									//	+2020.12
 				//var originx = _.range(1, numpoints+1).map(x=>x/175);	//	+2020.12	//	-2021.3
 				var originx = [-1.5/175,-.5/175,.5/175,1.5/175];						//	+2021.3
-				var neighborhoodx = true ? originx : fourierx;			//	+2020.12
+				//var neighborhoodx = true ? originx : fourierx;		//	+2020.12	//	-2021.5
+				var neighborhoodx = false ? originx : fourierx.map(x=>x.div(100));		//	+2021.5
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
 				//if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added	//	2020.2	Removed
 				//if (vm.trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc			//	2020.2	Removed
@@ -196,8 +198,6 @@ class Newton {
 				if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(gaussx);																													//	+2020.11
 				//if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin						//	2020.2	Added	//	-2020.12
 				if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(neighborhoodx);	//	+2020.12
-				//for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>Math.random() * 10 - 5).map(Math.round));
-				//xs = xs.map(row=>row.map(cell=>Math.round(1000 * cell) / 1000));
 				Newton.x = xs;
 				return xs;
 			}

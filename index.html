@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	1/10/2021
+	Date:	5/10/2021
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -102,7 +102,6 @@
 			}
 			function plot33s(expr) {
 				Plot.graph3s(expr, 'graph3', { style: 'surface' });
-				//$('#title3').html(expr);	//	2019.5	Removed
 			}
 			function plot4(expr, x, y) {
 				if (x) {
@@ -176,6 +175,7 @@
 							</optgroup>
 							<optgroup label="1 Variable">
 								<option>x</option>
+								<option>x*x</option>	<!--	+2021.5	-->
 								<option>x/x</option>
 								<option>(x^2-1)/(x-1)</option>
 								<option>(x-1)/(x^2-1)</option>

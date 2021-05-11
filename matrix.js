@@ -1,13 +1,14 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	3/10/2021
+	Date:	5/10/2021
 	Matrix:	A matrix library
 */
 
 class matrix {
 
-	static dft(b) {
+	//static dft(b) {	//	-2021.5
+	static idft(b) {	//	+2021.5
 		if (b.length == 4) {
 			var w0 = math.complex(1,0);
 			var w1 = math.complex(0,1);
@@ -245,7 +246,6 @@ matrix.homogeneous = class {
 					matrix.log(A);A = matrix.homogeneous.rref(A);matrix.log(A);				//	+2020.8
 					var row0 = A[0];
 					var row1 = A[1];
-					//var b = row1[2] == 0 ? 0 : math.unaryMinus(math.divide(row1[2],row1[1]));					//	2019.12	Removed
 					var a = row0[2] == 0 || row0[0] == 0 ? 0 : math.unaryMinus(math.divide(row0[2],row0[0]));	//	2019.12	Added
 					var b = row1[2] == 0 || row1[1] == 0 ? 0 : math.unaryMinus(math.divide(row1[2],row1[1]));	//	2019.12	Added
 					var ret = [a, b, 1];																		//	2019.7	Added
