@@ -1,7 +1,7 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   1/10/2021
+    Date:   6/10/2021
     Transform: A data transformer
 */
 
@@ -91,6 +91,43 @@ class Transform {												//	+2020.6
 
 	static topoints(xs,y) {																//	+2020.8
 		return _.zip(...xs,y);
+	}
+
+	static isfrac(seq) {																//	+2021.6
+		var terminating = math.abs(seq[3])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01 || math.abs(seq[0])<.01);
+		var geometric = math.abs(seq[0]*seq[3]-seq[1]*seq[2])<.01;
+		return !terminating && geometric;
+	}
+
+	static infiniteseq2frac(seq) {														//	+2021.6
+		seq = math.round(math.number(seq))
+		var leading0 = 1;	//	All sequences implicitly have 1 leading0 in 1's place (i.e. start at .1's place) ( e.g. 0.4738 )
+		while (seq[0]==0) { leftshift(seq); leading0++ }									//	Process leading0's	//	+2020.12
+		var den = divide([seq[0],0,0,0],seq);
+		den.pop();		//	Least significant number in division is typically error so remove it
+		den.reverse()	//	[…,x³,x²,x¹,x⁰,…] -> […,x⁰,x¹,x²,x³,…]
+		while (den[0]==0 || math.abs(den[0]/den[1]) < 0.5) den.shift(); // Remove Leading0's (Leading0's are negative powers)
+		var width = den.length;					//	Denominator Width			//	e.g. width(101) = 3
+		var pow = width - 1;													//	Highest power of a polynomial is width-1
+		pow -= leading0;
+		var num = [0,0,0,0,0,0];
+		num[1-pow] = seq[0];					//	index=1-pow : return API is numerators as [x¹,x⁰,x⁻¹,x⁻²,x⁻³,x⁻⁴]
+		while (den.length<4) den.push(0);		//	+2021.5
+		return {num, den}
+		function leftshift(arr) { arr.shift(); arr.push(0); }
+		function divide(num,den) {
+			return div(num,den,3).slice(0,4);
+			function div(n,d,c) {
+				if (c<=0) return n;
+				var q = math.divide(n[0],d[0]);
+				var sub = math.multiply(d,q);
+				var r = math.subtract(n,sub);
+				leftshift(r);
+				var rest = div(r,den,c-1);
+				rest.unshift(q);
+				return rest;
+			}
+		}
 	}
 
 }
