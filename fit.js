@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/10/2021
+	Date:	7/10/2021
 	Fit:	Infers a function from points
 */
 
@@ -121,7 +121,8 @@ class Fit {
 					function complexpointstoderivatives(points) {
 						var y = points.map(xy=>xy[1]);
 						//return math.re(matrix.dft(y)).map((x,i)=>math.multiply(x,math.factorial(i))).slice(0,4);							//	-2021.5
-						return math.re(matrix.idft(y)).map((x,i)=>math.prod(x,math.factorial(i),math.pow(points[0][0].re,-i))).slice(0,4);	//	+2021.5
+						//return math.re(matrix.idft(y)).map((x,i)=>math.prod(x,math.factorial(i),math.pow(points[0][0].re,-i))).slice(0,4);//	+2021.5	//	-2021.7
+						return math.re(matrix.idft(y)).map((x,i)=>math.prod(x,math.factorial(i),math.pow(points[0][0].re,-i)));							//	+2021.7
 					}
 					function realpointstoderivatives(points) {		//	~2021.3
 						return center();
@@ -143,10 +144,11 @@ class Fit {
 					//if (comp) var terminating = math.abs((math.round(seq[3])-seq[3]))<1E-5 && math.abs((math.round(seq[2])-seq[2]))<1E-5; else // +2020.12 // -2021.5
 					//var terminating = math.abs(seq[3])<.01;													//	-2021.3
 					//var terminating = math.abs(seq[3])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01);	//	+2021.3				//	-2021.5
-					var terminating = math.abs(seq[3])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01 || math.abs(seq[0])<.01);	//	+2021.5
-					var geometric = math.abs(seq[0]*seq[3]-seq[1]*seq[2])<.01;									//	+2021.5
+					//var terminating = math.abs(seq[3])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01 || math.abs(seq[0])<.01);	//	+2021.5	//	-2021.7
+					//var geometric = math.abs(seq[0]*seq[3]-seq[1]*seq[2])<.01;								//	+2021.5							//	-2021.7
 					//if (!terminating && geometric) return infiniteseq2frac(seq);								//	+2021.5	//	-2021.6
-					if (!terminating && geometric) return Transform.infiniteseq2frac(seq);									//	+2021.6
+					//if (!terminating && geometric) return Transform.infiniteseq2frac(seq);								//	+2021.6				//	-2021.7
+					if (Transform.isfrac(seq)) return Transform.infiniteseq2frac(seq);																//	+2021.7
 					return finiteseq2frac(seq);																	//	+2021.5
 					//return terminating ? finiteseq2frac(seq) : infiniteseq2frac(seq);							//	-2021.5
 					//function finiteseq2frac(seq) { return {'num' : [0,0,...seq] , 'den' : [1,0,0,0] } }		//	-2021.3
@@ -192,8 +194,10 @@ class Fit {
 					//}
 				}
 			},
-			decodernum: [[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]],
-			decoderden: [0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]
+			//decodernum: [[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]],							//	-2021.7
+			//decoderden: [0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]									//	-2021.7
+			decodernum: [[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0],[-5,0],[-6,0],[-7,0],[-8,0]],	//	+2021.7
+			decoderden: [0,0,0,0,0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]							//	+2021.7
 		}
 	}
 
@@ -519,7 +523,6 @@ class Fit {
 						var bestindex = diffs.indexOf(best);
 						var param = candidates[bestindex];
 						if (typeof (param) == 'undefined') { console.log(candidates, diffs, best); console.trace(); end }
-						//if (diff(f, points, param) < .005) return param;
 						if (diff(f, points, param) < .1) return param;
 					}
 				}

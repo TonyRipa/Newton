@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	5/10/2021
+	Date:	7/10/2021
 	Newton:	An A.I. for Math
 */
 
@@ -114,7 +114,6 @@ class Newton {
 			if (trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }			//	2020.2	Added
 			console.log(JSON.stringify(xs))
 			console.log(JSON.stringify(y))
-			//if (vars.length==2) return [inferpolynomial(xs, y, F.poly32)];	//	2019.4	list	//	2019.5	Removed
 			//if (vars.length==2) return {candidates:[inferpolynomial(xs, y, F.poly32)],best:0};	//	2019.5	object	//	-2020.7
 			//if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32))],best:0};		//	+2020.7			//	-2020.11
 			//if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32))],best:0,e:[0]};					//	+2020.11	//	-2020.12
@@ -183,11 +182,13 @@ class Newton {
 				//var fourierx = { 4 : [math.complex(1,1E-99),math.complex(0,1),math.complex(-1,0),math.complex(0,-1)] ,	//	-2021.5
 				var fourierx = { 4 : [math.complex(1,0),math.complex(0,1),math.complex(-1,0),math.complex(0,-1)] ,			//	+2021.5
 					8: [math.complex(+1,0),math.complex(+.7071067811865475,+.7071067811865475),math.complex(0,+1),math.complex(-.7071067811865475,+.7071067811865475),math.complex(-1,0),math.complex(-.7071067811865475,-.7071067811865475),math.complex(0,-1),math.complex(+.7071067811865475,-.7071067811865475)] };	//	+2020.12
-				fourierx = fourierx[4];									//	+2020.12
+				//fourierx = fourierx[4];								//	+2020.12	//	-2021.7
+				fourierx = fourierx[8];													//	+2021.7
 				//var originx = _.range(1, numpoints+1).map(x=>x/175);	//	+2020.12	//	-2021.3
 				var originx = [-1.5/175,-.5/175,.5/175,1.5/175];						//	+2021.3
 				//var neighborhoodx = true ? originx : fourierx;		//	+2020.12	//	-2021.5
-				var neighborhoodx = false ? originx : fourierx.map(x=>x.div(100));		//	+2021.5
+				//var neighborhoodx = false ? originx : fourierx.map(x=>x.div(100));	//	+2021.5	//	-2021.7
+				var neighborhoodx = false ? originx : fourierx.map(x=>x.div(20));					//	+2021.7
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
 				//if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added	//	2020.2	Removed
 				//if (vm.trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc			//	2020.2	Removed

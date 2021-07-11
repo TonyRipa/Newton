@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/10/2021
+	Date:	7/10/2021
 	Render:	A toString Class
 */
 
@@ -59,14 +59,17 @@ Render.transform = class {
 			if (termcoefs[2]==1) return termcoefs[1];
 			return termcoefs[1] + '/' + termcoefs[2];
 		}
-		if (JSON.stringify(decodernum)=='[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]]') {//alert(5)	//	Differential (ax+b+cx⁻1+dx⁻²+ex⁻³+fx⁻⁴)/(g+hx+ix²+jx³)
+		//if (JSON.stringify(decodernum)=='[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]]') {//alert(5)	//	Differential (ax+b+cx⁻1+dx⁻²+ex⁻³+fx⁻⁴)/(g+hx+ix²+jx³)								//	-2021.7
+		if (decodernum.every((x,i) => x[0]==1-i&&x[1]==0)) {//alert(5)	//	Differential (ax+b+cx⁻1+dx⁻²+ex⁻³+fx⁻⁴+gx⁻⁵+hx⁻⁶+ix⁻⁷+jx⁻⁸)/(k+lx+mx²+nx³)	//	+2021.7
 			termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);
-			var num = termcoefs.slice(0,6);
-			var den = termcoefs.slice(6);
-			//if (['[1]','[1,0,0,0]'].includes(JSON.stringify(den))) return Render.simple.polynomial(num.map((v,i)=>i>1?v/math.factorial(i-2):v),vars,decodernum.map(xy=>[-1-xy[0],xy[1]]));//	+2021.5	//	-2021.6
+			//var num = termcoefs.slice(0,6);				//	-2021.7
+			//var den = termcoefs.slice(6);					//	-2021.7
+			var num = termcoefs.slice(0,decodernum.length);	//	+2021.7
+			var den = termcoefs.slice(decodernum.length);	//	+2021.7
 			if (['[1]','[1,0,0,0]'].includes(JSON.stringify(den))) return Render.polynomial([num.map((v,i)=>i>1?v/math.factorial(i-2):v),vars,decodernum.map(xy=>[-1-xy[0],xy[1]])])[0];				//	+2021.6
 			if (JSON.stringify(den.slice(1))=='[0,0,0]') return Render.simple.polynomial(num.map((v,i)=>i>1?v/math.factorial(i-2):v),vars,decodernum.map(xy=>[-1-xy[0],xy[1]])) + ' / ' + den[0];	//	+2021.3
-			if (JSON.stringify(num)=='[0,1,0,0,0,0]' && (den.length<3 || den[2]==0)) return `exp(${coef(-den[0])}${vars[0]})`;	//	+2020.12
+			//if (JSON.stringify(num)=='[0,1,0,0,0,0]' && (den.length<3 || den[2]==0)) return `exp(${coef(-den[0])}${vars[0]})`;	//	+2020.12	//	-2021.7
+			if (num.every((x,i)=>i==1?x==1:x==0) && (den.length<3 || den[2]==0)) return `exp(${coef(-den[0])}${vars[0]})`;							//	+2021.7
 			var h = (den[0]<0) ? 'h' : '';									//	+2020.11
 			if (den[0] && den[1]==0 && num[0]) return `cos${h}(${coef(math.sqrt(math.abs(den[0])))}${vars[0]})`;	//	+2020.11
 			if (den[0] && den[1]==0 && num[1]) return `sin${h}(${coef(math.sqrt(math.abs(den[0])))}${vars[0]})`;	//	+2020.11
@@ -94,7 +97,8 @@ Render.simple = class {
 		var fulldecoder = Render.simple.tofulldecoder(termcoefs, decoder);
 		var seq = Render.simple.toseq(fulldecoder);
 		var {num,den} = Transform.infiniteseq2frac(seq);
-		var decoders = { decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]], decoderden: [0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]] };
+		//var decoders = { decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]], decoderden: [0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]] };									//	-2021.7
+		var decoders = { decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0],[-5,0],[-6,0],[-7,0],[-8,0]], decoderden: [0,0,0,0,0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]] };	//	+2021.7
 		return Render.simple.polynomialratio([...num,...den], vars, decoders);
 	}
 
@@ -110,7 +114,8 @@ Render.simple = class {
 
 	static toseq(fulldecoder) {	//	+2021.6
 		var seq = [];
-		for (let power of [0,1,2,3])
+		//for (let power of [0,1,2,3])			//	-2021.7
+		for (let power of [0,1,2,3,4,5,6,7])	//	+2021.7
 			if (fulldecoder.filter(xyc=>xyc[0]==power).length) seq.push(fulldecoder.filter(xyc=>xyc[0]==power)[0][2]); else seq.push(0);
 		return seq;
 	}
