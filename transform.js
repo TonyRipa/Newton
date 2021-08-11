@@ -1,7 +1,7 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   7/10/2021
+    Date:   8/10/2021
     Transform: A data transformer
 */
 
@@ -27,7 +27,6 @@ class Transform {												//	+2020.6
 			var ret = [];
 			var sum = 0;
 			for(var i = 0; i<points.length; i++) {
-				//var y = (isNaN(points[i][1])) ? points[i+1][1] : points[i][1]								//	-2021.1
 				var y = (isNaN(points[i][1])) ? (i==0) ? points[i+1][1] : points[i-1][1] : points[i][1];	//	+2021.1
 				sum += y * c(i,points);
 				ret.push([points[i][0], sum]);
@@ -94,7 +93,8 @@ class Transform {												//	+2020.6
 		var L = seq.length;	//	+2021.7
 		seq = math.round(math.number(seq))
 		var leading0 = 1;	//	All sequences implicitly have 1 leading0 in 1's place (i.e. start at .1's place) ( e.g. 0.4738 )
-		while (seq[0]==0) { leftshift(seq); leading0++ }									//	Process leading0's	//	+2020.12
+		if (seq.some(x=>x!=0))																										//	+2021.8
+			while (seq[0]==0) { leftshift(seq); leading0++ }								//	Process leading0's	//	+2020.12
 		//var den = divide([seq[0],0,0,0],seq);						//	-2021.7
 		var den = divide([seq[0],...new Array(L-1).fill(0)],seq);	//	+2021.7
 		den.pop();		//	Least significant number in division is typically error so remove it

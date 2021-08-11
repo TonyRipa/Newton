@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/10/2021
+	Date:	8/10/2021
 	Fit:	Infers a function from points
 */
 
@@ -13,8 +13,10 @@ class Fit {
 				var points = allpoints.slice(0,5);
 				points = Transform.nonan(points);
 				var [xs,y] = Transform.toxy(points);
-				var n = y.map(f=>f.n);
-				var d = y.map(f=>f.d);
+				//var n = y.map(f=>f.n);													//	-2021.8
+				//var d = y.map(f=>f.d);													//	-2021.8
+				var n = y.map(f=>matrix.dec2frac(Number((f.n/f.d).toFixed(vm.range))).n);	//	+2021.8
+				var d = y.map(f=>matrix.dec2frac(Number((f.n/f.d).toFixed(vm.range))).d);	//	+2021.8
 				var num = matrix.solve(...Fit.poly21().tomatrix(xs,n));
 				var den = matrix.solve(...Fit.poly21().tomatrix(xs,d));
 				return [...num,...den];
@@ -857,8 +859,6 @@ Fit.unsafe = class {	//	+2020.8
 			},
 			decodernum: [[0,0]],
 			decoderden: [0,[0,0]]
-			//decoderden: [0,0,[0,0],[1,0],[2,0,1]]
-			//decoderden: [0,0,[0,0],[2,0,1]]
 		};
 	}
 
