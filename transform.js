@@ -1,7 +1,7 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   8/10/2021
+    Date:   9/10/2021
     Transform: A data transformer
 */
 
@@ -63,7 +63,8 @@ class Transform {												//	+2020.6
 		}
 	}
 
-	static nonan(points) { return points.filter(xy=>!math.number(xy).includes(NaN)); }	//	+2020.8
+	//static nonan(points) { return points.filter(xy=>!math.number(xy).includes(NaN)); }	//	+2020.8												//	-2021.9
+	static nonan(points) { return points.filter(xy=>xy[0].hasOwnProperty('im')?(!xy[0].isNaN()&&!xy[1].isNaN()):!math.number(xy).includes(NaN)); }	//	+2021.9
 
 	static nonanxy(xs,y) {																//	+2020.8
 		var allpoints = Transform.topoints(xs,y);
@@ -83,7 +84,6 @@ class Transform {												//	+2020.6
 	}
 
 	static isfrac(seq) {																//	+2021.6
-		//var terminating = math.abs(seq[3])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01 || math.abs(seq[0])<.01);			//	-2021.7
 		var terminating = math.abs(seq.slice(-1)[0])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01 || math.abs(seq[0])<.01);	//	+2021.7
 		var geometric = math.abs(seq[0]*seq[3]-seq[1]*seq[2])<.01;
 		return !terminating && geometric;

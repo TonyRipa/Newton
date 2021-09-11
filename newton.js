@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/10/2021
+	Date:	9/10/2021
 	Newton:	An A.I. for Math
 */
 
@@ -35,17 +35,17 @@ class Newton {
 		if (trans==1) return Newton.getpoints().tran;													//	2020.2	Added
 		return Newton.getpoints().orig;
 	}
-	static getvars(input) {	//	2018.12
-		input = input.replace('sinh','').replace('sin','').replace('cosh','').replace('cos','').replace('exp','');	//	2019.2	sinh & cosh
-		var vars = [];
-		var alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-		for (let symbol of input) {
-			if (alphabet.includes(symbol)) {
-				if (!vars.includes(symbol)) vars.push(symbol);
-			}
-		}
-		return vars;
-	}
+	//static getvars(input) {	//	2018.12	//	-2021.9
+	//	input = input.replace('sinh','').replace('sin','').replace('cosh','').replace('cos','').replace('exp','');	//	2019.2	sinh & cosh
+	//	var vars = [];
+	//	var alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	//	for (let symbol of input) {
+	//		if (alphabet.includes(symbol)) {
+	//			if (!vars.includes(symbol)) vars.push(symbol);
+	//		}
+	//	}
+	//	return vars;
+	//}
 	//static simplify(input) {																			//	2020.2	Removed
 	static simplify(input,trans=vm.trans) {																//	2020.2	Added
 		//var expr, constant, best, candidates;															//	-2020.10
@@ -53,7 +53,6 @@ class Newton {
 		[expr, constant] = input.split('|');
 		//({candidates,best} = infers(expr));															//	2019.5	Added	//	-2020.10
 		({candidates,best,e} = infers(expr));																				//	+2020.10
-		//vm.selected = best;																			//	2019.5	Added	//	2019.8	Removed
 		assert(candidates !== undefined, "Newton.simplify returning undefined")							//	2018.8	Added
 		//if (!constant) return [Newton.getpointsreal(), candidates];									//	2018.8	Added	//	2019.8	Removed
 		var points = Newton.getpointsreal();															//	2019.8	Added
@@ -83,18 +82,19 @@ class Newton {
 			vm.selected = 0;
 			//var evalu = infer(evaluate(candidate,constant));											//	-2020.8
 			//var evalu = infer(evaluate(candidate,constant))[0];										//	+2020.8			//	-2021.1
-			var evalu = infer(evaluate(candidate[trans==0?0:1],constant))[trans==0?0:1];									//	+2021.1
+			//var evalu = infer(evaluate(candidate[trans==0?0:1],constant))[trans==0?0:1];									//	+2021.1	//	-2021.9
+			var evalu = Expression.evaluate(candidate[trans==0?0:1],constant);															//	+2021.9
 			//return [points, [candidate], [evalu]];													//	-2020.10
 			//return [points, [candidate], [evalu], e];													//	+2020.10		//	-2020.1
 			return [points, [candidate[0]], [evalu], e];																	//	+2020.1
 		}
-		function evaluate(input, val) {
-			return substitute(input, Newton.getvars(input).slice(-1)[0], val);
-		}
-		function substitute(input, vari, val) {
-			if (vari === undefined) return input;
-			return input.replace(new RegExp(vari, 'g'), '(' + val + ')');
-		}
+		//function evaluate(input, val) {											//	-2021.9
+		//	return substitute(input, Newton.getvars(input).slice(-1)[0], val);
+		//}
+		//function substitute(input, vari, val) {									//	-2021.9
+		//	if (vari === undefined) return input;
+		//	return input.replace(new RegExp(vari, 'g'), '(' + val + ')');
+		//}
 		function infer(input) {														//	2019.4	Added
 			var candidates,best;													//	2019.5	Added
 			({candidates,best} = infers(input));									//	2019.5	Added
@@ -103,7 +103,8 @@ class Newton {
 		function infers(input) {//alert('infer')									//	2019.4	Renamed
 			assert(input !== undefined, "Newton.infer Arg undefined")				//	2018.8	Added
 			var F = Fit;															//	2019.8	Added
-			var vars = Newton.getvars(input);
+			//var vars = Newton.getvars(input);										//	-2021.9
+			var vars = Expression.getvars(input);									//	+2021.9
 			var xs = makexs(vars);
 			var y = makey(xs, input);
 			console.log(JSON.stringify(xs))

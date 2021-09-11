@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	8/10/2021
+	Date:	9/10/2021
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -25,6 +25,7 @@
 		<script src="untransform.js"></script>	<!--	2020.2	Added	-->
 		<script src="matrix.js"></script>		<!--	2018.9	Added	-->
 		<script src="fit.js"></script>			<!--	2019.8	Added	-->
+		<script src="expression.js"></script>	<!--	+2021.9			-->
 		<script src="newton.js"></script>
 		<script src="plot.js"></script>
 		<script src='../js/vue.js'></script><script>window.Vue || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js'><" + "/script>")</script>	<!--	2019.6	Added	-->
@@ -51,11 +52,11 @@
 			//function validate() {	//	2019.12	Added	//	-2020.11
 			//	return simplify()[1][vm.selected] == vm.exprsimp[vm.selected];
 			//}
-			//function go() {		//	2019.12	Removed
 			function simplify() {	//	2019.12	Added
 				var input;
 				input = $('#inp').val() || '0';
-				vm.d = math.max(Newton.getvars(input).length,1) + 1;														//	2018.12
+				//vm.d = math.max(Newton.getvars(input).length,1) + 1;														//	2018.12	//	-2021.9
+				vm.d = math.max(Expression.getvars(input).length,1) + 1;																//	+2021.9
 				if (vm.d==3 && vm.trans!=0) { alert('Error : Attempting to transform a 3D graph.') ; return }				//	2018.12
 				vm.expr = input.split('|')[0];
 				vm.constant = input.split('|')[1];
@@ -95,7 +96,8 @@
 				Plot.plot(points, 'graph1');
 			}
 			function plot13(points, title) {
-				var vars = Plot.getvars(title);
+				//var vars = Plot.getvars(title);		//	-2021.9
+				var vars = Expression.getvars(title);	//	+2021.9
 				Plot.plot3(points, 'graph1', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y', width: '325px' , height: '325px' });
 			}
 			function plot2(points) {
@@ -110,7 +112,8 @@
 				Plot.graph(expr, 'graph3');
 			}
 			function plot33(expr) {
-				var vars = Plot.getvars(expr);
+				//var vars = Plot.getvars(expr);		//	-2021.9
+				var vars = Expression.getvars(expr);	//	+2021.9
 				Plot.graph3(expr, 'graph3', { style: 'surface', xLabel: vars[0] || 'x', yLabel: vars[1] || 'y', width: '325px' , height: '325px' });
 			}
 			function plot4() {
@@ -132,7 +135,8 @@
 			}
 			function plot53(expr, x, totalsimp) {
 				plot_text_html(expr + '|' + x, 5);
-				var vars = Plot.getvars(expr);
+				//var vars = Plot.getvars(expr);		//	-2021.9
+				var vars = Expression.getvars(expr);	//	+2021.9
 				var data = Plot.graph3(totalsimp, 'graph5', { style: 'line', yMin: -5, yMax: 5, xLabel: vars[0], yLabel: vars[1], width: '325px' , height: '325px' });
 			}
 		</script>
