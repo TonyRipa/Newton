@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	9/10/2021
+	Date:	10/10/2021
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -61,83 +61,95 @@
 				vm.expr = input.split('|')[0];
 				vm.constant = input.split('|')[1];
 				//if (vm.constant && vm.trans!=0) { alert('Error : Attempting to transform a point evaluation.') ; return }	//	2019.3	//	-2021.1
-				//[vm.pointss, vm.exprsimp, vm.totalsimp] = Newton.simplify(input);	//	2019.12	Removed
 				return Newton.simplify(input);										//	2019.12	Added
 			}
-			function render() {	//	2019.5	Added
-				var exprsimp, totalsimp;
-				exprsimp = vm.exprsimp[vm.selected];						//	2019.5	Added
-				totalsimp = (vm.totalsimp||vm.exprsimp)[vm.selected];		//	2019.5	Added
-				plot_clear();
-				plot_text(vm.expr);
-				//if (vm.d == 2) plot1(vm.pointss.orig); else plot13(vm.pointss.orig, vm.expr);	//	-2020.8
-				plot_html(1); if (vm.d == 2) plot1(vm.pointss.orig); else plot13(vm.pointss.nonan, vm.expr);	//	+2020.8
-				//if (vm.d == 2) plot2(vm.pointss.tran); else plot23(vm.pointss.orig, vm.expr);	//	-2020.8
-				if (vm.trans==1) { plot_html(2); if (vm.d == 2) plot2(vm.pointss.tran); else plot23(vm.pointss.nonan, vm.expr); }	//	+2020.8
-				plot_html(3); if (vm.d == 2) plot3(exprsimp); else plot33(exprsimp);
-				plot4();
-				if (vm.trans>0) plot_text(vm.untransformed[vm.selected]);	//	+2020.7
-				if (vm.constant) if (vm.d == 2) plot5(vm.trans==0?exprsimp:vm.untransformed[vm.selected], vm.constant, totalsimp); else plot53(exprsimp, vm.constant, totalsimp);
-				if (vm.constant) plot_text(totalsimp);
-			}
-			function plot_clear() {	//	+2021.8
-				$('#main').children().not(':first').remove();
-			}
-			function plot_text(text) {
-				$('#main').append(`<td style="text-align:center;width:100px">${text}</td>`);
-			}
-			function plot_html(index) {
-				$('#main').append(`<td><div id="graph${index}" style="border:thin solid black; width:325px; height:325px"></div></td>`);
-			}
-			function plot_text_html(text, index) {
-				$('#main').append(`<td><div style="text-align:center">${text}</div><div id="graph${index}" style="border:thin solid black; width:305px; height:305px"></div></td>`);
-			}
-			function plot1(points) {
-				Plot.plot(points, 'graph1');
-			}
-			function plot13(points, title) {
-				//var vars = Plot.getvars(title);		//	-2021.9
-				var vars = Expression.getvars(title);	//	+2021.9
-				Plot.plot3(points, 'graph1', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y', width: '325px' , height: '325px' });
-			}
-			function plot2(points) {
-				Plot.plot(points, 'graph2');
-			}
-			function plot23(points, title) {
-				var vars = Plot.getvars(title);
-				Plot.plot3(points, 'graph2', { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' });
-			}
-			function plot3(expr) {
-				if (expr === undefined) { var s = "index.plot3 Arg is undefined" ; alert(s) ; throw new Error(s) }	//	2018.8
-				Plot.graph(expr, 'graph3');
-			}
-			function plot33(expr) {
-				//var vars = Plot.getvars(expr);		//	-2021.9
-				var vars = Expression.getvars(expr);	//	+2021.9
-				Plot.graph3(expr, 'graph3', { style: 'surface', xLabel: vars[0] || 'x', yLabel: vars[1] || 'y', width: '325px' , height: '325px' });
-			}
-			function plot4() {
-				var title=['polyn1 a₀+a₁x+…+aₙxⁿ','laurent21 ax⁻²+bx⁻¹','laurent26 ax⁻²+bx⁻¹+c+dx+ex²+fx³+gx⁴+hx⁵+ix⁶','rational0_0 a/b','rational0_1 a/(bx)','rational1_0 (a+bx)/c','rational1_01H (a+bx)/(c+1*x)','rational1_02H (a+bx)/(c+dx+x²)','sparse (a+bx+cx²)/(d+ex+fx²)','polynomialratio (a+bx+cx²)/(d+ex+fx²)'];
-				var options = '';
-				if (vm.exprsimp.length>1) {
-					options = [];
-					for (let i = 0; i<vm.exprsimp.length; i++)
-						options.push(`<option value='${i}'' title='${title[i]}' onclick='vm.selected=${i}'>${vm.exprsimp[i]}</option>`);
-					options = options.join('');
-					if (options) options = `<select size='10'>${options}</select>`;
+			function render() {
+				render_panes(make_panes());
+				function make_panes() {
+					var panes = [];
+					var exprsimp = vm.exprsimp[vm.selected];
+					var totalsimp = (vm.totalsimp||vm.exprsimp)[vm.selected];
+					panes.push(vm.expr);
+					if (vm.d == 2) panes.push([vm.pointss.orig, vm.expr]); else panes.push([vm.pointss.nonan, vm.expr]);
+					if (vm.trans==1) { if (vm.d == 2) panes.push([vm.pointss.tran, vm.expr]); else panes.push([vm.pointss.nonan, vm.expr]); }
+					panes.push(exprsimp);
+					panes.push(vm.exprsimp);
+					if (vm.trans>0) panes.push(vm.untransformed[vm.selected]);
+					if (vm.constant) if (vm.d == 2) panes.push([vm.trans==0?exprsimp:vm.untransformed[vm.selected], vm.constant, totalsimp]); else panes.push([exprsimp, vm.constant, totalsimp]);
+					if (vm.constant) panes.push(totalsimp);
+					return panes;
 				}
-				$('#main').append(`<td width='160px'><details><summary>${vm.exprsimp[vm.selected]}</summary>${options}</details></td>`);
-			}
-			function plot5(expr, x, totalsimp) {
-				plot_text_html(expr + '|' + x, 5);
-				var board = Plot.graph(expr, 'graph5');
-				board.create('point', [x, totalsimp], { name: '', size: .1 });
-			}
-			function plot53(expr, x, totalsimp) {
-				plot_text_html(expr + '|' + x, 5);
-				//var vars = Plot.getvars(expr);		//	-2021.9
-				var vars = Expression.getvars(expr);	//	+2021.9
-				var data = Plot.graph3(totalsimp, 'graph5', { style: 'line', yMin: -5, yMax: 5, xLabel: vars[0], yLabel: vars[1], width: '325px' , height: '325px' });
+				function render_panes(panes) {
+					plot_clear();
+					for (pane of panes) {
+						if (panetype(pane) == 'expr') {
+							if (panetype(lastpane) == 'points') graph_expr(pane); else plot_text(pane);
+						}
+						if (panetype(pane) == 'points') plot_points(...pane);
+						if (panetype(pane) == 'exprs') list_exprs(pane);
+						if (panetype(pane) == 'pipeexpr') projection(...pane);
+						var lastpane = pane;
+					}
+					function panetype(pane) {
+						if (typeof pane == 'undefined') return 'null';
+						if (typeof pane == 'string') return 'expr';
+						if (pane.length == 3) return 'pipeexpr';
+						if (Array.isArray(pane[0])) return 'points';
+						return 'exprs';
+					}
+					function plot_clear() {
+						$('#main').children().not(':first').remove();
+					}
+					function plot_text(text) {
+						$('#main').append(`<td style="text-align:center;width:100px">${text}</td>`);
+					}
+					function plot_html(index) {
+						$('#main').append(`<td><div id="graph${index}" style="border:thin solid black; width:325px; height:325px"></div></td>`);
+					}
+					function list_exprs(exprs) {
+						var title=['polyn1 a₀+a₁x+…+aₙxⁿ','laurent21 ax⁻²+bx⁻¹','laurent26 ax⁻²+bx⁻¹+c+dx+ex²+fx³+gx⁴+hx⁵+ix⁶','rational0_0 a/b','rational0_1 a/(bx)','rational1_0 (a+bx)/c','rational1_01H (a+bx)/(c+1*x)','rational1_02H (a+bx)/(c+dx+x²)','sparse (a+bx+cx²)/(d+ex+fx²)','polynomialratio (a+bx+cx²)/(d+ex+fx²)'];
+						var options = '';
+						if (exprs.length>1) {
+							options = [];
+							for (let i = 0; i<exprs.length; i++)
+								options.push(`<option value='${i}'' title='${title[i]}' onclick='vm.selected=${i}'>${exprs[i]}</option>`);
+							options = options.join('');
+							if (options) options = `<select size='10'>${options}</select>`;
+						}
+						$('#main').append(`<td width='160px'><details><summary>${exprs[vm.selected]}</summary>${options}</details></td>`);
+					}
+					function plot_points(points, expr) {
+						var id = math.round(math.random(999));
+						plot_html(id);
+						var vars = Expression.getvars(expr);
+						if (points[0].length == 2)
+							Plot.plot(points, 'graph' + id);
+						else
+							Plot.plot3(points, 'graph' + id, { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y', width: '325px' , height: '325px' });
+					}
+					function graph_expr(expr) {
+						if (expr === undefined) { var s = "index.plot3 Arg is undefined" ; alert(s) ; throw new Error(s) }
+						var id = math.round(math.random(999));
+						plot_html(id);
+						var vars = Expression.getvars(expr);
+						if (vars.length <= 1)
+							Plot.graph(expr, 'graph' + id);
+						else
+							Plot.graph3(expr, 'graph' + id, { style: 'surface', xLabel: vars[0] || 'x', yLabel: vars[1] || 'y', width: '325px' , height: '325px' });
+					}
+					function projection(expr, x, totalsimp) {
+						var id = math.round(math.random(999));
+						plot_text_html(expr + '|' + x, id);
+						var vars = Expression.getvars(expr);
+						if (vars.length <= 1)
+							Plot.graph(expr, 'graph' + id).create('point', [x, totalsimp], { name: '', size: .1 });
+						else
+							Plot.graph3(totalsimp, 'graph' + id, { style: 'line', yMin: -5, yMax: 5, xLabel: vars[0], yLabel: vars[1], width: '325px' , height: '325px' });
+						function plot_text_html(text, index) {
+							$('#main').append(`<td><div style="text-align:center">${text}</div><div id="graph${index}" style="border:thin solid black; width:305px; height:305px"></div></td>`);
+						}
+					}
+				}
 			}
 		</script>
 	</head>
