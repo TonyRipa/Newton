@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	10/10/2021
+	Date:	11/10/2021
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -37,13 +37,15 @@
 			function go1() {																	//	+2019.12	//	2020.11 Renamed
 				//[vm.pointss, vm.exprsimp, vm.totalsimp] = simplify();							//	-2020.07
 				//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.untransformed] = simplify();		//	+2020.07	//	-2020.10
-				[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();					//	+2020.10
+				//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();					//	+2020.10	//	-2021.11
+				[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed, vm.totalsimp] = simplify();						//	+2021.11
 			}
 			function cascade() {			//	+2020.11
 				//for (vm.range=1; vm.range<9; vm.range++) {		//	-2020.12
 					for (vm.range=1; vm.range<=9; vm.range++) {		//	+2020.12
 						for (vm.trans=0; vm.trans<=2; vm.trans++) {	//	+2021.1
-							[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();
+							//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();				//	-2021.11
+							[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed, vm.totalsimp] = simplify();	//	+2021.11
 							//if (vm.e && vm.e[vm.selected]<.00001) break;	//	-2021.1
 							if (vm.e && vm.e[vm.selected]<.00001) return;	//	+2021.1
 						}
@@ -231,7 +233,6 @@
 		<script>
 			vm = new Vue({
 				el: '#app',
-				//data: { trans: 0, size: 40, range: 4, expr: '', exprsimp: [], selected: '0' },		//	2020.3	Removed
 				//data: { trans: 0, size: 40, range: 9, expr: '', exprsimp: [], selected: '0' },		//	2020.3	Added	//	-2020.4
 				//data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0' },		//	+2020.4			//	-2020.10
 				//data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0', e: '' },						//	+2020.10	//	-2020.11

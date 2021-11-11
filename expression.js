@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	9/10/2021
+	Date:	11/10/2021
 	Newton:	An A.I. for Math
 */
 
@@ -9,6 +9,7 @@
 class Expression {
 
 	static getvars(input) {
+		input = input.toString();	//	+2021.11
 		input = input.replaceAll('sinh','').replaceAll('sin','').replaceAll('cosh','').replaceAll('cos','').replaceAll('exp','');
 		var vars = [];
 		var alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -27,7 +28,13 @@ class Expression {
 	static substitute(input, vari, val) {
 		if (vari === undefined) return input;
 		var scope = JSON.parse('{' + '"' + vari + '"' + ':' + val + '}');
-		return math.simplify(input, scope).toString();
+		try {												//	+2021.11
+			var ret = math.simplify(input, scope).toString();
+		} catch (e) {
+			return "0/0";
+		}
+		return ret;											//	+2021.11
+		//return math.simplify(input, scope).toString();	//	-2021.11
 	}
 
 	static expressiontofunction(expr) {
