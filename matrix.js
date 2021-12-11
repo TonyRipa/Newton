@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	5/10/2021
+	Date:	12/10/2021
 	Matrix:	A matrix library
 */
 
@@ -126,7 +126,9 @@ class matrix {
 		}
 	}
 
-	static dec2frac(decimal) {			//	~2021.3
+	static dec2frac(decimal) {									//	~2021.3
+		if (decimal=='.') return new math.fraction(0,1);		//	+2021.12
+		decimal = Number(decimal);								//	+2021.12
 		//if (decimal<0) return dec2frac(-decimal).neg();		//	-2021.3
 		if (decimal<0) return matrix.dec2frac(-decimal).neg();	//	+2021.3
 		decimal = standard(decimal);
@@ -139,7 +141,8 @@ class matrix {
 		return math.add(terminend,rest);
 		function standard(decimal) {
 			//decimal = String(decimal);								//	-2021.3
-			decimal = decimal.toFixed(16);								//	+2021.3
+			//decimal = decimal.toFixed(16);							//	+2021.3	//	-2021.12
+			decimal = decimal.toFixed(19);											//	+2021.12
 			while (decimal.slice(-1)==0) decimal = decimal.slice(0,-1)	//	+2021.3
 			decimal = unpad(decimal);
 			decimal = ensureradix(decimal);
@@ -155,18 +158,52 @@ class matrix {
 			}
 		}
 		function split(decimal) {
-			if (!decimal.includes('.')) return [decimal,''];
+			//if (!decimal.includes('.')) return [decimal,''];				//	-2021.12
+			if (!decimal.slice(0,-1).includes('.')) return [decimal,''];	//	+2021.12
 			var start = repeatstart(decimal);
 			var terminend = decimal.substring(0,start);
 			var rest = decimal.substring(start);
 			return [terminend,rest];
-			function repeatstart(decimal) {
+			//function repeatstart(decimal) {	//	-2021.12
+			//	decimal = String(decimal);
+			//	for (let h = 0; h <= decimal.length; h++)
+			//		for (let i = decimal.indexOf('.'); i < decimal.length; i++)
+			//			for (let j = i+1; j < Math.min(h,decimal.length); j++)
+			//				if (decimal[i] == decimal[j]) return i;
+			//	return decimal.length;
+			//}
+			function repeatstart(decimal) {		//	+2021.12
 				decimal = String(decimal);
-				for (let h = 0; h <= decimal.length; h++)
-					for (let i = decimal.indexOf('.'); i < decimal.length; i++)
-						for (let j = i+1; j < Math.min(h,decimal.length); j++)
-							if (decimal[i] == decimal[j]) return i;
-				return decimal.length;
+				var s = singlerepeat(decimal);
+				var m = multirepeat(decimal);
+				return (s[1]>=m[1]) ? s[0] : m[0];
+				function multirepeat(decimal) {
+					for (let h = 0; h <= decimal.length; h++)
+						for (let i = decimal.indexOf('.'); i < decimal.length; i++)
+							for (let j = i+1; j < Math.min(h,decimal.length); j++) {								
+								if (decimal[i] == decimal[j]) {
+									if (decimal[j] == decimal[j+(j-i)]) return [i, 3];
+									return [i, 2];
+								}
+							}
+					return [decimal.length, 2];
+				}
+				function singlerepeat(decimal) {
+					var [head,tail] = decimal.split('.');
+					var reps = [0,1,2,3,4,5,6,7,8,9].map(d=>repbydig(tail,d));
+					var maxreps = math.max(reps);
+					var maxdig = reps.indexOf(maxreps);
+					var pos = tail.indexOf(String(maxdig).repeat(maxreps));
+					return [head.length+pos+1,maxreps];
+					function repbydig(tail,dig) {
+						tail = tail.split('').map(digit => (digit==dig) ? dig : 'x').join('');
+						for (let i = 0; i<100; i++)
+							tail = tail.replace('xx','x');
+						tail = tail.split('x');
+						tail = tail.map(run=>run.length);
+						return math.max(tail);
+					}
+				}
 			}
 		}
 		function terminend2frac(terminend) {
@@ -254,7 +291,6 @@ matrix.homogeneous = class {
 			}
 			if (A[0].length==4) {		//	2019.7	Added
 				if (A.length>=4-1) {
-					//A = matrix.homogeneous.rref(A);console.log(A)		//	2020.1	Removed
 					//A = matrix.homogeneous.rref(A);matrix.log(A);		//	2020.1	Added	//	-2020.8
 					matrix.log(A);A = matrix.homogeneous.rref(A);matrix.log(A);				//	+2020.8
 					var row0 = A[0];
