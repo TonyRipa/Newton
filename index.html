@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	11/10/2021
+	Date:	01/10/2022
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -43,7 +43,7 @@
 			function cascade() {			//	+2020.11
 				//for (vm.range=1; vm.range<9; vm.range++) {		//	-2020.12
 					for (vm.range=1; vm.range<=9; vm.range++) {		//	+2020.12
-						for (vm.trans=0; vm.trans<=2; vm.trans++) {	//	+2021.1
+						for (vm.trans of [0,1]) {	//	+2021.1
 							//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();				//	-2021.11
 							[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed, vm.totalsimp] = simplify();	//	+2021.11
 							//if (vm.e && vm.e[vm.selected]<.00001) break;	//	-2021.1
@@ -73,7 +73,6 @@
 					var totalsimp = (vm.totalsimp||vm.exprsimp)[vm.selected];
 					panes.push(vm.expr);
 					if (vm.d == 2) panes.push([vm.pointss.orig, vm.expr]); else panes.push([vm.pointss.nonan, vm.expr]);
-					if (vm.trans==1) { if (vm.d == 2) panes.push([vm.pointss.tran, vm.expr]); else panes.push([vm.pointss.nonan, vm.expr]); }
 					panes.push(exprsimp);
 					panes.push(vm.exprsimp);
 					if (vm.trans>0) panes.push(vm.untransformed[vm.selected]);
@@ -209,8 +208,7 @@
 						<details>	<!--	+2020.11	-->
 							<summary>Advanced</summary>
 							<input type='radio' value='0' id='ut' v-model='trans' onclick='vm.size=40'><label for='ut'>Untransformed</label><br>
-							<input type='radio' value='1' id='it' v-model='trans' v-on:click='size=300'><label for='it'>Integral Transform</label><br>
-							<input type='radio' value='2' id='dt' v-model='trans' @click='size=4'><label for='dt'>Differential Transform</label><br> <!--2018.11 Dif -->
+							<input type='radio' value='1' id='dt' v-model='trans' @click='size=4'><label for='dt'>Differential Transform</label><br> <!--2018.11 Dif -->
 							<div style='border: thin solid black'>
 								<input type='range' min='1' max='9' step='1' v-model='range' title='Complexity'><span title='Complexity'>{{range}}</span><br>
 								<br>
@@ -233,7 +231,6 @@
 		<script>
 			vm = new Vue({
 				el: '#app',
-				//data: { trans: 0, size: 40, range: 9, expr: '', exprsimp: [], selected: '0' },		//	2020.3	Added	//	-2020.4
 				//data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0' },		//	+2020.4			//	-2020.10
 				//data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0', e: '' },						//	+2020.10	//	-2020.11
 				data: { trans: 0, size: 40, range: 1, expr: '', exprsimp: [], selected: '0', e: '' },										//	+2020.11

@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	12/10/2021
+	Date:	01/10/2022
 	Matrix:	A matrix library
 */
 
@@ -143,7 +143,7 @@ class matrix {
 			//decimal = String(decimal);								//	-2021.3
 			//decimal = decimal.toFixed(16);							//	+2021.3	//	-2021.12
 			decimal = decimal.toFixed(19);											//	+2021.12
-			while (decimal.slice(-1)==0) decimal = decimal.slice(0,-1)	//	+2021.3
+			//while (decimal.slice(-1)==0) decimal = decimal.slice(0,-1)//	+2021.3	//	-2022.01
 			decimal = unpad(decimal);
 			decimal = ensureradix(decimal);
 			return decimal;
@@ -172,37 +172,64 @@ class matrix {
 			//				if (decimal[i] == decimal[j]) return i;
 			//	return decimal.length;
 			//}
-			function repeatstart(decimal) {		//	+2021.12
+			//function repeatstart(decimal) {		//	+2021.12	//	-2022.01
+			//	decimal = String(decimal);
+			//	var s = singlerepeat(decimal);
+			//	var m = multirepeat(decimal);
+			//	return (s[1]>=m[1]) ? s[0] : m[0];
+			//	function multirepeat(decimal) {
+			//		for (let h = 0; h <= decimal.length; h++)
+			//			for (let i = decimal.indexOf('.'); i < decimal.length; i++)
+			//				for (let j = i+1; j < Math.min(h,decimal.length); j++) {								
+			//					if (decimal[i] == decimal[j]) {
+			//						if (decimal[j] == decimal[j+(j-i)]) return [i, 3];
+			//						return [i, 2];
+			//					}
+			//				}
+			//		return [decimal.length, 2];
+			//	}
+			//	function singlerepeat(decimal) {
+			//		var [head,tail] = decimal.split('.');
+			//		var reps = [0,1,2,3,4,5,6,7,8,9].map(d=>repbydig(tail,d));
+			//		var maxreps = math.max(reps);
+			//		var maxdig = reps.indexOf(maxreps);
+			//		var pos = tail.indexOf(String(maxdig).repeat(maxreps));
+			//		return [head.length+pos+1,maxreps];
+			//		function repbydig(tail,dig) {
+			//			tail = tail.split('').map(digit => (digit==dig) ? dig : 'x').join('');
+			//			for (let i = 0; i<100; i++)
+			//				tail = tail.replace('xx','x');
+			//			tail = tail.split('x');
+			//			tail = tail.map(run=>run.length);
+			//			return math.max(tail);
+			//		}
+			//	}
+			//}
+			function repeatstart(decimal) {	//	+2022.01
 				decimal = String(decimal);
-				var s = singlerepeat(decimal);
-				var m = multirepeat(decimal);
-				return (s[1]>=m[1]) ? s[0] : m[0];
-				function multirepeat(decimal) {
-					for (let h = 0; h <= decimal.length; h++)
-						for (let i = decimal.indexOf('.'); i < decimal.length; i++)
-							for (let j = i+1; j < Math.min(h,decimal.length); j++) {								
-								if (decimal[i] == decimal[j]) {
-									if (decimal[j] == decimal[j+(j-i)]) return [i, 3];
-									return [i, 2];
-								}
-							}
-					return [decimal.length, 2];
-				}
-				function singlerepeat(decimal) {
-					var [head,tail] = decimal.split('.');
-					var reps = [0,1,2,3,4,5,6,7,8,9].map(d=>repbydig(tail,d));
-					var maxreps = math.max(reps);
-					var maxdig = reps.indexOf(maxreps);
-					var pos = tail.indexOf(String(maxdig).repeat(maxreps));
-					return [head.length+pos+1,maxreps];
-					function repbydig(tail,dig) {
-						tail = tail.split('').map(digit => (digit==dig) ? dig : 'x').join('');
-						for (let i = 0; i<100; i++)
-							tail = tail.replace('xx','x');
-						tail = tail.split('x');
-						tail = tail.map(run=>run.length);
-						return math.max(tail);
+				let beststart = decimal.indexOf('.')+1;
+				let bestwidth = 1;
+				let bestnumreps = 0;
+				for (let width = 1; width <= decimal.length; width++)
+					for (let start = decimal.indexOf('.')+1; start < decimal.length; start++) {
+						let thisnumreps = numreps(decimal,start,width);
+						if (thisnumreps>bestnumreps) {
+							beststart = start;
+							bestwidth = width;
+							bestnumreps = thisnumreps;
+						}						
 					}
+				return beststart;
+				function numreps(decimal,start,width) {
+					let count = 0;
+					for (let i = start; i<decimal.length; i+=width) {
+						if (i == start) continue;
+						for (let j = 0; j<width; j++) {
+							if (decimal[i+j] != decimal[i+j-width]) return count;
+						}
+						count += width;
+					}
+					return count;
 				}
 			}
 		}
@@ -433,40 +460,6 @@ matrix.homogeneous = class {
 	//	}
 	//	//if (R[i].every(x=>x==0)) return true;						//	-2020.8
 	//	return false;
-	//}
-
-	//static ref(A) {												//	2018.10	Added	//	2020.1	Removed
-	//	if (A.length==1) return A;
-	//	if (A[0].length<1) return A;								//	2019.11	Added
-	//	A = zerosbelow(A);
-	//	let S = submatrix(A);
-	//	S = matrix.homogeneous.ref(S);
-	//	A = overlay(A,S);
-	//	return A;
-	//	function zerosbelow(A) {
-	//		let row0 = A[0];
-	//		let ret = [row0];
-	//		for ( let i = 1 ; i<A.length ; i++ ) {
-	//			let row = A[i];
-	//			if (row[0]!=0 && row0[0]!=0) row = math.subtract(row,math.multiply(math.divide(row[0],row0[0]),row0));
-	//			ret.push(row);
-	//		}
-	//		return ret;
-	//	}
-	//	function submatrix(A) {
-	//		return A.filter((x,i)=>i>0).map(row=>row.filter((x,i)=>i>0))
-	//	}
-	//	function overlay(A,S) {
-	//		return [A[0],...S.map((row,i)=>[A[i+1][0],...row])]
-	//	}
-	//}
-
-	//static rref(A) {												//	2018.10	Added	//	2020.1	Removed
-	//	var ref = matrix.homogeneous.ref;
-	//	return flip(ref(flip(ref(A))));
-	//	function flip(A) {
-	//		return A.slice().reverse();
-	//	}
 	//}
 
 }

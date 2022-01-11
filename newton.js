@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	11/10/2021
+	Date:	01/10/2022
 	Newton:	An A.I. for Math
 */
 
@@ -16,24 +16,13 @@ class Newton {
 	static getpoints() {
 		var orig = _.zip(...Newton.x, Newton.y);
 		console.log(orig)
-		if (math.typeof(Newton.x[0][0])=="Complex")return{orig,tran:[],nonan:[]}//	+2020.12
-		//var t = transform(orig)												//	-2020.6
-		var t = Transform.transform(orig)										//	+2020.6
-		var tran = t.map(point=>point.map(x=>math.fraction(0).add(x)));			//	2018.8	Fraction	//	2018.9	Added for NaN handling
-		var nonan = Transform.nonan(orig);										//	+2020.8
-		console.log('getpoints',tran);
-		//return {orig, tran};													//	2018.6	Added		//	-2020.8
-		return {orig, tran, nonan};												//	+2020.8
+		if (math.typeof(Newton.x[0][0])=="Complex") return {orig, nonan:[]}	//	+2020.12
+		var nonan = Transform.nonan(orig);									//	+2020.8
+		return {orig, nonan};												//	+2020.8
 	}
 	static getpointsreal() {													//	2018.8	Added
 		//return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.number(xyz)));											//	-2020.12
 		return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.typeof(xyz[0])=="Complex"?math.re(xyz):math.number(xyz)));	//	+2020.12
-	}
-	//static getrightpoints() {													//	2020.2	Removed
-	static getrightpoints(trans=vm.trans) {										//	2020.2	Added
-		//if (vm.trans==1) return Newton.getpoints().tran;						//	2019.3	vm.trans	//	2020.2	Removed
-		if (trans==1) return Newton.getpoints().tran;													//	2020.2	Added
-		return Newton.getpoints().orig;
 	}
 	//static getvars(input) {	//	2018.12	//	-2021.9
 	//	input = input.replace('sinh','').replace('sin','').replace('cosh','').replace('cos','').replace('exp','');	//	2019.2	sinh & cosh
@@ -54,7 +43,6 @@ class Newton {
 		//({candidates,best} = infers(expr));															//	2019.5	Added	//	-2020.10
 		({candidates,best,e} = infers(expr));																				//	+2020.10
 		assert(candidates !== undefined, "Newton.simplify returning undefined")							//	2018.8	Added
-		//if (!constant) return [Newton.getpointsreal(), candidates];									//	2018.8	Added	//	2019.8	Removed
 		var points = Newton.getpointsreal();															//	2019.8	Added
 		//if (!constant) return simplify0pipe(points, candidates, best);								//	2019.8	Added	//	-2020.7
 		//else return simplify1pipe(points, candidates[best], constant);								//	2019.8	Added	//	-2020.7
@@ -116,21 +104,17 @@ class Newton {
 			console.log(JSON.stringify(xs))
 			console.log(y)
 			console.log(JSON.stringify(y))
-			console.log(JSON.stringify(_.unzip(Newton.getpoints().tran)))
-			//if (vm.trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }	//	2020.2	Removed
-			if (trans==1) { [xs, y] = _.unzip(Newton.getpoints().tran); xs = [xs]; xs.ones = Array(y.length).fill(1); }			//	2020.2	Added
 			console.log(JSON.stringify(xs))
 			console.log(JSON.stringify(y))
 			//if (vars.length==2) return {candidates:[inferpolynomial(xs, y, F.poly32)],best:0};	//	2019.5	object	//	-2020.7
 			//if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32))],best:0};		//	+2020.7			//	-2020.11
 			//if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32))],best:0,e:[0]};					//	+2020.11	//	-2020.12
 			if (vars.length==2) return {candidates:[Render.stringify(inferpolynomial(xs, y, F.poly32()))],best:0,e:[0]};					//	+2020.11	//	+2020.12
-			//if (vm.trans==2) return {candidates:[inferdifferential(xs)],best:0};					//	2019.5	object	//	2020.2	Removed
-			//if (trans==2) return {candidates:[inferdifferential(xs)],best:0};											//	2020.2	Added	//	-2020.7
-			//if (trans==2) return {candidates:[Render.stringify(inferdifferential(xs))],best:0};											//	+2020.7	//	-2021.1
-			if (trans==2) {																																//	+2021.1
+			//if (vm.trans==1) return {candidates:[inferdifferential(xs)],best:0};					//	2019.5	object	//	2020.2	Removed
+			//if (trans==1) return {candidates:[inferdifferential(xs)],best:0};											//	2020.2	Added	//	-2020.7
+			//if (trans==1) return {candidates:[Render.stringify(inferdifferential(xs))],best:0};											//	+2020.7	//	-2021.1
+			if (trans==1) {																																//	+2021.1
 				var candidate = Render.stringify(inferdifferential(xs));
-				var points = Newton.getrightpoints(trans);
 				//var err = math.number(geterrorbypoints(points, candidate[1]));	//	-2021.4
 				var err = math.number(geterrorbyinput(input, candidate[1]));		//	+2021.4
 				return {candidates:[candidate],best:0,e:[err]};
@@ -170,21 +154,9 @@ class Newton {
 			return {candidates,best,e};															//	+2020.10
 			function makexs(vars) {
 				var xs = [];
-				var numpoints = (vm.trans==1) ? 300 : (vm.trans==0) ? 40 : 4;	//	2018.7	inc tran from 150 to 300 to recog tran(cos)	//	2019.9	Removed	//	--2021.1
+				var numpoints = (trans==0) ? 40 : 4;	//	2018.7	//	2019.9	Removed	//	--2021.1
 				//numpoints = Number(vm.size);		//	2019.3	//	2019.9	Removed
 				//var numpoints = Number(vm.size);	//	2019.3	//	2019.9	Added	//	-2021.1
-				//if (trans==1) numpoints *= 2;		//	+2020.5	inc numpoints for cosh & sinh	//	-2020.11
-				var gaussx = { 3 : [0.7745966692414834,  0,  -0.7745966692414834] ,
-					4 : [-0.3399810435848563,0.3399810435848563,-0.8611363115940526,0.8611363115940526] ,
-					10 : [-0.1488743389816312,0.1488743389816312,-0.4333953941292472,0.4333953941292472,-0.6794095682990244,0.6794095682990244,-0.8650633666889845,0.8650633666889845,-0.9739065285171717,0.9739065285171717] ,
-					20 : [-0.0765265211334973,0.0765265211334973,-0.2277858511416451,0.2277858511416451,-0.3737060887154195,0.3737060887154195,-0.5108670019508271,0.5108670019508271,-0.6360536807265150,0.6360536807265150,-0.7463319064601508,0.7463319064601508,-0.8391169718222188,0.8391169718222188,-0.9122344282513259,0.9122344282513259,-0.9639719272779138,0.9639719272779138,-0.9931285991850949,0.9931285991850949] ,
-					40 : [-0.0387724175060508,0.0387724175060508,-0.1160840706752552,0.1160840706752552,-0.1926975807013711,0.1926975807013711,-0.2681521850072537,0.2681521850072537,-0.3419940908257585,0.3419940908257585,-0.4137792043716050,0.4137792043716050,-0.4830758016861787,0.4830758016861787,-0.5494671250951282,0.5494671250951282,-0.6125538896679802,0.6125538896679802,-0.6719566846141796,0.6719566846141796,-0.7273182551899271,0.7273182551899271,-0.7783056514265194,0.7783056514265194,-0.8246122308333117,0.8246122308333117,-0.8659595032122595,0.8659595032122595,-0.9020988069688743,0.9020988069688743,-0.9328128082786765,0.9328128082786765,-0.9579168192137917,0.9579168192137917,-0.9772599499837743,0.9772599499837743,-0.9907262386994570,0.9907262386994570,-0.9982377097105593,0.9982377097105593] ,
-					64 : [-0.0243502926634244,0.0243502926634244,-0.0729931217877990,0.0729931217877990,-0.1214628192961206,0.1214628192961206,-0.1696444204239928,0.1696444204239928,-0.2174236437400071,0.2174236437400071,-0.2646871622087674,0.2646871622087674,-0.3113228719902110,0.3113228719902110,-0.3572201583376681,0.3572201583376681,-0.4022701579639916,0.4022701579639916,-0.4463660172534641,0.4463660172534641,-0.4894031457070530,0.4894031457070530,-0.5312794640198946,0.5312794640198946,-0.5718956462026340,0.5718956462026340,-0.6111553551723933,0.6111553551723933,-0.6489654712546573,0.6489654712546573,-0.6852363130542333,0.6852363130542333,-0.7198818501716109,0.7198818501716109,-0.7528199072605319,0.7528199072605319,-0.7839723589433414,0.7839723589433414,-0.8132653151227975,0.8132653151227975,-0.8406292962525803,0.8406292962525803,-0.8659993981540928,0.8659993981540928,-0.8893154459951141,0.8893154459951141,-0.9105221370785028,0.9105221370785028,-0.9295691721319396,0.9295691721319396,-0.9464113748584028,0.9464113748584028,-0.9610087996520538,0.9610087996520538,-0.9733268277899110,0.9733268277899110,-0.9833362538846260,0.9833362538846260,-0.9910133714767443,0.9910133714767443,-0.9963401167719553,0.9963401167719553,-0.9993050417357722,0.9993050417357722] };
-				gaussx = gaussx[64];
-				if (trans==1) numpoints = gaussx.length;
-				var b = 10;
-				var a = 0;
-				gaussx = gaussx.map(x => x*(b-a)/2 + (b+a)/2);
 				//var fourierx = { 4 : [math.complex(1,1E-99),math.complex(0,1),math.complex(-1,0),math.complex(0,-1)] ,	//	-2021.5
 				var fourierx = { 4 : [math.complex(1,0),math.complex(0,1),math.complex(-1,0),math.complex(0,-1)] ,			//	+2021.5
 					8: [math.complex(+1,0),math.complex(+.7071067811865475,+.7071067811865475),math.complex(0,+1),math.complex(-.7071067811865475,+.7071067811865475),math.complex(-1,0),math.complex(-.7071067811865475,-.7071067811865475),math.complex(0,-1),math.complex(+.7071067811865475,-.7071067811865475)] };	//	+2020.12
@@ -197,14 +169,11 @@ class Newton {
 				var neighborhoodx = false ? originx : fourierx.map(x=>x.div(20));					//	+2021.7
 				xs.ones = Array(numpoints).fill(math.fraction(1));	//	2018.9	fraction
 				//if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added	//	2020.2	Removed
-				//if (vm.trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc			//	2020.2	Removed
-				//if (vm.trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin					//	2020.2	Removed
+				//if (vm.trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin					//	2020.2	Removed
 				//if (trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*(Math.random()*8))/100000)));//	2018.8	Added		//	2020.2	Added	//	-2020.8
 				if (trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map((x,k)=>math.fraction(k<9?k:math.round(100000*(Math.random()*32-16))/100000)));								//	+2020.8
-				//if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(0, numpoints).map(x=>x/60));	//	2018.7	inc den from 30 to 60 cause tran inc			//	2020.2	Added	//	-2020.11
-				if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(gaussx);																													//	+2020.11
-				//if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin						//	2020.2	Added	//	-2020.12
-				if (trans==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(neighborhoodx);	//	+2020.12
+				//if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin						//	2020.2	Added	//	-2020.12
+				if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(neighborhoodx);	//	+2020.12
 				Newton.x = xs;
 				return xs;
 			}
@@ -298,8 +267,7 @@ class Newton {
 				var tovect, tomatrix, decodernum, decoderden, parser;
 				var parser = [F.rational1_01, F.rational0_0, F.rational0_1, F.rational1_0, F.rational1_01H, F.rational1_02H, F.sparse, F.polynomialratio, F.rationalbrute, F.rationalsearch][algo];
 				({tovect, tomatrix, decodernum, decoderden} = parser());									//	2019.3	Added
-				//var vect = tomatrix ? solve(...tomatrix(xs, y)) : tovect(Newton.getpoints().tran);		//	2019.11	Removed
-				var vect = tomatrix ? matrix.solve(...tomatrix(xs, y)) : tovect(Newton.getpoints().tran);	//	2019.11	Added
+				var vect = tomatrix ? matrix.solve(...tomatrix(xs, y)) : tovect(Newton.getpoints().orig);	//	2019.11	Added
 				//console.log('vect', vect);					//	-2020.4
 				console.log('Infer-Rational: vect=', vect);		//	+2020.4
 				//console.log(stringify(vect2matrixnum(vect), vars) + ' : ' + stringify(vect2matrixden(vect), vars));
