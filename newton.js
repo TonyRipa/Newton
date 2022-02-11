@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	01/10/2022
+	Date:	02/10/2022
 	Newton:	An A.I. for Math
 */
 
@@ -123,7 +123,7 @@ class Newton {
 			var e = math.fraction([1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20]);													//	+2020.11
 			var candidates = [];
 			//var inferers = [0,1,2,3,4,5,6,7,8];	//	2019.9	Added	//	-2020.8
-			var inferers = [0,1,2,3,4,5,6,7,8,9];						//	+2020.8
+			var inferers = [0,1,2,3,4,5,6,7,8];							//	+2020.8
 			for (let i of inferers) {				//	2019.9	Added
 			//for (let i of [0,1,2,3,4,5,6,7,8]) {	//	2019.9	Removed
 				//try {
@@ -265,7 +265,7 @@ class Newton {
 			function inferrational(xs, y, algo) {
 				if (arguments.length<3) algo = 0;
 				var tovect, tomatrix, decodernum, decoderden, parser;
-				var parser = [F.rational1_01, F.rational0_0, F.rational0_1, F.rational1_0, F.rational1_01H, F.rational1_02H, F.sparse, F.polynomialratio, F.rationalbrute, F.rationalsearch][algo];
+				var parser = [F.rational1_01, F.rational0_0, F.rational0_1, F.rational1_0, F.rational1_01H, F.sparse, F.polynomialratio, F.rationalbrute, F.rationalsearch][algo];
 				({tovect, tomatrix, decodernum, decoderden} = parser());									//	2019.3	Added
 				var vect = tomatrix ? matrix.solve(...tomatrix(xs, y)) : tovect(Newton.getpoints().orig);	//	2019.11	Added
 				//console.log('vect', vect);					//	-2020.4

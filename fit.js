@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2021
+	Date:	02/10/2022
 	Fit:	Infers a function from points
 */
 
@@ -338,31 +338,6 @@ class Fit {
 			},
 			decodernum: [[0,0],[1,0]],
 			decoderden: [0,0,[0,0],[1,0,1]]
-		};
-	}
-
-	static rational1_02H() {	//	(a+bx)/(c+dx+x²)
-		return {
-			tomatrix: function makeAb(xs,y) {
-				var A = [];
-				var b = [];
-				for (let i = 0; i < xs[0].length; i++) {
-					if (isNaN(y[i])) continue;
-					try {
-						var c1 = 1;
-						var c2 = xs[0][i];
-						var c3 = math.multiply(-1, y[i]);
-						var c4 = math.multiply(-1, math.multiply(xs[0][i], y[i]));
-						var row = [c1,c2,c3,c4];
-						A.push(row);
-						b.push(math.multiply(math.multiply(xs[0][i], xs[0][i]), y[i]));	//	'xs[0]²*y'
-					} catch(e) { }
-				}
-				console.log('rational1_02H : ' + JSON.stringify(['A=',A,'b=',b]));
-				return [A, b];
-			},
-			decodernum: [[0,0],[1,0]],
-			decoderden: [0,0,[0,0],[1,0],[2,0,1]]
 		};
 	}
 
@@ -941,34 +916,6 @@ Fit.unsafe = class {	//	+2020.8
 			},
 			decodernum: [[0,0],[1,0]],
 			decoderden: [0,0,[0,0],[1,0,1]]
-		};
-	}
-
-	static rational1_02H() {	//	(a+bx)/(c+dx+x²)
-		return {
-			tomatrix: function (xs, y) {
-				var A = makeA(xs);
-				var b = math.dotMultiply(math.dotMultiply(xs[0], xs[0]), y);	//	'xs[0]²*y'
-				return [A, b];
-				function makeA(xs) {
-					var c1 = xs.ones;
-					var c2 = xs[0];
-					var c3 = math.multiply(-1, y);
-					var c4 = math.multiply(-1, math.dotMultiply(xs[0], y));
-					console.log('xs.ones', c1);
-					console.log('xs[0]', c2);
-					console.log('-y', c3);
-					console.log('-xs[0]*y', c4);
-					var AT = [];
-					AT.push(c1);
-					AT.push(c2);
-					AT.push(c3);
-					AT.push(c4);
-					return math.transpose(AT);
-				}
-			},
-			decodernum: [[0,0],[1,0]],
-			decoderden: [0,0,[0,0],[1,0],[2,0,1]]
 		};
 	}
 

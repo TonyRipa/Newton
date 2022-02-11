@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	01/10/2022
+	Date:	02/10/2022
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -108,14 +108,14 @@
 						$('#main').append(`<td><div id="graph${index}" style="border:thin solid black; width:325px; height:325px"></div></td>`);
 					}
 					function list_exprs(exprs) {
-						var title=['polyn1 a₀+a₁x+…+aₙxⁿ','laurent21 ax⁻²+bx⁻¹','laurent26 ax⁻²+bx⁻¹+c+dx+ex²+fx³+gx⁴+hx⁵+ix⁶','rational0_0 a/b','rational0_1 a/(bx)','rational1_0 (a+bx)/c','rational1_01H (a+bx)/(c+1*x)','rational1_02H (a+bx)/(c+dx+x²)','sparse (a+bx+cx²)/(d+ex+fx²)','polynomialratio (a+bx+cx²)/(d+ex+fx²)'];
+						var title=['polyn1 a₀+a₁x+…+aₙxⁿ','laurent21 ax⁻²+bx⁻¹','laurent26 ax⁻²+bx⁻¹+c+dx+ex²+fx³+gx⁴+hx⁵+ix⁶','rational0_0 a/b','rational0_1 a/(bx)','rational1_0 (a+bx)/c','rational1_01H (a+bx)/(c+1*x)','sparse (a+bx+cx²)/(d+ex+fx²)','polynomialratio (a+bx+cx²)/(d+ex+fx²)'];
 						var options = '';
 						if (exprs.length>1) {
 							options = [];
 							for (let i = 0; i<exprs.length; i++)
 								options.push(`<option value='${i}'' title='${title[i]}' onclick='vm.selected=${i}'>${exprs[i]}</option>`);
 							options = options.join('');
-							if (options) options = `<select size='10'>${options}</select>`;
+							if (options) options = `<select size='9'>${options}</select>`;
 						}
 						$('#main').append(`<td width='160px'><details><summary>${exprs[vm.selected]}</summary>${options}</details></td>`);
 					}
