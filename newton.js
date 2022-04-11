@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	02/10/2022
+	Date:	04/10/2022
 	Newton:	An A.I. for Math
 */
 
@@ -61,7 +61,6 @@ class Newton {
 		if (trans==0 && constant) ret.push(undefined);													//	+2021.11
 		if (constant) ret.push(candidates.map(c=>Expression.evaluate(c[trans==0?0:1],constant)));		//	+2021.11
 		return ret;																						//	+2020.7
-		//return [Newton.getpointsreal(), candidates, candidates.map(e=>infer(evaluate(e, constant)))];	//	2019.4	Added	//	2019.8	Removed
 		//function simplify0pipe(points, candidates, bestindex) {										//	2019.8	Added	//	-2020.10
 		/*																													//	-2021.11
 		function simplify0pipe(points, candidates, bestindex, e) {															//	+2020.10
@@ -113,11 +112,19 @@ class Newton {
 			//if (vm.trans==1) return {candidates:[inferdifferential(xs)],best:0};					//	2019.5	object	//	2020.2	Removed
 			//if (trans==1) return {candidates:[inferdifferential(xs)],best:0};											//	2020.2	Added	//	-2020.7
 			//if (trans==1) return {candidates:[Render.stringify(inferdifferential(xs))],best:0};											//	+2020.7	//	-2021.1
-			if (trans==1) {																																//	+2021.1
+			//if (trans==1) {																															//	+2021.1	//	-2022.04
+			//	var candidate = Render.stringify(inferdifferential(xs));
+			//	//var err = math.number(geterrorbypoints(points, candidate[1]));	//	-2021.4
+			//	var err = math.number(geterrorbyinput(input, candidate[1]));		//	+2021.4
+			//	return {candidates:[candidate],best:0,e:[err]};
+			//}
+			if (trans == 1) {	//	+2022.04
 				var candidate = Render.stringify(inferdifferential(xs));
-				//var err = math.number(geterrorbypoints(points, candidate[1]));	//	-2021.4
-				var err = math.number(geterrorbyinput(input, candidate[1]));		//	+2021.4
-				return {candidates:[candidate],best:0,e:[err]};
+				var preuntrans = candidate[0];
+				var untrans = candidate[1];
+				if (Array.isArray(untrans)) untrans = untrans[geterrorbyinput(input, untrans[0]) < geterrorbyinput(input, untrans[1]) ? 0 : 1];
+				var err = math.number(geterrorbyinput(input, untrans));
+				return {candidates:[[preuntrans,untrans]],best:0,e:[err]};
 			}
 			//var e = math.fraction([100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000, 100000]);	//	2018.8	Fraction		//	-2020.11
 			var e = math.fraction([1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20]);													//	+2020.11
@@ -136,6 +143,8 @@ class Newton {
 					//e[i] = geterrorbypoints(Newton.getrightpoints(), candidates[i]);		//	2020.2	Removed
 					//e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i]);	//	2020.2	Added	//	-2020.7
 					//e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i][0]);					//	+2020.7	//	-2021.4
+					if (Array.isArray(candidates[i][0]))	//	+2022.04
+						candidates[i][0] = candidates[i][0][geterrorbyinput(input, candidates[i][0][0]) <= geterrorbyinput(input, candidates[i][0][1]) ? 0 : 1];
 					e[i] = geterrorbyinput(input, candidates[i][trans]);													//	+2021.4
 					//if (vm.range<9 && new RegExp(`[${Number(vm.range)+1}-9]`).test(candidates[i])) e[i]=math.fraction(99998);	//	2019.4 Complexity Control Single Digit	//	2020.3	Removed
 					//if (candidates[i].match(/\d\d/)) e[i]=math.fraction(99999);												//	2019.4 Complexity Control Double Digit	//	2020.3	Removed
@@ -304,7 +313,8 @@ class Newton {
 				return geterrorbypoints(points, outputstring);
 			}
 			function geterrorbypoints(points, outputstring) {
-				if (outputstring=='0 / 0') return math.fraction(0).add(NaN);									//	2018.9
+				//if (outputstring=='0 / 0') return math.fraction(0).add(NaN);	//	2018.9	//	-2022.04
+				if (outputstring == '0 / 0') return math.fraction(1);						//	+2022.04
 				var error = math.fraction(0);
 				for(var i = 0 ; i < points.length ; i++ ) {
 					var scope = {};
