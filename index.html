@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	02/10/2022
+	Date:	05/10/2022
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -35,7 +35,6 @@
 				else cascade();
 			}
 			function go1() {																	//	+2019.12	//	2020.11 Renamed
-				//[vm.pointss, vm.exprsimp, vm.totalsimp] = simplify();							//	-2020.07
 				//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.untransformed] = simplify();		//	+2020.07	//	-2020.10
 				//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();					//	+2020.10	//	-2021.11
 				[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed, vm.totalsimp] = simplify();						//	+2021.11
@@ -75,7 +74,8 @@
 					if (vm.d == 2) panes.push([vm.pointss.orig, vm.expr]); else panes.push([vm.pointss.nonan, vm.expr]);
 					panes.push(exprsimp);
 					panes.push(vm.exprsimp);
-					if (vm.trans>0) panes.push(vm.untransformed[vm.selected]);
+					//if (vm.trans>0) panes.push(vm.untransformed[vm.selected]);								//	-2022.05
+					if (vm.trans>0) vm.untransformed[vm.selected].map(untranselem => panes.push(untranselem));	//	+2022.05
 					if (vm.constant) if (vm.d == 2) panes.push([vm.trans==0?exprsimp:vm.untransformed[vm.selected], vm.constant, totalsimp]); else panes.push([exprsimp, vm.constant, totalsimp]);
 					if (vm.constant) panes.push(totalsimp);
 					return panes;
