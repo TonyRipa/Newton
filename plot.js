@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	9/10/2021
+	Date:	06/10/2022
 	Plot.js: A plot library
 */
 
@@ -17,18 +17,19 @@ class Plot {
 	static plot3(points, dom, options) {
 		var data = new vis.DataSet();
 		for (var i = 0; i < points.length; i++) {
-			data.add({ x: points[i][0], y: points[i][1], z: points[i][2] });
+			//data.add({ x: points[i][0], y: points[i][1], z: points[i][2] });				//	-2022.06
+			data.add({ x: points[i][0], y: points[i][1], z: math.round(points[i][2],4) });	//	+2022.06
 		}
 		Plot.plot3__data(data, dom, options);
 	}
 
 	static plot3__data(data, dom, options) {
-		new vis.Graph3d(document.getElementById(dom), data, options || {});
+		//new vis.Graph3d(document.getElementById(dom), data, options || {});				//	-2022.06
+		Plot.g3 = new vis.Graph3d(document.getElementById(dom), data, options || {});		//	+2022.06
 	}
 
 	static graph(expr, dom) {
 		assert(expr !== undefined, "Plot.graph Arg1 is undefined")	//	2018.8
-		//var f = Plot.expressiontofunction(expr);		//	-2021.9
 		var f = Expression.expressiontofunction(expr);	//	+2021.9
 		var board = JXG.JSXGraph.initBoard(dom, { renderer: 'canvas', boundingbox: [-5, 5, 5, -5], axis: true });
 		board.create('functiongraph', [f, -10, 10]);

@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	05/10/2022
+	Date:	06/10/2022
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -35,7 +35,6 @@
 				else cascade();
 			}
 			function go1() {																	//	+2019.12	//	2020.11 Renamed
-				//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.untransformed] = simplify();		//	+2020.07	//	-2020.10
 				//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();					//	+2020.10	//	-2021.11
 				[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed, vm.totalsimp] = simplify();						//	+2021.11
 			}
@@ -104,8 +103,11 @@
 					function plot_text(text) {
 						$('#main').append(`<td style="text-align:center;width:100px">${text}</td>`);
 					}
-					function plot_html(index) {
-						$('#main').append(`<td><div id="graph${index}" style="border:thin solid black; width:325px; height:325px"></div></td>`);
+					//function plot_html(index) {			//	-2022.06
+					//	$('#main').append(`<td><div id="graph${index}" style="border:thin solid black; width:325px; height:325px"></div></td>`);
+					//}
+					function plot_html(index, title = '') {	//	+2022.06
+						$('#main').append(`<td><div id="graph${index}" title="${title}" style="border:thin solid black; width:325px; height:325px"></div></td>`);
 					}
 					function list_exprs(exprs) {
 						var title=['polyn1 a₀+a₁x+…+aₙxⁿ','laurent21 ax⁻²+bx⁻¹','laurent26 ax⁻²+bx⁻¹+c+dx+ex²+fx³+gx⁴+hx⁵+ix⁶','rational0_0 a/b','rational0_1 a/(bx)','rational1_0 (a+bx)/c','rational1_01H (a+bx)/(c+1*x)','sparse (a+bx+cx²)/(d+ex+fx²)','polynomialratio (a+bx+cx²)/(d+ex+fx²)'];
@@ -119,14 +121,42 @@
 						}
 						$('#main').append(`<td width='160px'><details><summary>${exprs[vm.selected]}</summary>${options}</details></td>`);
 					}
-					function plot_points(points, expr) {
+					//function plot_points(points, expr) {	//	-2022.06
+					//	var id = math.round(math.random(999));
+					//	plot_html(id);
+					//	var vars = Expression.getvars(expr);
+					//	if (points[0].length == 2)
+					//		Plot.plot(points, 'graph' + id);
+					//	else
+					//		Plot.plot3(points, 'graph' + id, { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y', width: '325px' , height: '325px' });
+					//}
+					function plot_points(points, expr) {	//	+2022.06
 						var id = math.round(math.random(999));
-						plot_html(id);
+						plot_html(id, points.map(point=>'('+math.format(point,1).slice(1,-1)+')').join('\n'));
+						let plotable_points = points.map(point => math.typeof(point[0])=="Complex" ? plotable(point) : math.number(point));
 						var vars = Expression.getvars(expr);
-						if (points[0].length == 2)
-							Plot.plot(points, 'graph' + id);
+						if (plotable_points[0].length == 2)
+							Plot.plot(plotable_points, 'graph' + id);
 						else
-							Plot.plot3(points, 'graph' + id, { xLabel: vars[0] || 'x', yLabel: vars[1] || 'y', width: '325px' , height: '325px' });
+							Plot.plot3(plotable_points, 'graph' + id, get_options());
+						function plotable(point) {
+							return [
+								math.complex(point[0]).toPolar().phi,
+								math.complex(point[1]).toPolar().phi,
+								math.complex(point[1]).toPolar().r
+							];
+						}
+						function get_options() {
+							let dim = { width: '325px' , height: '325px' };
+							if (math.typeof(points[0][0]) == "Complex") {
+								let cameraPosition = { horizontal : 0, vertical : 1.57 };
+								let bounds = { xMin : -3.14 , xMax : 3.14 , yMin : -3.14 , yMax : 3.14 };
+								let labels = { xLabel: (vars[0] || 'x') + 'ᵩ', yLabel: 'yᵩ', zLabel: 'yᵣ' };
+								return { ...dim , ...labels , ...bounds , cameraPosition , zStep: 1 };
+							} else {
+								return { ...dim , xLabel: vars[0] || 'x', yLabel: vars[1] || 'y' };
+							}
+						}
 					}
 					function graph_expr(expr) {
 						if (expr === undefined) { var s = "index.plot3 Arg is undefined" ; alert(s) ; throw new Error(s) }
@@ -233,7 +263,8 @@
 				el: '#app',
 				//data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0' },		//	+2020.4			//	-2020.10
 				//data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0', e: '' },						//	+2020.10	//	-2020.11
-				data: { trans: 0, size: 40, range: 1, expr: '', exprsimp: [], selected: '0', e: '' },										//	+2020.11
+				//data: { trans: 0, size: 40, range: 1, expr: '', exprsimp: [], selected: '0', e: '' },										//	+2020.11	//	-2022.06
+				data: { trans: 0, size: 40, range: 1, expr: '', exprsimp: [], selected: 0, e: '' },											//	+2020.11	//	+2022.06
 				watch: { exprsimp: render, selected: render }	//	2019.5	Added
 			});
 		</script>

@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	05/10/2022
+	Date:	06/10/2022
 	Newton:	An A.I. for Math
 */
 
@@ -20,10 +20,10 @@ class Newton {
 		var nonan = Transform.nonan(orig);									//	+2020.8
 		return {orig, nonan};												//	+2020.8
 	}
-	static getpointsreal() {													//	2018.8	Added
-		//return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.number(xyz)));											//	-2020.12
-		return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.typeof(xyz[0])=="Complex"?math.re(xyz):math.number(xyz)));	//	+2020.12
-	}
+	//static getpointsreal() {												//	2018.8	Added									//	-2022.06
+	//	//return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.number(xyz)));											//	-2020.12
+	//	return _.mapValues(Newton.getpoints(),arr=>arr.map(xyz=>math.typeof(xyz[0])=="Complex"?math.re(xyz):math.number(xyz)));	//	+2020.12
+	//}
 	//static getvars(input) {	//	2018.12	//	-2021.9
 	//	input = input.replace('sinh','').replace('sin','').replace('cosh','').replace('cos','').replace('exp','');	//	2019.2	sinh & cosh
 	//	var vars = [];
@@ -43,7 +43,8 @@ class Newton {
 		//({candidates,best} = infers(expr));															//	2019.5	Added	//	-2020.10
 		({candidates,best,e} = infers(expr));																				//	+2020.10
 		assert(candidates !== undefined, "Newton.simplify returning undefined")							//	2018.8	Added
-		var points = Newton.getpointsreal();															//	2019.8	Added
+		//var points = Newton.getpointsreal();															//	2019.8	Added	//	-2022.06
+		var points = Newton.getpoints();																					//	+2022.06
 		//if (!constant) return simplify0pipe(points, candidates, best);								//	2019.8	Added	//	-2020.7
 		//else return simplify1pipe(points, candidates[best], constant);								//	2019.8	Added	//	-2020.7
 		//var ret;																						//	+2020.7			//	-2021.11
@@ -177,7 +178,6 @@ class Newton {
 			function makexs(vars) {
 				var xs = [];
 				var numpoints = (trans==0) ? 40 : 4;	//	2018.7	//	2019.9	Removed	//	--2021.1
-				//numpoints = Number(vm.size);		//	2019.3	//	2019.9	Removed
 				//var numpoints = Number(vm.size);	//	2019.3	//	2019.9	Added	//	-2021.1
 				//var fourierx = { 4 : [math.complex(1,1E-99),math.complex(0,1),math.complex(-1,0),math.complex(0,-1)] ,	//	-2021.5
 				var fourierx = { 4 : [math.complex(1,0),math.complex(0,1),math.complex(-1,0),math.complex(0,-1)] ,			//	+2021.5
