@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	04/10/2022
+	Date:	8/10/2022
 	Render:	A toString Class
 */
 
@@ -55,8 +55,6 @@ Render.transform = class {
 		}
 		if (JSON.stringify(decoderden) == '[0,0,[0,0],[1,0],[2,0,1]]' && termcoefs[0]!=1) {//alert(3)	//	Rational1_O2H (a+bx)/(c+dx+x²)
 			return Render.transform.polynomialratio([termcoefs[1],termcoefs[0],0,0,0,0,termcoefs[2],termcoefs[3],1,0],vars,{decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]],decoderden:[0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]},simp);	//	+2020.11
-			//termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);										//	-2021.6
-			//if (termcoefs[2]==0 && termcoefs[3]==0) return Render.simple.polynomial([termcoefs[0]],vars,[[1,0]]);	//	-2021.6
 		}
 		if (JSON.stringify(decodernum) == '[0,[0,0],0,[1,0],0,[2,0]]' && math.abs(termcoefs[0])!=1) {//alert(4)	//	Sparse (b+dx+fx²)/(a+cx+ex²)	//	+2020.8
 			if (termcoefs[5]==0) return Render.transform.polynomialratio([termcoefs[3],termcoefs[1],0,0,0,0,termcoefs[0],termcoefs[2],termcoefs[4],0],vars,{decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0]],decoderden:[0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]]},simp);	//	+2020.12
@@ -101,7 +99,8 @@ Render.simple = class {
 	static polytoratio(termcoefs, vars, decoder) {	//	+2021.6
 		var fulldecoder = Render.simple.tofulldecoder(termcoefs, decoder);
 		var seq = Render.simple.toseq(fulldecoder);
-		var {num,den} = Transform.infiniteseq2frac(seq);
+		//var {num,den} = Transform.infiniteseq2frac(seq);		//	-2022.8
+		var {num,den} = Transform.infiniteseq2frac(seq,true);	//	+2022.8
 		var decoders = { decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0],[-5,0],[-6,0],[-7,0],[-8,0]], decoderden: [0,0,0,0,0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]] };	//	+2021.7
 		return Render.simple.polynomialratio([...num,...den], vars, decoders);
 	}

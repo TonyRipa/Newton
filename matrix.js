@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	01/10/2022
+	Date:	8/10/2022
 	Matrix:	A matrix library
 */
 
@@ -42,10 +42,16 @@ class matrix {
 	static solve(A, b) {																//	2019.11	Added
 		console.log('solve', A, b);
 		var AT = math.transpose(A);
+		AT = conj(AT);																	//	+2022.8
+		console.log('AT',AT)															//	+2022.8
 		var ATA = math.multiply(AT, A);
+		console.log('ATA',ATA)															//	+2022.8
 		var ATb = math.multiply(AT, b);
 		if (matrix.short(A)) return matrix.solvesingular(A, b);							//	+2020.12
-		if (!matrix.homogeneous.fullrank(A)) {											//						+2020.11
+		let fullrank = matrix.homogeneous.fullrank(A)									//	+2022.8
+		console.log('fullrank',fullrank);												//	+2022.8
+		//if (!matrix.homogeneous.fullrank(A)) {	//	+2020.11						//	-2022.8
+		if (!fullrank) {																//	+2022.8
 			if (matrix.tall(A))
 				return matrix.solvesingular(ATA, ATb);
 			else
@@ -54,8 +60,11 @@ class matrix {
 		//if (!matrix.homogeneous.fullrank(A)) return matrix.solvesingular(ATA, ATb);	//			+2020.9		-2020.11
 		//if (matrix.homogeneous.singular(ATA)) return matrix.solvesingular(ATA, ATb);	//	+2020.6	-2020.9
 		return matrix.solvenotsingular(ATA, ATb);										//	+2020.6
-		//if (math.abs(math.det(ATA)) > .4) return matrix.solvenotsingular(ATA, ATb);	//	-2020.6
-		//return matrix.solvesingular(ATA, ATb);										//	-2020.6
+		function conj(x) {																//	+2022.8
+			if (Array.isArray(x)) return x.map(conj);
+			if (math.typeof(x)=='Complex)') return math.conj(x);
+			return x;
+		}
 	}
 
 	static tall(A) {																	//	+2020.11
@@ -67,7 +76,8 @@ class matrix {
 	}
 
 	static solvesingular(A, b) {														//	2019.11	Added
-		console.log("Matrix.SolveSingular: A="+JSON.stringify(math.number(A))+", b="+b);//	2019.11	Added
+		//console.log("Matrix.SolveSingular: A="+JSON.stringify(math.number(A))+", b="+b);//	2019.11	Added	//	-2022.8
+		console.log("Matrix.SolveSingular: A="+JSON.stringify(Transform.num2neat(A))+", b="+b);					//	+2022.8
 		if (b.every(x=>x==0)) return matrix.scaletoint(matrix.homogeneous.solve(A));
 		console.log('Matrix.SolveSingular: Homogenizing');
 		for(let i = 0;i<A.length;i++) {
@@ -78,19 +88,29 @@ class matrix {
 		solution.pop();			//	+2020.8
 		//solution.reverse();	//	-2020.9
 		//solution.pop();		//	-2020.8
-		console.log("Matrix.SolveSingular: sol.="+JSON.stringify(math.number(solution)));//	+2020.9
+		//console.log("Matrix.SolveSingular: sol.="+JSON.stringify(math.number(solution)));//	+2020.9	//	-2022.8
+		console.log("Matrix.SolveSingular: sol.="+JSON.stringify(Transform.num2neat(solution)));		//	+2022.8
 		return solution;
 	}
 
-	static solvenotsingular(A, b) {					//	2019.7	Added
-		console.log('Matrix.solvenotsingular')
-		console.log(JSON.stringify(math.number(A)),JSON.stringify(math.number(b)));
-		console.log(math.number(math.det(A)));
-		var Ainv = math.divide(math.eye(A[0].length), A);
-		var x = math.multiply(Ainv, b);
-		console.log(math.number(x.valueOf()))		//	+2020.8
+	static solvenotsingular(A, b) {										//	+2022.8
+		console.log('Matrix.solvenotsingular',A)
+		console.log(JSON.stringify(Transform.num2neat(A)),JSON.stringify(Transform.num2neat(b)))
+		console.log(math.det(A))
+		let x = math.divide(b, math.transpose(A))
+		console.log(Transform.num2neat(x.valueOf()))
 		return x.valueOf();
 	}
+
+	//static solvenotsingular(A, b) {				//	2019.7	Added	//	-2022.8
+	//	console.log('Matrix.solvenotsingular')
+	//	console.log(JSON.stringify(math.number(A)),JSON.stringify(math.number(b)))
+	//	console.log(math.number(math.det(A)));
+	//	var Ainv = math.divide(math.eye(A[0].length), A);
+	//	var x = math.multiply(Ainv, b);
+	//	console.log(math.number(x.valueOf()))		//	+2020.8
+	//	return x.valueOf();
+	//}
 
 	static scaletoint(vect) {								//	2019.7	Added
 		console.log('Matrix.scaletoint');
@@ -98,7 +118,8 @@ class matrix {
 		if (vect.length==2) return scaletoint2(vect);	//	+2021.2
 		var ret = math.multiply(vect,2*3*4*5*6*7*8*9*10*11*12*13);
 		ret = math.round(ret);
-		var gcd = ret.reduce((x,y)=>math.gcd(x,y))
+		//var gcd = ret.reduce((x,y)=>math.gcd(x,y))	//	-2022.8
+		var gcd = ret.reduce(gcdf)						//	+2022.8
 		if (gcd==0) return ret;
 		//if (vect.length==2 && math.norm(ret.map(x=>math.divide(x,gcd)))>1000) return scaletoint2(ret);	//	-2021.2
 		return ret.map(x=>math.divide(x,gcd))
@@ -116,17 +137,48 @@ class matrix {
 		//	var bestindex = scores.indexOf(bestscore);
 		//	return candidates[bestindex];
 		//}
-		function scaletoint2(vect) {	//	+2021.2
+		//function scaletoint2(vect) {	//	+2021.2	//	-2022.8
+		//	var f = vect[0];
+		//	var d = math.number(f);
+		//	//f = dec2frac(d);		//	-2021.3
+		//	f = matrix.dec2frac(d);	//	+2021.3
+		//	console.log('Matrix.scaletoint2 : vect = ' + JSON.stringify(vect) + ' = ' + math.number(vect));
+		//	return [f.n,f.d];
+		//}
+		function scaletoint2(vect) {	//	+2022.8
+			console.log('Matrix.scaletoint2 : vect = ' + JSON.stringify(vect));
 			var f = vect[0];
-			var d = math.number(f);
-			//f = dec2frac(d);		//	-2021.3
-			f = matrix.dec2frac(d);	//	+2021.3
-			console.log('Matrix.scaletoint2 : vect = ' + JSON.stringify(vect) + ' = ' + math.number(vect));
-			return [f.n,f.d];
+			return math.typeof(f)=='Complex' ? complex(f) : notcomplex(f)
+			function complex(f) {
+				let fr = matrix.dec2frac(f.re);
+				let fi = matrix.dec2frac(f.im);
+				let gcd = gcdf(fr.d,fi.d)
+				fr = math.number(fr.mul(gcd));
+				fi = math.number(fi.mul(gcd));
+				return [math.complex(fr,fi),gcd];
+			}
+			function notcomplex(f) {
+				var d = math.number(f);
+				f = matrix.dec2frac(d);
+				return [f.n,f.d];
+			}
+		}
+		function gcdf(x,y) {			//	+2022.8
+			if (math.typeof(x) == 'Complex' && math.typeof(y) == 'Complex') {
+				return x.arg()==y.arg() ? math.gcd(x.abs(),y.abs()) : 1
+			} else if (math.typeof(x) == 'Complex') {
+				return x.arg()==0 ? math.gcd(x.abs(),y) : 1
+			} else if (math.typeof(y) == 'Complex') {
+				return y.arg()==0 ? math.gcd(x,y.abs()) : 1
+			} else {
+				return math.gcd(x,y)
+			}
 		}
 	}
 
 	static dec2frac(decimal) {									//	~2021.3
+		console.log('matrix.dec2frac',decimal)					//	+2022.8
+		if (math.isNaN(math.number(math.abs(decimal)))) return math.fraction(0).add(NaN)	//	+2022.8
 		if (decimal=='.') return new math.fraction(0,1);		//	+2021.12
 		decimal = Number(decimal);								//	+2021.12
 		//if (decimal<0) return dec2frac(-decimal).neg();		//	-2021.3
@@ -236,6 +288,7 @@ class matrix {
 		function terminend2frac(terminend) {
 			if (terminend == '') terminend = '0';
 			if (terminend == '.') terminend = '0';
+			if (math.typeof(terminend) == 'Complex') return terminend;	//	+2022.8
 			return math.fraction(terminend);
 		}
 		function rest2frac(rest) {
@@ -275,11 +328,13 @@ class matrix {
 	}
 
 	static m(A) {									//	2020.1	Added
-		return math.number(A).map(row=>matrix.v(row)).join('\n');
+		//return math.number(A).map(row=>matrix.v(row)).join('\n');			//	-2022.8
+		return Transform.num2neat(A).map(row=>matrix.v(row)).join('\n');	//	+2022.8
 	}
 
 	static v(b) {									//	2020.1	Added
-		return math.number(b).map(x=>x.toFixed(1)).join('\t');
+		//return math.number(b).map(x=>x.toFixed(1)).join('\t');			//	-2022.8
+		return Transform.num2neat(b).join('\t');							//	+2022.8
 	}
 
 }
@@ -444,7 +499,8 @@ matrix.homogeneous = class {
 	static fullrank(A) {																//	+2020.9
 		if (A.length > A[0].length) A = math.transpose(A);
 		var R = matrix.homogeneous.rref(A);
-		console.log('R=',R,math.number(R))
+		//console.log('R=',R,math.number(R))						//	-2022.8
+		console.log('R=',R,Transform.num2neat(R))					//	+2022.8
 		for (var i=0; i<R.length; i++) {
 			if (R[i].every(x=>math.abs(x)<1E-1)) return false;
 		}

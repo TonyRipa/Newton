@@ -1,30 +1,18 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/10/2022
+	Date:	8/10/2022
 	Newton:	An A.I. for Math
 */
 
 class Expression {
-
-	//static getvars(input) {		//	-2022.7
-	//	input = input.toString();	//	+2021.11
-	//	input = input.replaceAll('sinh','').replaceAll('sin','').replaceAll('cosh','').replaceAll('cos','').replaceAll('exp','');
-	//	var vars = [];
-	//	var alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	//	for (let symbol of input) {
-	//		if (alphabet.includes(symbol)) {
-	//			if (!vars.includes(symbol)) vars.push(symbol);
-	//		}
-	//	}
-	//	return vars;
-	//}
 
 	static getvars(str) {			//	+2022.7
 		let bag = getvarsnode(math.parse(str));
 		let set = [...new Set(bag)];
 		return set;
 		function getvarsnode(node) {
+			if (Array.isArray(node)) return node.map(getvarsnode);	//	+2022.8
 			switch (node.type) {
 				case 'ConstantNode': return [];
 				case 'SymbolNode': return [node.name];

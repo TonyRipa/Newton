@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	06/10/2022
+	Date:	8/10/2022
 	Newton:	An A.I. for Math
 */
 
@@ -352,13 +352,6 @@ class Newton {
 				}
 				return scope;
 			}
-			//function solve(A, b) {									//	2019.11	Removed
-			//	console.log('solve',A, b);
-			//	var AT = math.transpose(A);
-			//	var ATA = math.multiply(AT, A);
-			//	var ATb = math.multiply(AT, b);
-			//	return matrix.solve(ATA, ATb);	//	2019.7	Added
-			//}
 		}
 	}
 	/*	//	-2020.7

@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	02/10/2022
+	Date:	8/10/2022
 	Fit:	Infers a function from points
 */
 
@@ -323,7 +323,8 @@ class Fit {
 				var A = [];
 				var b = [];
 				for (let i = 0; i < xs[0].length; i++) {
-					if (isNaN(y[i])) continue;
+					//if (isNaN(y[i])) continue;							//	-2022.8
+					if (math.isNaN(math.number(math.abs(y[i])))) continue;	//	+2022.8
 					try {
 						var c1 = 1;
 						var c2 = xs[0][i];
@@ -818,7 +819,6 @@ Fit.unsafe = class {	//	+2020.8
 		return {
 			tomatrix: function (xs, y) {
 				var A = makeA(xs);
-				//var b = math.dotMultiply(math.dotMultiply(xs[0], xs[0]), y);	//	'xs[0]²*y'
 				var b = xs.ones.map(q=>0);
 				return [A, b];
 				function makeA(xs) {
