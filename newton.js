@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2022
+	Date:	9/10/2022
 	Newton:	An A.I. for Math
 */
 
@@ -145,14 +145,17 @@ class Newton {
 			var e = math.fraction([1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20, 1E20]);													//	+2020.11
 			var candidates = [];
 			//var inferers = [0,1,2,3,4,5,6,7,8];	//	2019.9	Added	//	-2020.8
-			var inferers = [0,1,2,3,4,5,6,7,8];							//	+2020.8
+			//var inferers = [0,1,2,3,4,5,6,7,8];						//	+2020.8	//	-2022.9
+			var inferers = [0];														//	+2022.9
 			for (let i of inferers) {				//	2019.9	Added
 				//try {
 					console.log('Candidate: ' + i);
 					//candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent25) : inferrational(xs, y, i-2);	//	-2020.4
 					//candidates[i] = i==0 ? inferpolynomial(xs, y, F.poly01) : i==1 ? inferpolynomial(xs, y, F.laurent21) : i==2 ? inferpolynomial(xs, y, F.laurent26) : inferrational(xs, y, i-2);	//	+2020.4	//	-2020.12
 					candidates[i] = i==0 ? inferpolynomial(xs, y, F.polyn1(vm.range)) : i==1 ? inferpolynomial(xs, y, F.laurent21()) : i==2 ? inferpolynomial(xs, y, F.laurent26()) : inferrational(xs, y, i-2);//	+2020.4	//	+2020.12
+					console.log(candidates[i])							//	+2022.9
 					candidates[i] = Render.stringify(candidates[i]);	//	+2020.7
+					console.log(candidates[i])							//	+2022.9
 					assert(candidates[i] !== undefined);
 					//e[i] = geterrorbypoints(Newton.getrightpoints(), candidates[i]);		//	2020.2	Removed
 					//e[i] = geterrorbypoints(Newton.getrightpoints(trans), candidates[i]);	//	2020.2	Added	//	-2020.7
@@ -193,9 +196,11 @@ class Newton {
 				//if (vm.trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*Math.random()*8)/100000)));	//	2018.8	Added	//	2020.2	Removed
 				//if (vm.trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin					//	2020.2	Removed
 				//if (trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map(x=>math.fraction(math.round(100000*(Math.random()*8))/100000)));//	2018.8	Added		//	2020.2	Added	//	-2020.8
-				if (trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map((x,k)=>math.fraction(k<9?k:math.round(100000*(Math.random()*32-16))/100000)));								//	+2020.8
+				//if (trans==0) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map((x,k)=>math.fraction(k<9?k:math.round(100000*(Math.random()*32-16))/100000)));								//	+2020.8	//	-2022.9
+				if (vars.length==2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(xs.ones.map((x,k)=>math.fraction(k<9?k:math.round(100000*(Math.random()*32-16))/100000)));										//	+2022.9
 				//if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(_.range(1, numpoints+1).map(x=>x/175));	//	2018.12	start at 1, /175 for sin						//	2020.2	Added	//	-2020.12
-				if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(neighborhoodx);	//	+2020.12
+				//if (trans==1) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(neighborhoodx);	//	+2020.12	//	-2022.9
+				if (vars.length<2) for (var i = 0; i < Math.max(1, vars.length) ; i++) xs.push(neighborhoodx);				//	+2022.9
 				Newton.x = xs;
 				return xs;
 			}
@@ -272,10 +277,10 @@ class Newton {
 				var tomatrix, decoder;
 				//({tomatrix, decoder} = parser());				//	-2020.12
 				({tomatrix, decoder} = parser);					//	+2020.12
-				//var vect = solve(...tomatrix(xs, y));			//	2019.11	Removed
 				var ab = tomatrix(xs, y)
 				console.log(ab)
 				var vect = matrix.solve(...ab);	//	2019.11	Added
+				console.log([vect, vars, decoder])					//	+2022.9
 				return [vect, vars, decoder];						//	+2020.7
 				/*													//	-2020.7
 				var ret = Newton.stringify(vect, vars, decoder);

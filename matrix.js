@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2022
+	Date:	9/10/2022
 	Matrix:	A matrix library
 */
 
@@ -62,7 +62,8 @@ class matrix {
 		return matrix.solvenotsingular(ATA, ATb);										//	+2020.6
 		function conj(x) {																//	+2022.8
 			if (Array.isArray(x)) return x.map(conj);
-			if (math.typeof(x)=='Complex)') return math.conj(x);
+			//if (math.typeof(x)=='Complex)') return math.conj(x);						//	-2022.9
+			if (math.typeof(x)=='Complex') return math.conj(x);							//	+2022.9
 			return x;
 		}
 	}
@@ -94,11 +95,13 @@ class matrix {
 	}
 
 	static solvenotsingular(A, b) {										//	+2022.8
-		console.log('Matrix.solvenotsingular',A)
+		//console.log('Matrix.solvenotsingular',A)						//	-2022.9
+		console.log('Matrix.solvenotsingular',A,b)						//	+2022.9
 		console.log(JSON.stringify(Transform.num2neat(A)),JSON.stringify(Transform.num2neat(b)))
 		console.log(math.det(A))
 		let x = math.divide(b, math.transpose(A))
 		console.log(Transform.num2neat(x.valueOf()))
+		console.log(x.valueOf())										//	+2022.9
 		return x.valueOf();
 	}
 
@@ -486,23 +489,14 @@ matrix.homogeneous = class {
 		}
 	}
 
-	//static rref(A) {												//	2020.1	Added	//	-2020.8
-	//	var ref = matrix.homogeneous.ref;
-	//	var flip = matrix.homogeneous.flip;
-	//	return flip(ref(flip(ref(A,true))));
-	//}
-
-	//static flip(A) {												//	2020.1	Added	//	-2020.8
-	//	return A.slice().reverse().map(row=>row.slice().reverse());
-	//}
-
 	static fullrank(A) {																//	+2020.9
 		if (A.length > A[0].length) A = math.transpose(A);
 		var R = matrix.homogeneous.rref(A);
 		//console.log('R=',R,math.number(R))						//	-2022.8
 		console.log('R=',R,Transform.num2neat(R))					//	+2022.8
 		for (var i=0; i<R.length; i++) {
-			if (R[i].every(x=>math.abs(x)<1E-1)) return false;
+			//if (R[i].every(x=>math.abs(x)<1E-1)) return false;	//	-2022.9
+			if (R[i].every(x=>math.abs(x)<1E-4)) return false;		//	+2022.9
 		}
 		return true;
 	}

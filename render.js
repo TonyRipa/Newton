@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2022
+	Date:	9/10/2022
 	Render:	A toString Class
 */
 
@@ -22,6 +22,7 @@ class Render {	//	+2020.7
 	//}
 
 	static polynomial(termcoefs_vars_decoder) {		//	+2022.04
+		console.log('Render.polynomial',termcoefs_vars_decoder)	//	+2022.9
 		if (termcoefs_vars_decoder[1].length == 2) return [Render.simple.polynomial(...termcoefs_vars_decoder),Render.transform.polynomial(...termcoefs_vars_decoder)];
 		return [[Render.simple.polynomial(...termcoefs_vars_decoder),Render.simple.polytoratio(...termcoefs_vars_decoder)],Render.transform.polynomial(...termcoefs_vars_decoder)];
 	}
@@ -134,14 +135,15 @@ Render.simple = class {
 	}
 
 	static polynomial(termcoefs, vars, decoder) {
-		termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);
+		//termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);							//	-2022.9
+		console.log(termcoefs)																		//	+2022.9
+		termcoefs = termcoefs.map(cell=>math.typeof(cell)=='Complex'?cell.re:cell);					//	+2022.9
+		console.log(termcoefs)																		//	+2022.9
+		termcoefs = termcoefs.map(cell=>math.abs(cell-math.round(cell))<1E-5?math.round(cell):cell);//	+2022.9
+		console.log(termcoefs)																		//	+2022.9
+		termcoefs = termcoefs.map(cell=>matrix.dec2frac(cell));										//	+2022.9
+		console.log(termcoefs)																		//	+2022.9
 		var ret = '';
-		//for (var i = 0; i < decoder.length; i++)							//	-2021.6
-		//	if (Array.isArray(decoder[i]))
-		//		if(decoder[i].length==2)
-		//			ret += term(termcoefs[i] || 0, termvars(decoder[i][0], decoder[i][1], vars))
-		//		else
-		//			ret += term(decoder[i][2] || 0, termvars(decoder[i][0], decoder[i][1], vars))
 		var fulldecoder = Render.simple.tofulldecoder(termcoefs, decoder);	//	+2021.6
 		var seq = Render.simple.toseq(fulldecoder);							//	+2021.6
 		for (let decode of fulldecoder)										//	+2021.6
@@ -153,10 +155,12 @@ Render.simple = class {
 		return ret;
 		function term(termcoef, termvar) {
 			if (termcoef == 0) return '';
-			if ('1'.includes(termvar)) return '+' + termcoef;
+			//if ('1'.includes(termvar)) return '+' + termcoef;											//	-2022.9
+			if ('1'.includes(termvar)) return '+' + neat(termcoef);										//	+2022.9
 			if (termcoef == 1) return '+' + termvar;
 			if (termcoef == -1) return '-' + termvar;	//	+2021.1
-			return '+' + termcoef + ('1'.includes(termvar) ? '' : '*' + termvar);
+			//return '+' + termcoef + ('1'.includes(termvar) ? '' : '*' + termvar);						//	-2022.9
+			return '+' + neat(termcoef) + ('1'.includes(termvar) ? '' : '*' + termvar);					//	+2022.9
 		}
 		function termvars(v1, v2, vars) {
 			if (vars.length == 1) return subterm(vars[0], v1);
@@ -167,6 +171,13 @@ Render.simple = class {
 				if (power == 0) return '';
 				return variable + (power == 1 ? '' : '^' + power);
 			}
+		}
+		function neat(x) {	//	+2022.9
+			let ret = '';
+			if (x.s == -1) ret += '-';
+			ret += x.n;
+			if (x.d != 1) ret += '/' + x.d;
+			return ret;
 		}
 	}
 

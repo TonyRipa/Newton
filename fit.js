@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2022
+	Date:	9/10/2022
 	Fit:	Infers a function from points
 */
 
@@ -10,6 +10,7 @@ class Fit {
 	static polynomialratio() {	//	+2020.8	//	(a+bx+cx²)/(d+ex+fx²)
 		return {
 			tovect: function brute(allpoints) {
+				console.log(allpoints)														//	+2022.9
 				var points = allpoints.slice(0,5);
 				points = Transform.nonan(points);
 				var [xs,y] = Transform.toxy(points);
@@ -17,6 +18,7 @@ class Fit {
 				//var d = y.map(f=>f.d);													//	-2021.8
 				var n = y.map(f=>matrix.dec2frac(Number((f.n/f.d).toFixed(vm.range))).n);	//	+2021.8
 				var d = y.map(f=>matrix.dec2frac(Number((f.n/f.d).toFixed(vm.range))).d);	//	+2021.8
+				console.log(n,d)															//	+2022.9
 				var num = matrix.solve(...Fit.poly21().tomatrix(xs,n));
 				var den = matrix.solve(...Fit.poly21().tomatrix(xs,d));
 				return [...num,...den];
@@ -241,7 +243,8 @@ class Fit {
 				var A = [];
 				var b = [];
 				for (let i = 0; i < xs[0].length; i++) {
-					if (isNaN(y[i])) continue;
+					//if (isNaN(y[i])) continue;							//	-2022.9
+					if (math.isNaN(math.number(math.abs(y[i])))) continue;	//	+2022.9
 					try {
 						var c1 = 1;
 						var c2 = math.multiply(-1, y[i]);
@@ -268,7 +271,8 @@ class Fit {
 				var A = [];
 				var b = [];
 				for (let i = 0; i < xs[0].length; i++) {
-					if (isNaN(y[i])) continue;
+					//if (isNaN(y[i])) continue;							//	-2022.9
+					if (math.isNaN(math.number(math.abs(y[i])))) continue;	//	+2022.9
 					try {
 						var c1 = 1;
 						var c2 = math.multiply(-1, math.multiply(xs[0][i], y[i]));
@@ -295,7 +299,8 @@ class Fit {
 				var A = [];
 				var b = [];
 				for (let i = 0; i < xs[0].length; i++) {
-					if (isNaN(y[i])) continue;
+					//if (isNaN(y[i])) continue;							//	-2022.9
+					if (math.isNaN(math.number(math.abs(y[i])))) continue;	//	+2022.9
 					try {
 						var c1 = 1;
 						var c2 = xs[0][i];
@@ -305,7 +310,8 @@ class Fit {
 						b.push(0);
 					} catch(e) { }
 				}
-				console.log('rational0_1 : ' + JSON.stringify(['A=',A,'b=',b]));
+				//console.log('rational0_1 : ' + JSON.stringify(['A=',A,'b=',b]));	//	-2022.9
+				console.log('rational1_0 : ' + JSON.stringify(['A=',A,'b=',b]));	//	+2022.9
 				return [A, b];
 			},
 			decodernum: [[0,0],[1,0]],
@@ -368,7 +374,6 @@ class Fit {
 					AT.push(c2);
 					AT.push(c3);
 					AT.push(c4);
-					//AT.push(c5);
 					return math.transpose(AT);
 				}
 			},
@@ -701,7 +706,8 @@ class Fit {
 				var A = [];
 				var b = [];
 				for (let i = 0; i < xs[0].length; i++) {
-					if (isNaN(y[i])) continue;
+					//if (isNaN(y[i])) continue;							//	-2022.9
+					if (math.isNaN(math.number(math.abs(y[i])))) continue;	//	+2022.9
 					try {
 						var row = [];
 						for (var power = -2; power <= -1; power++) row.push(math.pow(xs[0][i],power));
@@ -743,7 +749,8 @@ class Fit {
 				var A = [];
 				var b = [];
 				for (let i = 0; i < xs[0].length; i++) {
-					if (isNaN(y[i])) continue;
+					//if (isNaN(y[i])) continue;							//	-2022.9
+					if (math.isNaN(math.number(math.abs(y[i])))) continue;	//	+2022.9
 					try {
 						var row = [];
 						for (var power = 0; power <= n; power++) row.push(math.pow(xs[0][i],power));
@@ -751,7 +758,10 @@ class Fit {
 						b.push(y[i]);
 					} catch(e) { }
 				}
-				console.log('polyn1 : ' + JSON.stringify(['n=',n,'A=',A,'b=',b]));
+				//console.log('polyn1 : ' + JSON.stringify(['n=',n,'A=',A,'b=',b]));	//	-2022.9
+				console.log('polyn1 : n = ' + JSON.stringify(n));						//	+2022.9
+				console.log('polyn1 : A = ' + JSON.stringify(A));						//	+2022.9
+				console.log('polyn1 : b = ' + JSON.stringify(b));						//	+2022.9
 				return [A, b];
 			},
 			//decoder: _.range(n+1).map(x=>[x,0])		//	-2021.3
