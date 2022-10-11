@@ -1,14 +1,16 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	06/10/2022
+	Date:	10/10/2022
 	Plot.js: A plot library
 */
 
 class Plot {
 
-	static plot(points, dom) {
-		var board = JXG.JSXGraph.initBoard(dom, { renderer: 'canvas', boundingbox: [-5, 5, 5, -5], axis: true });
+	//static plot(points, dom) {																					//	-2022.10
+	//	var board = JXG.JSXGraph.initBoard(dom, { renderer: 'canvas', boundingbox: [-5, 5, 5, -5], axis: true });	//	-2022.10
+	static plot(points, dom, options = { renderer: 'canvas', boundingbox: [-5, 5, 5, -5], axis: true }) {			//	+2022.10
+		var board = JXG.JSXGraph.initBoard(dom, options);															//	+2022.10
 		for (var i = 0; i < points.length; i++) {
 			board.create('point', points[i], { name: '', size: .1 });
 		}
@@ -66,75 +68,5 @@ class Plot {
 			return data;
 		}
 	}
-
-	//static plot3__datas(datas, dom, options) {		//	-2021.9
-	//	new Plotly.newPlot(dom, [datas], options);
-	//}
-	//
-	//static graph3s(expr, dom, options) {
-	//	var f = Plot.expressiontofunction(expr);
-	//	var data1 = Plot.functiontoplotlydata(f);
-	//	Plot.plot3__datas(data1, dom, { scene: { aspectratio: { x: 1, y: 1, z: 1 } } });
-	//	return data;
-	//}
-	//
-	//static functiontoplotlydata(f) {
-	//	if (f.length == 1) return functiontoplotlydata1(f);
-	//	if (f.length == 2) return functiontoplotlydata2(f);
-	//	throw new Error('Not the right amount of variables.');
-	//	function functiontoplotlydata1(f) {
-	//		var y = [];
-	//		for (var x = -5; x < 5; x++)
-	//			y.push(f(x));
-	//		return {y};
-	//	}
-	//	function functiontoplotlydata2(f) {
-	//		var z = []
-	//		for (var x = -5; x < 5; x++) {
-	//			var row = []
-	//			for (var y = -5; y < 5; y++) {
-	//				row.push(f(x, y));
-	//			}
-	//			z.push(row)
-	//		}
-	//		return {x:[-5,-4,-3,-2,-1,0,1,2,3,4,5],y:[-5,-4,-3,-2,-1,0,1,2,3,4,5],z, type: 'surface'};
-	//	}
-	//}
-	//
-	//static expressiontofunction(expr) {
-	//	assert(expr !== undefined, "Plot.expressiontofunction Arg is undefined")	//	2018.8
-	//	var vars = Plot.getvars(expr);
-	//	if (vars.length <= 1) return Plot.expressiontofunction1(expr);
-	//	if (vars.length == 2) return Plot.expressiontofunction2(expr);
-	//	throw new Error('Not the right amount of variables: expr = ' + expr);
-	//}
-	//
-	//static expressiontofunction1(expr) {
-	//	expr = expr.replace(new RegExp('\\^', 'g'), '**');
-	//	expr = expr.replace(/[A-Za-z]/g, 'x')
-	//	var f = x=>eval(expr);
-	//	return f;
-	//}
-	//
-	//static expressiontofunction2(expr) {
-	//	var vars = Plot.getvars(expr);
-	//	expr = expr.replace(/\^/g, '**');
-	//	expr = expr.replace(new RegExp(vars[0], 'g'), 'x');
-	//	expr = expr.replace(new RegExp(vars[1], 'g'), 'y');
-	//	var f = (x, y) =>eval(expr);
-	//	return f;
-	//}
-	//
-	//static getvars(input) {
-	//	assert(input !== undefined, "Plot.getvars Arg is undefined")	//	2018.8  
-	//	var vars = [];
-	//	var alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	//	for (let symbol of input) {
-	//		if (alphabet.includes(symbol)) {
-	//			if (!vars.includes(symbol)) vars.push(symbol);
-	//		}
-	//	}
-	//	return vars;
-	//}
 
 }

@@ -1,8 +1,8 @@
 
 /*
-    Author: Anthony John Ripa
-    Date:   8/10/2022
-    UnTransform: A data untransformer
+	Author: Anthony John Ripa
+	Date:   10/10/2022
+	UnTransform: A data untransformer
 */
 
 class Untransform {				//	+2020.7
@@ -17,6 +17,7 @@ class Untransform {				//	+2020.7
 		if (s == 's / (1+s^2)') return 'cos(x)';
 		if (s == '1 / (-1+s^2)') return 'sinh(x)';
 		if (s == 's / (-1+s^2)') return 'cosh(x)';
+		if (s == '1 / (1+-2*s+s^2)') return 'x*exp(x)';	//	+2022.10
 		if (s.includes('-') && !s.includes(' / ') && !s.includes('^-')) {	//	+2021.1
 			var arr = s.split('-');
 			return arr.map(Untransform.str).join('-');
@@ -28,7 +29,6 @@ class Untransform {				//	+2020.7
 		if (s.startsWith('2 /')) {
 			var un = Untransform.str('1'+s.substr(1));	//	+2020.7
 			if (un == '1') return 2;
-			//return '2*' + untransform(s.substr(2));	//	-2020.7
 			return '2*' + Untransform.str('1 '+s.substr(2));//	+2020.7
 		}
 		if (s.match(/^-?\d*\*\w\^-?\d+$/)) {			//	+2021.11

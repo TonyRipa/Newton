@@ -1,7 +1,7 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   8/10/2022
+    Date:   10/10/2022
     Transform: A data transformer
 */
 
@@ -34,8 +34,11 @@ class Transform {												//	+2020.6
 	}
 
 	static isfrac(seq) {																//	+2021.6
-		var terminating = math.abs(seq.slice(-1)[0])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01 || math.abs(seq[0])<.01);	//	+2021.7
+		//var terminating = math.abs(seq.slice(-1)[0])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01 || math.abs(seq[0])<.01);	//	+2021.7	//	-2022.10
+		var terminating = math.abs(seq.slice(-1)[0])<.01 && (math.abs(seq[2])<.01 || math.abs(seq[1])>.01);											//	+2022.10
 		var geometric = math.abs(seq[0]*seq[3]-seq[1]*seq[2])<.01;
+		var shiftedgeometric = math.abs(seq[1]/1*seq[4]/4-seq[2]/2*seq[3]/3)<.01;	//	+2022.10
+		geometric ||= shiftedgeometric;												//	+2022.10
 		return !terminating && geometric;
 	}
 
@@ -58,7 +61,6 @@ class Transform {												//	+2020.6
 		pow -= leading0;
 		var num = new Array(L+2).fill(0);	//	+2021.7
 		num[1-pow] = seq[0];					//	index=1-pow : return API is numerators as [x¹,x⁰,x⁻¹,x⁻²,x⁻³,x⁻⁴]
-		//while (den.length<4) den.push(0);		//	+2021.5	//	-2021.7
 		while (den.length<L) den.push(0);					//	+2021.7
 		return {num, den}
 		function leftshift(arr) { arr.shift(); arr.push(0); }
