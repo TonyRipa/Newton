@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	8/10/2022
+	Date:	11/10/2022
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -36,22 +36,23 @@
 			}
 			function go1() {																	//	+2019.12	//	2020.11 Renamed
 				//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();					//	+2020.10	//	-2021.11
-				[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed, vm.totalsimp] = simplify();						//	+2021.11
+				//[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed, vm.totalsimp] = simplify();					//	+2021.11	//	-2022.11
+				vm.simplify = simplify();																										//	+2022.11
+				[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed] = vm.simplify;													//	+2022.11
 			}
 			function cascade() {			//	+2020.11
 				//for (vm.range=1; vm.range<9; vm.range++) {		//	-2020.12
 					for (vm.range=1; vm.range<=9; vm.range++) {		//	+2020.12
 						for (vm.trans of [0,1]) {	//	+2021.1
 							//[vm.pointss, vm.exprsimp, vm.totalsimp, vm.e, vm.untransformed] = simplify();				//	-2021.11
-							[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed, vm.totalsimp] = simplify();	//	+2021.11
+							//[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed, vm.totalsimp] = simplify();//	+2021.11			//	-2022.11
+							vm.simplify = simplify();																							//	+2022.11
+							[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed] = vm.simplify;										//	+2022.11
 							//if (vm.e && vm.e[vm.selected]<.00001) break;	//	-2021.1
 							if (vm.e && vm.e[vm.selected]<.00001) return;	//	+2021.1
 						}
 					}
 			}
-			//function validate() {	//	2019.12	Added	//	-2020.11
-			//	return simplify()[1][vm.selected] == vm.exprsimp[vm.selected];
-			//}
 			function simplify() {	//	2019.12	Added
 				var input;
 				input = $('#inp').val() || '0';
@@ -68,7 +69,8 @@
 				function make_panes() {
 					var panes = [];
 					var exprsimp = vm.exprsimp[vm.selected];
-					var totalsimp = (vm.totalsimp||vm.exprsimp)[vm.selected];
+					//var totalsimp = (vm.totalsimp||vm.exprsimp)[vm.selected];	//	-2022.11
+					var totalsimp = (vm.simplify.slice(-1)[0])[vm.selected];	//	+2022.11
 					panes.push(vm.expr);
 					if (vm.d == 2) panes.push([vm.pointss.orig, vm.expr]); else panes.push([vm.pointss.nonan, vm.expr]);
 					panes.push(exprsimp);
