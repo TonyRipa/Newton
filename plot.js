@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	10/10/2022
+	Date:	12/10/2022
 	Plot.js: A plot library
 */
 
@@ -9,11 +9,68 @@ class Plot {
 
 	//static plot(points, dom) {																					//	-2022.10
 	//	var board = JXG.JSXGraph.initBoard(dom, { renderer: 'canvas', boundingbox: [-5, 5, 5, -5], axis: true });	//	-2022.10
-	static plot(points, dom, options = { renderer: 'canvas', boundingbox: [-5, 5, 5, -5], axis: true }) {			//	+2022.10
-		var board = JXG.JSXGraph.initBoard(dom, options);															//	+2022.10
-		for (var i = 0; i < points.length; i++) {
-			board.create('point', points[i], { name: '', size: .1 });
-		}
+	//static plot(points, dom, options = { renderer: 'canvas', boundingbox: [-5, 5, 5, -5], axis: true }) {			//	+2022.10	//	-2022.12
+	//	var board = JXG.JSXGraph.initBoard(dom, options);															//	+2022.10
+	//	for (var i = 0; i < points.length; i++) {
+	//		board.create('point', points[i], { name: '', size: .1 });
+	//	}
+	//}
+
+	static plot(points, dom, options) {																								//	+2022.12
+
+		let tooltip = d3.select("body").append("div").style("opacity","0").style("position","absolute").style("background-color","grey")
+
+		d3.select('#'+dom).select('svg').remove()
+
+		let width = 325
+		let height = 325
+
+		let margin = {left:50,right:50,top:50,bottom:50}
+
+		let ymin = d3.min(points.map(xy=>xy[1]))
+		let ymax = d3.max(points.map(xy=>xy[1]))
+		if (ymin == ymax) { ymin-- ; ymax++ }
+
+		let xmin = d3.min(points.map(xy=>xy[0]))
+		let xmax = d3.max(points.map(xy=>xy[0]))
+		if (xmin == xmax) { xmin-- ; xmax++ }
+
+		if (options && options.boundingbox) [xmin, ymax, xmax, ymin] = options.boundingbox
+
+		let y = d3.scaleLinear().domain([ymin, ymax]).range([height, 0])
+		let yAxis = d3.axisLeft(y).ticks(3)
+
+		let x = d3.scaleLinear().domain([xmin, xmax]).range([0,width])
+		let xAxis = d3.axisBottom(x).ticks(3)
+
+		var svg = d3.select('#'+dom).append('svg')
+			.attr('height','100%').attr('width','100%')
+			.attr('viewBox',`0 0 ${width} ${height}`).attr('preserveAspectRatio','none')
+
+		svg.selectAll('circle')
+			.data(points)
+			.enter().append('circle')
+			.attr('cx', function(d) { return x(d[0]) })
+			.attr('cy', function(d) { return y(d[1]) })
+			.attr('r' , 5)
+			.attr('fill', 'red')
+			.on('mousemove',function(event, d) {
+				d3.select(this).attr('r',10).attr('fill','cyan')
+				tooltip.style("opacity","1")
+				.style("left",(event.pageX+ 1)+"px")
+				.style("top" ,(event.pageY-30)+"px")
+				tooltip.html(d)
+			})
+			.on('mouseout',function(event, d) {
+				d3.select(this).attr('r',5).attr('fill','red')
+				tooltip.style("opacity","0")
+			})
+
+		svg.append('g').attr('transform', `translate(${margin.left},0)`)
+			.call(yAxis)
+
+		svg.append('g').attr('transform', `translate(0,${height-margin.top})`)
+			.call(xAxis)
 	}
 
 	static plot3(points, dom, options) {
@@ -39,7 +96,6 @@ class Plot {
 	}
 
 	static graph3(expr, dom, options) {
-		//var f = Plot.expressiontofunction(expr);		//	-2021.9
 		var f = Expression.expressiontofunction(expr);	//	+2021.9
 		return Plot.graph3f(f, dom, options);
 	}
