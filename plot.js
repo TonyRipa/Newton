@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	12/10/2022
+	Date:	1/10/2023
 	Plot.js: A plot library
 */
 
@@ -16,67 +16,77 @@ class Plot {
 	//	}
 	//}
 
-	static plot(points, dom, options) {																								//	+2022.12
-
-		let tooltip = d3.select("body").append("div").style("opacity","0").style("position","absolute").style("background-color","grey")
-
-		d3.select('#'+dom).select('svg').remove()
-
-		let width = 325
-		let height = 325
-
-		let margin = {left:50,right:50,top:50,bottom:50}
-
-		let ymin = d3.min(points.map(xy=>xy[1]))
-		let ymax = d3.max(points.map(xy=>xy[1]))
-		if (ymin == ymax) { ymin-- ; ymax++ }
-
-		let xmin = d3.min(points.map(xy=>xy[0]))
-		let xmax = d3.max(points.map(xy=>xy[0]))
-		if (xmin == xmax) { xmin-- ; xmax++ }
-
-		if (options && options.boundingbox) [xmin, ymax, xmax, ymin] = options.boundingbox
-
-		let y = d3.scaleLinear().domain([ymin, ymax]).range([height, 0])
-		let yAxis = d3.axisLeft(y).ticks(3)
-
-		let x = d3.scaleLinear().domain([xmin, xmax]).range([0,width])
-		let xAxis = d3.axisBottom(x).ticks(3)
-
-		var svg = d3.select('#'+dom).append('svg')
-			.attr('height','100%').attr('width','100%')
-			.attr('viewBox',`0 0 ${width} ${height}`).attr('preserveAspectRatio','none')
-
-		svg.selectAll('circle')
-			.data(points)
-			.enter().append('circle')
-			.attr('cx', function(d) { return x(d[0]) })
-			.attr('cy', function(d) { return y(d[1]) })
-			.attr('r' , 5)
-			.attr('fill', 'red')
-			.on('mousemove',function(event, d) {
-				d3.select(this).attr('r',10).attr('fill','cyan')
-				tooltip.style("opacity","1")
-				.style("left",(event.pageX+ 1)+"px")
-				.style("top" ,(event.pageY-30)+"px")
-				tooltip.html(d)
-			})
-			.on('mouseout',function(event, d) {
-				d3.select(this).attr('r',5).attr('fill','red')
-				tooltip.style("opacity","0")
-			})
-
-		svg.append('g').attr('transform', `translate(${margin.left},0)`)
-			.call(yAxis)
-
-		svg.append('g').attr('transform', `translate(0,${height-margin.top})`)
-			.call(xAxis)
+	static plot(points, dom, options) {																								//	+2023.1
+		points = math.transpose(points)
+		let trace = {
+			x: points[0],
+			y: points[1],
+			mode: 'markers',
+			type: 'scatter'
+		}
+		Plotly.newPlot(dom, [trace])
 	}
+
+	// static plot(points, dom, options) {																			//	+2022.12	//	-2023.1
+
+	// 	let tooltip = d3.select("body").append("div").style("opacity","0").style("position","absolute").style("background-color","grey")
+
+	// 	d3.select('#'+dom).select('svg').remove()
+
+	// 	let width = 325
+	// 	let height = 325
+
+	// 	let margin = {left:50,right:50,top:50,bottom:50}
+
+	// 	let ymin = d3.min(points.map(xy=>xy[1]))
+	// 	let ymax = d3.max(points.map(xy=>xy[1]))
+	// 	if (ymin == ymax) { ymin-- ; ymax++ }
+
+	// 	let xmin = d3.min(points.map(xy=>xy[0]))
+	// 	let xmax = d3.max(points.map(xy=>xy[0]))
+	// 	if (xmin == xmax) { xmin-- ; xmax++ }
+
+	// 	if (options && options.boundingbox) [xmin, ymax, xmax, ymin] = options.boundingbox
+
+	// 	let y = d3.scaleLinear().domain([ymin, ymax]).range([height, 0])
+	// 	let yAxis = d3.axisLeft(y).ticks(3)
+
+	// 	let x = d3.scaleLinear().domain([xmin, xmax]).range([0,width])
+	// 	let xAxis = d3.axisBottom(x).ticks(3)
+
+	// 	var svg = d3.select('#'+dom).append('svg')
+	// 		.attr('height','100%').attr('width','100%')
+	// 		.attr('viewBox',`0 0 ${width} ${height}`).attr('preserveAspectRatio','none')
+
+	// 	svg.selectAll('circle')
+	// 		.data(points)
+	// 		.enter().append('circle')
+	// 		.attr('cx', function(d) { return x(d[0]) })
+	// 		.attr('cy', function(d) { return y(d[1]) })
+	// 		.attr('r' , 5)
+	// 		.attr('fill', 'red')
+	// 		.on('mousemove',function(event, d) {
+	// 			d3.select(this).attr('r',10).attr('fill','cyan')
+	// 			tooltip.style("opacity","1")
+	// 			.style("left",(event.pageX+ 1)+"px")
+	// 			.style("top" ,(event.pageY-30)+"px")
+	// 			tooltip.html(d)
+	// 		})
+	// 		.on('mouseout',function(event, d) {
+	// 			d3.select(this).attr('r',5).attr('fill','red')
+	// 			tooltip.style("opacity","0")
+	// 		})
+
+	// 	svg.append('g').attr('transform', `translate(${margin.left},0)`)
+	// 		.call(yAxis)
+
+	// 	svg.append('g').attr('transform', `translate(0,${height-margin.top})`)
+	// 		.call(xAxis)
+	// }
 
 	static plot3(points, dom, options) {
 		var data = new vis.DataSet();
 		for (var i = 0; i < points.length; i++) {
-			//data.add({ x: points[i][0], y: points[i][1], z: points[i][2] });				//	-2022.06
 			data.add({ x: points[i][0], y: points[i][1], z: math.round(points[i][2],4) });	//	+2022.06
 		}
 		Plot.plot3__data(data, dom, options);

@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	12/10/2022
+	Date:	1/10/2023
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -10,7 +10,8 @@
 	<head>
 		<title>Newton</title>
 		<meta charset="utf-8" />
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.7.0/d3.min.js"></script>	<!--	+2022.12	-->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.17.0/plotly.js"></script>	<!--	+2023.1	-->
+		<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.7.0/d3.min.js"></script>-->	<!--	+2022.12-->	<!--	-2023.1	-->
 		<script src='../js/jquery.js'></script><script>window.jQuery || document.write("<script src='https://code.jquery.com/jquery-latest.js'><" + "/script>")</script>
 		<script src='../js/math3.js'></script><script>window.math || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js'><" + "/script>")</script>
 		<script src='../js/lodash.js'></script><script>window._ || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min.js'><" + "/script>")</script>
@@ -244,7 +245,6 @@
 								<input type='range' min='1' max='9' step='1' v-model='range' title='Complexity'><span title='Complexity'>{{range}}</span><br>
 								<br>
 								<center v-if='e'>Complexity: {{range}}</center>				<!-- +2020.11 -->
-								<!--<center v-if='e'>Error: {{e[selected]}}</center>-->		<!-- +2020.10 -->	<!-- -2020.11 -->
 								<center v-if='e'>Error: {{e[selected].toExponential(0)}}</center>				<!-- +2020.11 -->
 							</div>
 						</details>
