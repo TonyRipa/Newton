@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	1/10/2023
+	Date:	2/10/2023
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -170,7 +170,8 @@
 						if (vars.length <= 1)
 							Plot.graph(expr, 'graph' + id);
 						else
-							Plot.graph3(expr, 'graph' + id, { style: 'surface', xLabel: vars[0] || 'x', yLabel: vars[1] || 'y', width: '325px' , height: '325px' });
+							Plot.graph3(expr, 'graph' + id, { showLegend: true, legendLabel: '', style: 'surface', xLabel: vars[0] || 'x', yLabel: vars[1] || 'y', width: '325px' , height: '325px' });	//	+2023.02
+							//Plot.graph3(expr, 'graph' + id, { style: 'surface', xLabel: vars[0] || 'x', yLabel: vars[1] || 'y', width: '325px' , height: '325px' });	//	-2023.02
 					}
 					function projection(expr, x, totalsimp) {
 						var id = math.round(math.random(999));
@@ -262,7 +263,6 @@
 		<script>
 			vm = new Vue({
 				el: '#app',
-				//data: { trans: 0, size: 40, range: 5, expr: '', exprsimp: [], selected: '0', e: '' },						//	+2020.10	//	-2020.11
 				//data: { trans: 0, size: 40, range: 1, expr: '', exprsimp: [], selected: '0', e: '' },										//	+2020.11	//	-2022.06
 				data: { trans: 0, size: 40, range: 1, expr: '', exprsimp: [], selected: 0, e: '' },											//	+2020.11	//	+2022.06
 				watch: { exprsimp: render, selected: render }	//	2019.5	Added
