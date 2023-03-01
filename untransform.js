@@ -1,7 +1,7 @@
 
 /*
 	Author: Anthony John Ripa
-	Date:   10/10/2022
+	Date:   02/28/2023
 	UnTransform: A data untransformer
 */
 
@@ -26,10 +26,15 @@ class Untransform {				//	+2020.7
 			var arr = s.split('+');
 			return arr.map(Untransform.str).join('+');	//	+2020.7
 		}
-		if (s.startsWith('2 /')) {
-			var un = Untransform.str('1'+s.substr(1));	//	+2020.7
-			if (un == '1') return 2;
-			return '2*' + Untransform.str('1 '+s.substr(2));//	+2020.7
+		//if (s.startsWith('2 /')) {					//	-2023.02
+		//	var un = Untransform.str('1'+s.substr(1));	//	+2020.7
+		//	if (un == '1') return 2;
+		//	return '2*' + Untransform.str('1 '+s.substr(2));//	+2020.7
+		//}
+		if (s.match(new RegExp("\\d /"))) {				//	+2023.02
+			var un = Untransform.str('1'+s.substr(1));
+			if (un == '1') return s[0];
+			return s[0] + '*' + Untransform.str('1 '+s.substr(2));
 		}
 		if (s.match(/^-?\d*\*\w\^-?\d+$/)) {			//	+2021.11
 			var [coef,spow] = s.split("*");
