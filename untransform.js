@@ -1,7 +1,7 @@
 
 /*
 	Author: Anthony John Ripa
-	Date:   02/28/2023
+	Date:   03/10/2023
 	UnTransform: A data untransformer
 */
 
@@ -31,7 +31,8 @@ class Untransform {				//	+2020.7
 		//	if (un == '1') return 2;
 		//	return '2*' + Untransform.str('1 '+s.substr(2));//	+2020.7
 		//}
-		if (s.match(new RegExp("\\d /"))) {				//	+2023.02
+		//if (s.match(new RegExp("\\d /"))) {			//	+2023.02	//	-2023.03
+		if (s.match(new RegExp("[2-9] /"))) {							//	+2023.03
 			var un = Untransform.str('1'+s.substr(1));
 			if (un == '1') return s[0];
 			return s[0] + '*' + Untransform.str('1 '+s.substr(2));
@@ -42,7 +43,6 @@ class Untransform {				//	+2020.7
 			if (un == '1') return coef;
 			return coef + '*' + un;
 		}
-		//return 'ℒ⁻¹(' + s + ')';						//	-2022.8
 		return 'ℒ^-1(' + s + ')';						//	+2022.8
 	}
 
