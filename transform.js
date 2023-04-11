@@ -1,7 +1,7 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   10/10/2022
+    Date:   4/10/2023
     Transform: A data transformer
 */
 
@@ -49,13 +49,16 @@ class Transform {												//	+2020.6
 		seq = seq.map(x=>math.typeof(x)=='Fraction'?math.number(x):x)									//	+2022.8
 		seq = math.round(seq)																			//	+2022.8
 		var leading0 = 1;	//	All sequences implicitly have 1 leading0 in 1's place (i.e. start at .1's place) ( e.g. 0.4738 )
-		if (seq.some(x=>x!=0))																										//	+2021.8
+		if (seq.some(x=>x!=0)) {	//	~2023.4
 			while (seq[0]==0) { leftshift(seq); leading0++ }								//	Process leading0's	//	+2020.12
-		var den = divide([seq[0],...new Array(L-1).fill(0)],seq);	//	+2021.7
-		den.pop();		//	Least significant number in division is typically error so remove it
-		den.reverse()	//	[…,x³,x²,x¹,x⁰,…] -> […,x⁰,x¹,x²,x³,…]
-		while (den[0]==0 || math.abs(den[0]/den[1]) < 0.5) den.shift(); // Remove Leading0's (Leading0's are negative powers)
-		if (powers_increasing) den.reverse()															//	+2022.8
+			var den = divide([seq[0],...new Array(L-1).fill(0)],seq);	//	+2021.7
+			den.pop();		//	Least significant number in division is typically error so remove it
+			den.reverse()	//	[…,x³,x²,x¹,x⁰,…] -> […,x⁰,x¹,x²,x³,…]
+			while (den[0]==0 || math.abs(den[0]/den[1]) < 0.5) den.shift(); // Remove Leading0's (Leading0's are negative powers)
+			if (powers_increasing) den.reverse()															//	+2022.8
+		} else {					//	+2023.4
+			var den = [1]
+		}
 		var width = den.length;					//	Denominator Width			//	e.g. width(101) = 3
 		var pow = width - 1;													//	Highest power of a polynomial is width-1
 		pow -= leading0;
@@ -65,7 +68,6 @@ class Transform {												//	+2020.6
 		return {num, den}
 		function leftshift(arr) { arr.shift(); arr.push(0); }
 		function divide(num,den) {
-			//return div(num,den,3).slice(0,4);	//	-2021.7
 			return div(num,den,3).slice(0,L);	//	+2021.7
 			function div(n,d,c) {
 				if (c<=0) return n;
