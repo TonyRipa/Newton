@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	9/10/2022
+	Date:	5/10/2023
 	Fit:	Infers a function from points
 */
 
@@ -158,7 +158,8 @@ class Fit {
 					//function finiteseq2frac(seq) { return {'num' : [0,0,...seq] , 'den' : [1,0,0,0] } }		//	-2021.3
 					function finiteseq2frac(seq) {																//	+2021.3
 						seq = math.number(seq);
-						seq = seq.map(matrix.dec2frac);
+						//seq = seq.map(matrix.dec2frac);			//	-2023.5
+						seq = seq.map(x=>matrix.dec2frac(x,11));	//	+2023.5
 						var dens = seq.map(x=>x.d);
 						var lcm = math.lcm(...dens);
 						seq = seq.map(x=>x.mul(lcm));
@@ -363,7 +364,6 @@ class Fit {
 					var c2 = [...xs.ones, 0];
 					var c3 = [...math.multiply(-1, math.dotMultiply(xs[0], y)), 1];
 					var c4 = [...math.multiply(-1, y), 0];
-					//var c5 = [0, 0, 0, 0, 1];
 					console.log('xs[0]', c1);
 					console.log('xs.ones', c2);
 					console.log('xs[0]*y', c3);

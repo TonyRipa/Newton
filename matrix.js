@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	9/10/2022
+	Date:	5/10/2023
 	Matrix:	A matrix library
 */
 
@@ -83,7 +83,6 @@ class matrix {
 		console.log('Matrix.SolveSingular: Homogenizing');
 		for(let i = 0;i<A.length;i++) {
 			A[i].push(math.unaryMinus(b[i]));
-			//A[i].reverse();	//	-2020.8
 		}
 		var solution = matrix.homogeneous.solve(A);
 		solution.pop();			//	+2020.8
@@ -179,13 +178,15 @@ class matrix {
 		}
 	}
 
-	static dec2frac(decimal) {									//	~2021.3
+	//static dec2frac(decimal) {								//	~2021.3	//	-2023.5
+	static dec2frac(decimal, precision = 19) {								//	+2023.5
 		console.log('matrix.dec2frac',decimal)					//	+2022.8
 		if (math.isNaN(math.number(math.abs(decimal)))) return math.fraction(0).add(NaN)	//	+2022.8
 		if (decimal=='.') return new math.fraction(0,1);		//	+2021.12
 		decimal = Number(decimal);								//	+2021.12
 		//if (decimal<0) return dec2frac(-decimal).neg();		//	-2021.3
-		if (decimal<0) return matrix.dec2frac(-decimal).neg();	//	+2021.3
+		//if (decimal<0) return matrix.dec2frac(-decimal).neg();//	+2021.3	//	-2023.5
+		if (decimal<0) return matrix.dec2frac(-decimal,precision).neg();	//	+2023.5
 		decimal = standard(decimal);
 		var radix = decimal.indexOf('.');
 		var [terminend,rest] = split(decimal);
@@ -197,7 +198,8 @@ class matrix {
 		function standard(decimal) {
 			//decimal = String(decimal);								//	-2021.3
 			//decimal = decimal.toFixed(16);							//	+2021.3	//	-2021.12
-			decimal = decimal.toFixed(19);											//	+2021.12
+			//decimal = decimal.toFixed(19);										//	+2021.12	//	-2023.5
+			decimal = decimal.toFixed(precision);													//	+2023.5
 			//while (decimal.slice(-1)==0) decimal = decimal.slice(0,-1)//	+2021.3	//	-2022.01
 			decimal = unpad(decimal);
 			decimal = ensureradix(decimal);
