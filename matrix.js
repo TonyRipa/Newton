@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	5/10/2023
+	Date:	6/10/2023
 	Matrix:	A matrix library
 */
 
@@ -63,7 +63,8 @@ class matrix {
 		function conj(x) {																//	+2022.8
 			if (Array.isArray(x)) return x.map(conj);
 			//if (math.typeof(x)=='Complex)') return math.conj(x);						//	-2022.9
-			if (math.typeof(x)=='Complex') return math.conj(x);							//	+2022.9
+			//if (math.typeof(x)=='Complex') return math.conj(x);						//	+2022.9	//	-2023.6
+			if (math.typeOf(x)=='Complex') return math.conj(x);										//	+2023.6
 			return x;
 		}
 	}
@@ -87,7 +88,6 @@ class matrix {
 		var solution = matrix.homogeneous.solve(A);
 		solution.pop();			//	+2020.8
 		//solution.reverse();	//	-2020.9
-		//solution.pop();		//	-2020.8
 		//console.log("Matrix.SolveSingular: sol.="+JSON.stringify(math.number(solution)));//	+2020.9	//	-2022.8
 		console.log("Matrix.SolveSingular: sol.="+JSON.stringify(Transform.num2neat(solution)));		//	+2022.8
 		return solution;
@@ -150,7 +150,8 @@ class matrix {
 		function scaletoint2(vect) {	//	+2022.8
 			console.log('Matrix.scaletoint2 : vect = ' + JSON.stringify(vect));
 			var f = vect[0];
-			return math.typeof(f)=='Complex' ? complex(f) : notcomplex(f)
+			//return math.typeof(f)=='Complex' ? complex(f) : notcomplex(f)	//	-2023.6
+			return math.typeOf(f)=='Complex' ? complex(f) : notcomplex(f)	//	+2023.6
 			function complex(f) {
 				let fr = matrix.dec2frac(f.re);
 				let fi = matrix.dec2frac(f.im);
@@ -165,12 +166,24 @@ class matrix {
 				return [f.n,f.d];
 			}
 		}
-		function gcdf(x,y) {			//	+2022.8
-			if (math.typeof(x) == 'Complex' && math.typeof(y) == 'Complex') {
+		//function gcdf(x,y) {			//	+2022.8	//	-2023.6
+		//	if (math.typeof(x) == 'Complex' && math.typeof(y) == 'Complex') {
+		//		return x.arg()==y.arg() ? math.gcd(x.abs(),y.abs()) : 1
+		//	} else if (math.typeof(x) == 'Complex') {
+		//		return x.arg()==0 ? math.gcd(x.abs(),y) : 1
+		//	} else if (math.typeof(y) == 'Complex') {
+		//		return y.arg()==0 ? math.gcd(x,y.abs()) : 1
+		//	} else {
+		//		return math.gcd(x,y)
+		//	}
+		//}
+		function gcdf(x,y) {						//	+2023.6
+			let [typex, typey] = [math.typeOf(x), math.typeOf(y)]
+			if (typex == 'Complex' && typey == 'Complex') {
 				return x.arg()==y.arg() ? math.gcd(x.abs(),y.abs()) : 1
-			} else if (math.typeof(x) == 'Complex') {
+			} else if (typex == 'Complex') {
 				return x.arg()==0 ? math.gcd(x.abs(),y) : 1
-			} else if (math.typeof(y) == 'Complex') {
+			} else if (typey == 'Complex') {
 				return y.arg()==0 ? math.gcd(x,y.abs()) : 1
 			} else {
 				return math.gcd(x,y)
@@ -293,7 +306,8 @@ class matrix {
 		function terminend2frac(terminend) {
 			if (terminend == '') terminend = '0';
 			if (terminend == '.') terminend = '0';
-			if (math.typeof(terminend) == 'Complex') return terminend;	//	+2022.8
+			//if (math.typeof(terminend) == 'Complex') return terminend;	//	+2022.8	//	-2023.6
+			if (math.typeOf(terminend) == 'Complex') return terminend;					//	+2023.6
 			return math.fraction(terminend);
 		}
 		function rest2frac(rest) {

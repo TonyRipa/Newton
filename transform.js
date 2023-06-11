@@ -1,14 +1,13 @@
 
 /*
     Author: Anthony John Ripa
-    Date:   4/10/2023
+    Date:   6/10/2023
     Transform: A data transformer
 */
 
 
 class Transform {												//	+2020.6
 
-	//static nonan(points) { return points.filter(xy=>!math.number(xy).includes(NaN)); }	//	+2020.8												//	-2021.9
 	//static nonan(points) { console.log(points);return points.filter(xy=>xy[0].hasOwnProperty('im')?(!xy[0].isNaN()&&!xy[1].isNaN()):!math.number(xy).includes(NaN)); }	//	+2021.9	//	-2022.8
 	static nonan(points) {	//	+2022.8
 		return points.filter( point => point.every(an) )
@@ -46,7 +45,8 @@ class Transform {												//	+2020.6
 	static infiniteseq2frac(seq, powers_increasing) {													//	+2022.8
 		var L = seq.length;	//	+2021.7
 		//seq = math.round(math.number(seq))															//	-2022.8
-		seq = seq.map(x=>math.typeof(x)=='Fraction'?math.number(x):x)									//	+2022.8
+		//seq = seq.map(x=>math.typeof(x)=='Fraction'?math.number(x):x)									//	+2022.8	//	-2023.6
+		seq = seq.map(x=>math.typeOf(x)=='Fraction'?math.number(x):x)												//	+2023.6
 		seq = math.round(seq)																			//	+2022.8
 		var leading0 = 1;	//	All sequences implicitly have 1 leading0 in 1's place (i.e. start at .1's place) ( e.g. 0.4738 )
 		if (seq.some(x=>x!=0)) {	//	~2023.4
@@ -82,16 +82,29 @@ class Transform {												//	+2020.6
 		}
 	}
 
-	static num2neat(num) {	//	+2022.8
-		if (math.typeof(num)=='Array') {
+	static num2neat(num) {	//	+2023.6
+		let type = math.typeOf(num)
+		if (type=='Array') {					
 			return num.map(Transform.num2neat)
-		} else if (math.typeof(num)=='Complex') {
+		} else if (type=='Complex') {
 			return num.round().toString()
-		} else if (math.typeof(num)=='string') {
-			return Transform.num2neat(math.eval(num))
+		} else if (type=='string') {
+			return Transform.num2neat(math.evaluate(num))
 		} else {
 			return math.number(num)
 		}
 	}
+
+	//static num2neat(num) {	//	+2022.8	//	-2023.6
+	//	if (math.typeof(num)=='Array') {					
+	//		return num.map(Transform.num2neat)
+	//	} else if (math.typeof(num)=='Complex') {
+	//		return num.round().toString()
+	//	} else if (math.typeof(num)=='string') {
+	//		return Transform.num2neat(math.eval(num))
+	//	} else {
+	//		return math.number(num)
+	//	}
+	//}
 
 }

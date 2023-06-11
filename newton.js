@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	9/10/2022
+	Date:	6/10/2023
 	Newton:	An A.I. for Math
 */
 
@@ -16,7 +16,8 @@ class Newton {
 	static getpoints() {
 		var orig = _.zip(...Newton.x, Newton.y);
 		console.log(orig)
-		if (math.typeof(Newton.x[0][0])=="Complex") return {orig, nonan:[]}	//	+2020.12
+		//if (math.typeof(Newton.x[0][0])=="Complex") return {orig, nonan:[]}	//	+2020.12	//	-2023.6
+		if (math.typeOf(Newton.x[0][0])=="Complex") return {orig, nonan:[]}						//	+2023.6
 		var nonan = Transform.nonan(orig);									//	+2020.8
 		return {orig, nonan};												//	+2020.8
 	}
@@ -226,7 +227,8 @@ class Newton {
 			//	return ys;
 			//}
 			function makey(xs, input) {	//	+2020.12
-				if (math.typeof(xs[0][0]) == "Complex")
+				//if (math.typeof(xs[0][0]) == "Complex")	//	-2023.6
+				if (math.typeOf(xs[0][0]) == "Complex")		//	+2023.6
 					var ys = makeyraw(xs, input);
 				else if (input.includes('2.718') || input.includes('sin') || input.includes('cos') || input.includes('exp'))
 					var ys = makeyraw(xs.map(x=>math.number(x)), input).map(y=>math.fraction(0).add(y));
@@ -245,7 +247,8 @@ class Newton {
 						}
 						var scope = makescope(vars, vals);
 						try {
-							ys.push(math.eval(expression, scope));
+							//ys.push(math.eval(expression, scope));	//	-2023.6
+							ys.push(math.evaluate(expression, scope));	//	+2023.6
 						} catch { ys.push(NaN); }
 					}
 					return ys;
@@ -326,7 +329,8 @@ class Newton {
 				var scope = {};
 				for (let char of 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
 					scope[char] = x;
-				var y = math.eval(inputstring,scope);
+				//var y = math.eval(inputstring,scope);		//	-2023.6
+				var y = math.evaluate(inputstring,scope);	//	+2023.6
 				points = [[x,math.fraction(y)]];
 				return geterrorbypoints(points, outputstring);
 			}
@@ -340,7 +344,8 @@ class Newton {
 						scope[char] = points[i][0];
 					var input = points[i][1];
 					try {
-						var output = math.eval(outputstring, scope);
+						//var output = math.eval(outputstring, scope);		//	-2023.6
+						var output = math.evaluate(outputstring, scope);	//	+2023.6
 					} catch(e) {
 						var output = 0;
 					}

@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	5/10/2023
+	Date:	6/10/2023
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -15,7 +15,8 @@
 		<script src='../js/jquery.js'></script><script>window.jQuery || document.write("<script src='https://code.jquery.com/jquery-latest.js'><" + "/script>")</script>
 		<!-- <script src='../js/math3.js'></script><script>window.math || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js'><" + "/script>")</script> -->	<!--	-2023.4	-->
 		<!-- <script src='../js/math4.4.1.js'></script><script>window.math || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/4.4.1/math.min.js'><" + "/script>")</script> -->	<!--	+2023.4	-->	<!--	-2023.5	-->
-		<script src='../js/math4.4.2.js'></script><script>window.math || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/4.4.2/math.min.js'><" + "/script>")</script>	<!--	+2023.5	-->
+		<!-- <script src='../js/math4.4.2.js'></script><script>window.math || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/4.4.2/math.min.js'><" + "/script>")</script> -->	<!--	+2023.5	-->	<!--	-2023.6	-->
+		<script src='../js/math7.js'></script><script>window.math || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.0.0/math.min.js'><" + "/script>")</script>	<!--	+2023.6	-->
 		<script src='../js/lodash.js'></script><script>window._ || document.write("<script src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min.js'><" + "/script>")</script>
 		<script src='../js/jsxgraphcore.js'></script>
 		<script>
@@ -51,7 +52,6 @@
 						//[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed, vm.totalsimp] = simplify();//	+2021.11			//	-2022.11
 						vm.simplify = simplify();																							//	+2022.11
 						[vm.selected, vm.e, vm.pointss, vm.exprsimp, vm.untransformed] = vm.simplify;										//	+2022.11
-						//if (vm.e && vm.e[vm.selected]<.00001) break;	//	-2021.1
 						if (vm.e && vm.e[vm.selected]<.00001) return;	//	+2021.1
 					}
 				}
@@ -138,7 +138,8 @@
 					function plot_points(points, expr) {	//	+2022.06
 						var id = math.round(math.random(999));
 						plot_html(id, points.map(point=>'('+math.format(point,1).slice(1,-1)+')').join('\n'));
-						let plotable_points = points.map(point => math.typeof(point[0])=="Complex" ? plotable(point) : math.number(point));
+						//let plotable_points = points.map(point => math.typeof(point[0])=="Complex" ? plotable(point) : math.number(point));//	-2023.6
+						let plotable_points = points.map(point => math.typeOf(point[0])=="Complex" ? plotable(point) : math.number(point));  //	+2023.6
 						var vars = Expression.getvars(expr);
 						if (plotable_points[0].length == 2)
 							Plot.plot(plotable_points, 'graph' + id);
@@ -153,7 +154,8 @@
 						}
 						function get_options() {
 							let dim = { width: '325px' , height: '325px' };
-							if (math.typeof(points[0][0]) == "Complex") {
+							//if (math.typeof(points[0][0]) == "Complex") {	//	-2023.6
+							if (math.typeOf(points[0][0]) == "Complex") {	//	+2023.6
 								let cameraPosition = { horizontal : 0, vertical : 1.57 };
 								let bounds = { xMin : -3.14 , xMax : 3.14 , yMin : -3.14 , yMax : 3.14 };
 								let labels = { xLabel: (vars[0] || 'x') + 'ᵩ', yLabel: 'yᵩ', zLabel: 'yᵣ' };

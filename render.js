@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	9/10/2022
+	Date:	6/10/2023
 	Render:	A toString Class
 */
 
@@ -102,7 +102,8 @@ Render.simple = class {
 		var seq = Render.simple.toseq(fulldecoder);
 		//var {num,den} = Transform.infiniteseq2frac(seq);		//	-2022.8
 		var {num,den} = Transform.infiniteseq2frac(seq,true);	//	+2022.8
-		var decoders = { decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0],[-5,0],[-6,0],[-7,0],[-8,0]], decoderden: [0,0,0,0,0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]] };	//	+2021.7
+		//var decoders = { decodernum:[[1,0],[0,0],[-1,0],[-2,0],[-3,0],[-4,0],[-5,0],[-6,0],[-7,0],[-8,0]], decoderden: [0,0,0,0,0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]] };	//	+2021.7	//	-2023.6
+		var decoders = { decodernum:[[-1,0],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]], decoderden: [0,0,0,0,0,0,0,0,0,0,[0,0],[1,0],[2,0],[3,0]] };						//	+2023.6
 		return Render.simple.polynomialratio([...num,...den], vars, decoders);
 	}
 
@@ -118,7 +119,6 @@ Render.simple = class {
 
 	static toseq(fulldecoder) {	//	+2021.6
 		var seq = [];
-		//for (let power of [0,1,2,3])			//	-2021.7
 		for (let power of [0,1,2,3,4,5,6,7])	//	+2021.7
 			if (fulldecoder.filter(xyc=>xyc[0]==power).length) seq.push(fulldecoder.filter(xyc=>xyc[0]==power)[0][2]); else seq.push(0);
 		return seq;
@@ -137,7 +137,8 @@ Render.simple = class {
 	static polynomial(termcoefs, vars, decoder) {
 		//termcoefs = termcoefs.map(cell=>Math.round(cell * 1.00) / 1.00);							//	-2022.9
 		console.log(termcoefs)																		//	+2022.9
-		termcoefs = termcoefs.map(cell=>math.typeof(cell)=='Complex'?cell.re:cell);					//	+2022.9
+		//termcoefs = termcoefs.map(cell=>math.typeof(cell)=='Complex'?cell.re:cell);				//	+2022.9	//	-2023.6
+		termcoefs = termcoefs.map(cell=>math.typeOf(cell)=='Complex'?cell.re:cell);								//	+2023.6
 		console.log(termcoefs)																		//	+2022.9
 		termcoefs = termcoefs.map(cell=>math.abs(cell-math.round(cell))<1E-5?math.round(cell):cell);//	+2022.9
 		console.log(termcoefs)																		//	+2022.9

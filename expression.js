@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2022
+	Date:	6/10/2023
 	Newton:	An A.I. for Math
 */
 
@@ -48,7 +48,8 @@ class Expression {
 		throw new Error('Not the right amount of variables: expr = ' + expr);
 		function expressiontofunction1(expr) {
 			var vari = Expression.getvars(expr)[0];
-			var f = x=>math.eval(expr,JSON.parse('{' + '"' + vari + '"' + ':'+x+'}'));
+			//var f = x=>math.eval(expr,JSON.parse('{' + '"' + vari + '"' + ':'+x+'}'));	//	-2023.6
+			var f = x=>math.evaluate(expr, {[vari]: x});									//	+2023.6
 			return f;
 		}
 		function expressiontofunction2(expr) {

@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	5/10/2023
+	Date:	6/10/2023
 	Fit:	Infers a function from points
 */
 
@@ -16,8 +16,17 @@ class Fit {
 				var [xs,y] = Transform.toxy(points);
 				//var n = y.map(f=>f.n);													//	-2021.8
 				//var d = y.map(f=>f.d);													//	-2021.8
-				var n = y.map(f=>matrix.dec2frac(Number((f.n/f.d).toFixed(vm.range))).n);	//	+2021.8
-				var d = y.map(f=>matrix.dec2frac(Number((f.n/f.d).toFixed(vm.range))).d);	//	+2021.8
+				let type = math.typeOf(y[0])												//	+2023.6
+				if (type == 'number') {														//	+2023.6
+					var n = y.map(x=>matrix.dec2frac(Number((x).toFixed(vm.range))).n);
+					var d = y.map(x=>matrix.dec2frac(Number((x).toFixed(vm.range))).d);
+				} else if (type == 'Complex') {
+					var n = _.chunk(matrix.scaletoint(y.map(e=>[e.re.toFixed(vm.range),e.im.toFixed(vm.range)]).flat()),2).map(e=>math.complex(...e))
+					var d = n.map((e,i)=>e==0?1:math.round(math.divide(e,y[i])));
+				} else {
+					var n = y.map(f=>matrix.dec2frac(Number((f.n/f.d).toFixed(vm.range))).n);//	+2021.8
+					var d = y.map(f=>matrix.dec2frac(Number((f.n/f.d).toFixed(vm.range))).d);//	+2021.8					
+				}
 				console.log(n,d)															//	+2022.9
 				var num = matrix.solve(...Fit.poly21().tomatrix(xs,n));
 				var den = matrix.solve(...Fit.poly21().tomatrix(xs,d));
@@ -45,7 +54,6 @@ class Fit {
 					if (p[0]+p[2]+p[4]==0) continue;
 					for (var sp=p; sp.some(x=>x>0); sp=incrementsign(sp)) {
 						//console.log(JSON.stringify([n,p,sp]));
-						//var curval = diff(f, points, sp);						//	2020.3	Removed
 						var curcomp = complexity(sp);							//	+2020.5
 						//var curval = diff(f, points, sp) * complexity(sp);	//	2020.3	Added	//	-2020.5
 						var curval = diff(f, points, sp) * curcomp;				//	+2020.5
@@ -116,7 +124,8 @@ class Fit {
 	static differential() {			//	2018.11
 		return {
 			tovect: function transform(points) {			   console.log('parsDiff: points = ',points.map(xy=>math.format(xy[1])));
-				var comp = math.typeof(points[0][0]) == "Complex";	//	+2020.12
+				//var comp = math.typeof(points[0][0]) == "Complex";	//	+2020.12	//	-2023.6
+				var comp = math.typeOf(points[0][0]) == "Complex";						//	+2023.6
 				var derivatives = pointstoderivatives(points); console.log('parsDiff: der = ',math.format(derivatives));
 				var {num,den} = seq2frac(derivatives);		   console.log('parsDiff: der = ',math.format(derivatives),' num = ',num,' den = ',math.format(den))
 				return [...num,...den];
