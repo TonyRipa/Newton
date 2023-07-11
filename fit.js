@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/10/2023
+	Date:	7/10/2023
 	Fit:	Infers a function from points
 */
 
@@ -44,7 +44,6 @@ class Fit {
 				var points = _.sampleSize(allpoints, 16);
 				var f = (x, p) =>(p[1] + p[3] * x + p[5] * x * x) / (p[0] + p[2] * x + p[4] * x * x);
 				var range = vm.range;
-				//var bestval = 1000;			//	-2020.4
 				var bestval = 1/0;				//	+2020.4
 				var bestcomp = 1/0;				//	+2020.5
 				var besti;
@@ -135,7 +134,8 @@ class Fit {
 						var y = points.map(xy=>xy[1]);
 						//return math.re(matrix.dft(y)).map((x,i)=>math.multiply(x,math.factorial(i))).slice(0,4);							//	-2021.5
 						//return math.re(matrix.idft(y)).map((x,i)=>math.prod(x,math.factorial(i),math.pow(points[0][0].re,-i))).slice(0,4);//	+2021.5	//	-2021.7
-						return math.re(matrix.idft(y)).map((x,i)=>math.prod(x,math.factorial(i),math.pow(points[0][0].re,-i)));							//	+2021.7
+						//return math.re(matrix.idft(y)).map((x,i)=>math.prod(x,math.factorial(i),math.pow(points[0][0].re,-i)));						//	+2021.7	//	-2023.7
+						return math.re(math.divide(math.fft(y),y.length)).map((x,i)=>math.prod(x,math.factorial(i),math.pow(points[0][0].re,-i)));	//	+2023.7
 					}
 					function realpointstoderivatives(points) {		//	~2021.3
 						return center();
@@ -780,6 +780,7 @@ class Fit {
 
 }
 
+/*	//	-2023.7
 Fit.unsafe = class {	//	+2020.8
 
 	static laurent21() {	//	ax⁻²+bx⁻¹
@@ -939,3 +940,4 @@ Fit.unsafe = class {	//	+2020.8
 	}
 
 }
+*/

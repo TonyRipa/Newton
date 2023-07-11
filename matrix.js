@@ -1,48 +1,49 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/10/2023
+	Date:	7/10/2023
 	Matrix:	A matrix library
 */
 
 class matrix {
 
 	//static dft(b) {	//	-2021.5
-	static idft(b) {	//	+2021.5
-		if (b.length == 4) {
-			var w0 = math.complex(1,0);
-			var w1 = math.complex(0,1);
-			var w2 = math.complex(-1,0);
-			var w3 = math.complex(0,-1);
-			var M = [[w0,w0,w0,w0],
-					 [w0,w1,w2,w3],
-					 [w0,w2,w0,w2],
-					 [w0,w3,w2,w1]];
-		} else {
-			var w0 = math.complex(+1,0);
-			var w1 = math.complex(+.7071067811865475,+.7071067811865475);
-			var w2 = math.complex(0,+1);
-			var w3 = math.complex(-.7071067811865475,+.7071067811865475);
-			var w4 = math.complex(-1,0);
-			var w5 = math.complex(-.7071067811865475,-.7071067811865475);
-			var w6 = math.complex(0,-1);
-			var w7 = math.complex(+.7071067811865475,-.7071067811865475);
-			var M = [[w0,w0,w0,w0,w0,w0,w0,w0],
-					 [w0,w1,w2,w3,w4,w5,w6,w7],
-					 [w0,w2,w4,w6,w0,w2,w4,w6],
-					 [w0,w3,w6,w1,w4,w7,w2,w5],
-					 [w0,w4,w0,w4,w0,w4,w0,w4],
-					 [w0,w5,w2,w7,w4,w1,w6,w3],
-					 [w0,w6,w4,w2,w0,w6,w4,w2],
-					 [w0,w7,w6,w5,w4,w3,w2,w1]]
-		}
-		return math.divide(b,M);
-	}
+	//static idft(b) {	//	+2021.5	//	-2023.7
+	//	if (b.length == 4) {
+	//		var w0 = math.complex(1,0);
+	//		var w1 = math.complex(0,1);
+	//		var w2 = math.complex(-1,0);
+	//		var w3 = math.complex(0,-1);
+	//		var M = [[w0,w0,w0,w0],
+	//				 [w0,w1,w2,w3],
+	//				 [w0,w2,w0,w2],
+	//				 [w0,w3,w2,w1]];
+	//	} else {
+	//		var w0 = math.complex(+1,0);
+	//		var w1 = math.complex(+.7071067811865475,+.7071067811865475);
+	//		var w2 = math.complex(0,+1);
+	//		var w3 = math.complex(-.7071067811865475,+.7071067811865475);
+	//		var w4 = math.complex(-1,0);
+	//		var w5 = math.complex(-.7071067811865475,-.7071067811865475);
+	//		var w6 = math.complex(0,-1);
+	//		var w7 = math.complex(+.7071067811865475,-.7071067811865475);
+	//		var M = [[w0,w0,w0,w0,w0,w0,w0,w0],
+	//				 [w0,w1,w2,w3,w4,w5,w6,w7],
+	//				 [w0,w2,w4,w6,w0,w2,w4,w6],
+	//				 [w0,w3,w6,w1,w4,w7,w2,w5],
+	//				 [w0,w4,w0,w4,w0,w4,w0,w4],
+	//				 [w0,w5,w2,w7,w4,w1,w6,w3],
+	//				 [w0,w6,w4,w2,w0,w6,w4,w2],
+	//				 [w0,w7,w6,w5,w4,w3,w2,w1]]
+	//	}
+	//	return math.divide(b,M);
+	//}
 
 	static solve(A, b) {																//	2019.11	Added
 		console.log('solve', A, b);
 		var AT = math.transpose(A);
-		AT = conj(AT);																	//	+2022.8
+		// AT = conj(AT);																//	+2022.8	//	-2023.7
+		AT = math.conj(AT);																			//	+2023.7
 		console.log('AT',AT)															//	+2022.8
 		var ATA = math.multiply(AT, A);
 		console.log('ATA',ATA)															//	+2022.8
@@ -60,13 +61,13 @@ class matrix {
 		//if (!matrix.homogeneous.fullrank(A)) return matrix.solvesingular(ATA, ATb);	//			+2020.9		-2020.11
 		//if (matrix.homogeneous.singular(ATA)) return matrix.solvesingular(ATA, ATb);	//	+2020.6	-2020.9
 		return matrix.solvenotsingular(ATA, ATb);										//	+2020.6
-		function conj(x) {																//	+2022.8
-			if (Array.isArray(x)) return x.map(conj);
-			//if (math.typeof(x)=='Complex)') return math.conj(x);						//	-2022.9
-			//if (math.typeof(x)=='Complex') return math.conj(x);						//	+2022.9	//	-2023.6
-			if (math.typeOf(x)=='Complex') return math.conj(x);										//	+2023.6
-			return x;
-		}
+		// function conj(x) {															//	+2022.8	//	-2023.7
+		// 	if (Array.isArray(x)) return x.map(conj);
+		// 	//if (math.typeof(x)=='Complex)') return math.conj(x);						//	-2022.9
+		// 	//if (math.typeof(x)=='Complex') return math.conj(x);						//	+2022.9	//	-2023.6
+		// 	if (math.typeOf(x)=='Complex') return math.conj(x);										//	+2023.6
+		// 	return x;
+		// }
 	}
 
 	static tall(A) {																	//	+2020.11
