@@ -1,7 +1,7 @@
 ﻿
 <!--
 	Author: Anthony John Ripa
-	Date:	8/10/2023
+	Date:	9/10/2023
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -10,13 +10,21 @@
 	<head>
 		<title>Newton</title>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.9.1/math.js"></script>
-		<script src="comp.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.js"></script>
+		<script src="http://tonyripa.github.io/PlaceValue/digit.js"></script>
+		<script src="http://tonyripa.github.io/PlaceValue/rational.js"></script>
+		<script src="http://tonyripa.github.io/PlaceValue/complex.js"></script>
+		<script src="http://tonyripa.github.io/PlaceValue/rationalcomplex.js"></script>
+		<script src="wholeplacevalue.js"></script>
+		<script src="http://tonyripa.github.io/PlaceValue/placevalueratio.js"></script>
+		<script src="http://tonyripa.github.io/PlaceValue/abstractpolynomial.js"></script>
+		<script src="http://tonyripa.github.io/PlaceValue/polynomial1.js"></script>
+		<script src="polynomialratio1.js"></script>
 		<script src="newton.js"></script>
 		<script>
 			function go() {
 				let input = $('input').val()
-				let output = new Newton(input).simplify()
+				let output = Newton.simplify(input)
 				$('output').val(output)
 			}
 		</script>
@@ -24,7 +32,41 @@
 	<body>
 		<center>
 			<h1>Newton</h1>
-			<input value='x/x'>
+			<input id='inp' placeholder="Type or Click Dropdown" style="position:absolute;width:140px;" value='0'>
+			<select onchange="$('#inp').val($(this).val())" style="height:23px;width:190px">
+				<option disabled>Choose an option or type</option>
+				<optgroup label="0 Variable">
+					<option selected>0</option>
+					<option>1</option>
+					<option>2</option>
+					<option>12/8</option>
+				</optgroup>
+				<optgroup label="1 Variable">
+					<option>x</option>
+					<option>x*x</option>
+					<option>x/x</option>
+					<option>(x^2-1)/(x-1)</option>
+					<option>(x-1)/(x^2-1)</option>
+					<option>2+h</option>
+					<option>(2+h)^2</option>
+					<option>(2+h)^2-2^2</option>
+					<option>((2+h)^2-2^2)/h</option>
+					<option>((2+h)^2-2^2)/h|0</option>
+				</optgroup>
+				<optgroup label="Exponential">
+					<option>exp(x)</option>
+					<option>exp(2x)</option>
+					<option>sin(x)</option>
+					<option>sin(3x)</option>
+					<option>cos(x)</option>
+					<option>cos(4x)</option>
+					<option>sinh(x)</option>
+					<option>sinh(5x)</option>
+					<option>cosh(x)</option>
+					<option>cosh(6x)</option>
+				</optgroup>
+			</select><br>
+			<br>
 			<button onclick='go()'>Go</button><br>
 			<br>
 			<output></output>
