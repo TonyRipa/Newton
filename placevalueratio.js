@@ -1,6 +1,6 @@
 
 // Author:  Anthony John Ripa
-// Date:    10/10/2023
+// Date:    11/10/2023
 // PlaceValueRatio: a datatype for representing base agnostic arithmetic via ratios of WholePlaceValues
 
 class placevalueratio {					//	+2023.5
@@ -238,7 +238,7 @@ class placevalueratio {					//	+2023.5
 		return ratio.get(0)
 	}
 
-	factor() {	//	+2023.10
+	factor() {	//	+2023.11
 		let n = this.num.clone()
 		let d = this.den.clone()
 		let power = 0
@@ -251,10 +251,24 @@ class placevalueratio {					//	+2023.5
 		let r = n.reciprocal()
 		let q = n.divide(d)
 		if (r.len() <= 4) return this.parse('('+q.get(0)+')E'+power+'/('+q.get(1).times(q.get(1)).divide(q.get(0)).sub(q.get(2)).divide(q.get(0))+')('+q.get(1).divide(q.get(0)).negate()+')(1)')
+		if (f1(this,q)) return f1(this,q)	//	+2023.11
 		return this.clone()
+		function f1(me, q) {				//	+2023.11
+			//	a + c/(1-bx)
+			let len = q.len()
+			if (len<3) return false
+			let b = q.get(2).divide(q.get(1))
+			for (let i = 1 ; i < len-1 ; i++)
+				if (!(q.get(i).times(b).equals(q.get(i+1)))) return false
+			let c = q.get(1).divide(b)
+			let a = q.get(0).sub(c)
+			let n = q.parse('('+a.times(b).negate()+')('+a.add(c)+')')
+			let d = q.parse('('+b.negate()         +')(1)')
+			return new me.constructor(n,d)
+		}
 	}
 
-/*	//	-2023.10
+/*	//	-2023.11
 	factor() {	//	+2023.5
 		//if (this.num.len() < 5) return this.clone()										//	-2023.7
 		if (this.num.len() < 4) return this.clone()											//	+2023.7
