@@ -1,6 +1,6 @@
 
 // Author:  Anthony John Ripa
-// Date:    11/10/2023
+// Date:    12/10/2023
 // PlaceValueRatio: a datatype for representing base agnostic arithmetic via ratios of WholePlaceValues
 
 class placevalueratio {					//	+2023.5
@@ -65,7 +65,8 @@ class placevalueratio {					//	+2023.5
 	tohtml(short) {       // Long and Short HTML  2015.11
 		if (short) return this.toString(true);
 		//return this.num.toString(true) + ' / ' + this.den;      // Replaces toStringInternal 2015.7	//	-2023.5
-		return this.num.toString(true) + ' / ' + this.den + ' = ' + this.num.divideleft(this.den);		//	+2023.5
+		//return this.num.toString(true) + ' / ' + this.den + ' = ' + this.num.divideleft(this.den);	//	+2023.5	//	-2023.11
+		return  this.num.divideleft(this.den) + ' = ' + this.num.toString(true) + ' / ' + this.den + ' = ' + new markedplacevalue(this.num).divide(new markedplacevalue(this.den));	//	+2023.11
 	}
 
 	toString(sTag) {      //  sTag    2015.11
@@ -252,6 +253,7 @@ class placevalueratio {					//	+2023.5
 		let q = n.divide(d)
 		if (r.len() <= 4) return this.parse('('+q.get(0)+')E'+power+'/('+q.get(1).times(q.get(1)).divide(q.get(0)).sub(q.get(2)).divide(q.get(0))+')('+q.get(1).divide(q.get(0)).negate()+')(1)')
 		if (f1(this,q)) return f1(this,q)	//	+2023.11
+		if (f2(this,q)) return f2(this,q)	//	+2023.12
 		return this.clone()
 		function f1(me, q) {				//	+2023.11
 			//	a + c/(1-bx)
@@ -264,6 +266,19 @@ class placevalueratio {					//	+2023.5
 			let a = q.get(0).sub(c)
 			let n = q.parse('('+a.times(b).negate()+')('+a.add(c)+')')
 			let d = q.parse('('+b.negate()         +')(1)')
+			return new me.constructor(n,d)
+		}
+		function f2(me, q) {				//	+2023.12
+			//	1/(1-r1x) + 1/(1-r2x)
+			let len = q.len()
+			if (len<3) return false
+			let [a,b,c] = [q.get(0),q.get(1),q.get(2)]
+			if (!a.equals(a.parse(2))) return false
+			let pseudodiscriminant = a.times(b.times(b)).sub(b.times(b).scale(4)).add(c.scale(4)).divide(a).sqrt()
+			let r1 = b.add(pseudodiscriminant).unscale(2)
+			let r2 = b.sub(pseudodiscriminant).unscale(2)
+			let n = q.parse(                  '('+r1.add(r2).negate()+')(2)')
+			let d = q.parse('('+r1.times(r2)+')('+r1.add(r2).negate()+')(1)')
 			return new me.constructor(n,d)
 		}
 	}

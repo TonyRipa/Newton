@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	11/10/2023
+	Date:	12/10/2023
 	Newton:	An A.I. for Math
 */
 
@@ -9,11 +9,11 @@ class Newton {
 
 	static preprocess(input) {
 		let ret = input
-		ret = ret.replace(/exp\((-?\d*\w)\)/,'(1+($1)+($1)^2/2+($1)^3/6+($1)^4/24+($1)^5/120)')
-		ret = ret.replace(/cosh\((-?\d*\w)\)/,'(1+($1)^2/2+($1)^4/24)')
-		ret = ret.replace(/sinh\((-?\d*\w)\)/,'(($1)+($1)^3/6+($1)^5/120)')
-		ret = ret.replace(/cos\((-?\d*\w)\)/,'(1-($1)^2/2+($1)^4/24)')
-		ret = ret.replace(/sin\((-?\d*\w)\)/,'(($1)-($1)^3/6+($1)^5/120)')
+		ret = ret.replace(new RegExp(/exp\((-?\d*\w)\)/ ,'g'),'(1+($1)+($1)^2/2+($1)^3/6+($1)^4/24+($1)^5/120)')
+		ret = ret.replace(new RegExp(/cosh\((-?\d*\w)\)/,'g'),'(1+($1)^2/2+($1)^4/24)')
+		ret = ret.replace(new RegExp(/sinh\((-?\d*\w)\)/,'g'),'(($1)+($1)^3/6+($1)^5/120)')
+		ret = ret.replace(new RegExp(/cos\((-?\d*\w)\)/ ,'g'),'(1-($1)^2/2+($1)^4/24)')
+		ret = ret.replace(new RegExp(/sin\((-?\d*\w)\)/ ,'g'),'(($1)-($1)^3/6+($1)^5/120)')
 		return ret
 	}
 
@@ -25,11 +25,19 @@ class Newton {
 			let x = p.base
 			let s = p.pointtimes(new polynomialratio1().parse(`1+${x}+2${x}^2+6${x}^3+24${x}^4+120${x}^5`))
 			if (s.pv.num.terms() == 2) {	//	+2023.11
-				let b = s.pv.den.get(1)
-				let ab = s.pv.num.get(1)
-				let a = ab.divide(b)
-				let c = s.pv.num.get(0).sub(a)
-				return `${coef(a)} + ${coef(c)}exp(${coef(b.negate())}${x})`
+				if (s.pv.den.terms() == 2) {//	+2023.12
+					let b = s.pv.den.get(1)
+					let ab = s.pv.num.get(1)
+					let a = ab.divide(b)
+					let c = s.pv.num.get(0).sub(a)
+					return `${coef(a)} + ${coef(c)}exp(${coef(b.negate())}${x})`					
+				}
+				if (s.pv.den.terms() == 3) {//	+2023.12
+					let [a,b,c] = [s.pv.den.get(0),s.pv.den.get(1),s.pv.den.get(2)]
+					let r1 = b.negate().add(b.times(b).sub(a.times(c).scale(4)).sqrt()).divide(a).unscale(2)
+					let r2 = b.negate().sub(b.times(b).sub(a.times(c).scale(4)).sqrt()).divide(a).unscale(2)
+					return `exp(${coef(r1)}${x}) + exp(${coef(r2)}${x})`					
+				}
 			}
 			if (s.pv.num.is1term()) {
 				if (s.pv.num.isconst() && s.pv.den.len()<3) return `${coef(s.pv.num.get(0))}exp(${coef(s.pv.den.get(1).negate())}${x})`
