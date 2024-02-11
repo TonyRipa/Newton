@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	12/10/2023
+	Date:	2/10/2024
 	Newton:	An A.I. for Math
 */
 
@@ -40,13 +40,15 @@ class Newton {
 				}
 			}
 			if (s.pv.num.is1term()) {
-				if (s.pv.num.isconst() && s.pv.den.len()<3) return `${coef(s.pv.num.get(0))}exp(${coef(s.pv.den.get(1).negate())}${x})`
-				let ish = s.pv.den.get(2).times(s.pv.den.get(0)).isneg()
-				let sign = (ish == s.pv.den.get(2).isneg()) ? '' : '-'
-				let h = ish ? 'h' : ''
-				let co = s.pv.den.get(2).abs().sqrt()
-				if (!s.pv.num.get(0).is0()) return `${sign}${coef(s.pv.num.get(0)           )}cos${h}(${coef(co)}${x})`
-				if (!s.pv.num.get(1).is0()) return `${sign}${coef(s.pv.num.get(1).divide(co))}sin${h}(${coef(co)}${x})`
+				if (s.pv.den.terms() == 2) {//	+2024.2
+					if (s.pv.num.isconst() && s.pv.den.len()<3) return `${coef(s.pv.num.get(0))}exp(${coef(s.pv.den.get(1).negate())}${x})`
+					let ish = s.pv.den.get(2).times(s.pv.den.get(0)).isneg()
+					let sign = (ish == s.pv.den.get(2).isneg()) ? '' : '-'
+					let h = ish ? 'h' : ''
+					let co = s.pv.den.get(2).abs().sqrt()
+					if (!s.pv.num.get(0).is0()) return `${sign}${coef(s.pv.num.get(0)           )}cos${h}(${coef(co)}${x})`
+					if (!s.pv.num.get(1).is0()) return `${sign}${coef(s.pv.num.get(1).divide(co))}sin${h}(${coef(co)}${x})`					
+				}
 			}
 			function coef(c) {
 				c = c.toString(false,true)
