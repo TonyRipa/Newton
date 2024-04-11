@@ -1,13 +1,17 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2/10/2024
+	Date:	4/10/2024
 	Newton:	An A.I. for Math
 */
 
 class Newton {
 
-	static preprocess(input) {
+	static simplify(input) {	//	+2024.4
+		return Newton.poly2trig(Newton.trig2poly(input))
+	}
+
+	static trig2poly(input) {
 		let ret = input
 		ret = ret.replace(new RegExp(/exp\((-?\d*\w)\)/ ,'g'),'(1+($1)+($1)^2/2+($1)^3/6+($1)^4/24+($1)^5/120)')
 		ret = ret.replace(new RegExp(/cosh\((-?\d*\w)\)/,'g'),'(1+($1)^2/2+($1)^4/24)')
@@ -17,8 +21,8 @@ class Newton {
 		return ret
 	}
 
-	static simplify(input) {
-		let p = new polynomialratio1().parse(Newton.preprocess(input))
+	static poly2trig(input) {
+		let p = new polynomialratio1().parse(input)
 		return exp(p) ?? p.toString()
 		function exp(p) {
 			if (p.pv.num.terms()<3) return p.toString()
