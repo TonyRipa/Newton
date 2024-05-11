@@ -1,7 +1,7 @@
 
 <!--
 	Author: Anthony John Ripa
-	Date:	4/10/2024
+	Date:	5/10/2024
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -10,19 +10,21 @@
 	<head>
 		<title>Newton</title>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.30.0/plotly.min.js"></script>
-		<script src="http://tonyripa.github.io/PlaceValue/digit.js"></script>
-		<script src="http://tonyripa.github.io/PlaceValue/rational.js"></script>
-		<script src="http://tonyripa.github.io/PlaceValue/complex.js"></script>
-		<script src="http://tonyripa.github.io/PlaceValue/rationalcomplex.js"></script>
-		<script src="http://tonyripa.github.io/PlaceValue/wholeplacevalue.js"></script>
-		<script src="http://tonyripa.github.io/PlaceValue/placevalueratio.js"></script>
-		<script src="http://tonyripa.github.io/PlaceValue/abstractpolynomial.js"></script>
-		<script src="http://tonyripa.github.io/PlaceValue/polynomial1.js"></script>
-		<script src="http://tonyripa.github.io/PlaceValue/polynomialratio1.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/digit.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/rational.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/complex.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/rationalcomplex.js"></script>
+		<script src="wholeplacevalue.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/placevalueratio.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/abstractpolynomial.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/polynomial1.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/polynomialratio1.js"></script>
+		<script src="expression.js"></script>
 		<script src="newton.js"></script>
+		<script src="Lisp.js"></script>
 		<script src="plot.js"></script>
 		<script src="helper.js"></script>
 		<script src="stats.js"></script>
@@ -33,12 +35,16 @@
 		<center>
 			<h1>Newton</h1>
 			<select onchange='$("#netstr").val($(this).val())'>
+				<option>exprdata→input→sample→regress</option>
 				<option>exprdata→input→trigpoly→polytrig</option>
+				<option>input,econdata→filter→plot</option>
+				<option>symdata→plot3</option>
+				<option>symdata→plots</option>
+				<option>eqndata→input→solve</option>
 				<option>probdata→prob2oddstable</option>
 				<option>oddsdata→oddschain2oddstable</option>
-				<option>input,econdata→filter→plot</option>
 			</select>
-			<input id='netstr' value='exprdata→input→trigpoly→polytrig' size=30>
+			<input id='netstr' value='exprdata→input→sample→regress' size=30>
 			<button onclick='ui.makenet()'>Make Net</button><br>
 			<br>
 			<hr>

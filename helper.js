@@ -42,3 +42,8 @@ function cartesianProductOf() {//https://stackoverflow.com/questions/12303989/ca
 		}), true);
 	}, [ [] ]);
 }
+function lookup(key,data) {
+	for (let datum of data) {
+		if (JSON.stringify(key)==JSON.stringify(datum[0])) return datum[1]
+	}
+}

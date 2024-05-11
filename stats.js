@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	4/10/2024
+	Date:	5/10/2024
 	Stats:	A statistics library
 */
 
@@ -50,6 +50,131 @@ class Stats {
 			ret[val].push(row)
 		}
 		return ret
+	}
+	static average(list) {
+		let unit = list.every(e=>e.endsWith('‰')) ? '‰' : ''
+		if (unit=='‰') list = list.map(e=>e.slice(0,-1))
+		let mean = calcmean(list)
+		mean = math.round(mean,2)
+		return mean + unit
+		function calcmean(list) {
+			let count = 0
+			let sum = 0
+			for (let i = 0 ; i < list.length ; i++) {
+				if (!isNaN(list[i])) {
+					sum += Number(list[i])
+					count++
+				}
+			}
+			return sum / count
+		}
+	}
+	/*
+	static oddschain2oddstable(r) {	//	-2024.5
+		let ret = ''
+		for (let i = 0 ; i <= r.length ; i++) {
+			for (let j = 0 ; j <= r.length ; j++) {
+				let odds
+				if (i==j) {
+					odds = 1
+				} else if (i==j-1) {
+					odds = r[i]
+				} else if (i==j-2) {
+					odds = r[i]*r[i+1]
+				} else if (i==j-3) {
+					odds = r[i]*r[i+1]*r[i+2]
+				} else if (i==j+1) {
+					odds = 1/r[j]
+				} else if (i==j+2) {
+					odds = 1/(r[j]*r[j+1])
+				} else if (i==j+3) {
+					odds = 1/(r[j]*r[j+1]*r[j+2])
+				}
+				odds = isNaN(odds) ? '%' : odds
+				odds = odds==1/0 ? '∞' : odds
+				odds = odds==-1/0 ? '-∞' : odds
+				ret += odds
+				if (j<r.length) ret += '\t'
+			}
+			if (i<r.length) ret += '\n'
+		}
+		return ret
+	}
+	*/
+	static oddschain2oddstable(r) {	//	+2024.5
+		let ret = ''
+		for (let i = 0 ; i <= r.length ; i++) {
+			for (let j = 0 ; j <= r.length ; j++) {
+				let odds = 1
+				if (i==j) { odds *= 1 }
+				if (i<=j-1) { odds *= r[i] }
+				if (i<=j-2) { odds *= r[i+1] }
+				if (i<=j-3) { odds *= r[i+2] }
+				if (i>=j+1) { odds /= r[j] }
+				if (i>=j+2) { odds /= r[j+1] }
+				if (i>=j+3) { odds /= r[j+2] }
+				odds = isNaN(odds) ? '%' : odds
+				odds = odds==1/0 ? '∞' : odds
+				odds = odds==-1/0 ? '-∞' : odds
+				ret += odds
+				if (j<r.length) ret += '\t'
+			}
+			if (i<r.length) ret += '\n'
+		}
+		return ret
+	}
+	static marginalsort(matrix,order=-1) {
+		let ret = Stats.rowmarginalsort(matrix,order)
+		ret = math.transpose(ret)
+		ret = Stats.rowmarginalsort(ret,order)
+		return math.transpose(ret)
+	}
+	static rowmarginalsort(matrix,order=-1) {
+		let head = matrix[0]
+		let body = matrix.slice(1,-1)
+		let marg = matrix.slice(-1)[0]
+		console.log(body)
+		if (order==+1) body.sort((Ra,Rb)=>Rb.slice(-1)[0]<Ra.slice(-1)[0])
+		if (order==-1) body.sort((Ra,Rb)=>Rb.slice(-1)[0]>Ra.slice(-1)[0])
+		return [head,...body,marg]
+	}
+	static kv2matrix(rows) {
+		let xhead = [], yhead = []
+		for (let i=0; i<rows.length; i++) {
+			let row = rows[i]
+			let [x,y] = row[0]
+			if (!xhead.includes(x)) xhead.push(x)
+			if (!yhead.includes(y)) yhead.push(y)
+		}
+		let z = []
+		for (let x=0; x<xhead.length; x++) {
+			z.push([])
+			for (let y=0; y<yhead.length; y++) {
+				z[x][y] = math.round(lookup([xhead[x],yhead[y]],rows)*1000,2)+'‰'
+			}
+		}
+		return {xhead,yhead,z}
+	}
+	static kv2tensor(rows) {
+		let xhead = [], yhead = [], zhead = []
+		for (let i=0; i<rows.length; i++) {
+			let row = rows[i]
+			let [x,y,z] = row[0]
+			if (!xhead.includes(x)) xhead.push(x)
+			if (!yhead.includes(y)) yhead.push(y)
+			if (!zhead.includes(z)) zhead.push(z)
+		}
+		let f = []
+		for (let x=0; x<xhead.length; x++) {
+			f.push([])
+			for (let y=0; y<yhead.length; y++) {
+				f[x].push([])
+				for (let z=0; z<zhead.length; z++) {
+					f[x][y][z] = math.round(lookup([xhead[x],yhead[y],zhead[z]],rows)*1000,2)+'‰'
+				}
+			}
+		}
+		return {xhead,yhead,zhead,f}
 	}
 
 }
