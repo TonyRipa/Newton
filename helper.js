@@ -1,21 +1,22 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	4/10/2024
+	Date:	6/1/2024
 	Helper:	A utility library
 */
 
 let log = console.log
 function show(x) { alert(JSON.stringify(x)) }
 function get_input(id) { return document.getElementById(id).value }
+function putval(id,val) { document.getElementById(id).value = val.replace(/\\n/g,'\n') }
 function set_div(id,val) { if (!Array.isArray(val)) val = [val]; document.getElementById(id).innerHTML = val.join('<br>') }
 function set_output(id,val) { if (!Array.isArray(val)) val = [val]; document.getElementById(id).innerHTML = val.join('<br>') }
 function set_textarea(id,val) { if (!Array.isArray(val)) val = [val]; document.getElementById(id).value = val.join('\n') }
 function colvals(data,colindex) { return [...new Set(math.transpose(data)[colindex])] }
-function id2array(id,sep='\t') { return tsv2array(id2text(id),sep) }
+function id2array(id,sep=',') { return csv2array(id2text(id),sep) }
 function id2text(id) { return document.getElementById(id).value }
-function tsv2array(tsv,sep='\t') {
-	return tsv.trim().replace(new RegExp('\n\t*\n','g'),'\n').split('\n').map(row=>row.split(sep).map(e=>unquoteifposs(e)))
+function csv2array(csv,sep=',') {
+	return csv.trim().replace(new RegExp('\n'+sep+'*\n','g'),'\n').split('\n').map(row=>row.split(sep).map(e=>unquoteifposs(e)))
 }
 function unquoteifposs(x) {
 	let ret

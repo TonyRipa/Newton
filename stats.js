@@ -1,13 +1,27 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	5/10/2024
+	Date:	6/9/2024
 	Stats:	A statistics library
 */
 
 class Stats {
 
 	static p(query,data) {
+		let [head,...body] = data
+		body = Stats.pbody(query, body)
+		if (!Array.isArray(body)) body = [body]
+		return [Stats.phead(query).map(i=>head[i]), ...body]
+	}
+	static phead(query) {
+		if (query.includes('|')) {
+			let [colindex,condition] = query.split('|')
+			return [...condition.split(','),colindex]
+		} else {
+			return [query]
+		}
+	}
+	static pbody(query,data) {
 		let [colindex,condition] = query.split('|')
 		if (condition == undefined) {
 			return Stats.pcol(colindex,data)
@@ -19,13 +33,13 @@ class Stats {
 			return Stats.pcols(data,condition,colindex).sort((r1,r2)=>isNaN(r1[1])?+1:isNaN(r2[1])?-1:r2[1]-r1[1]).map(xy=>[JSON.parse(xy[0]),xy[1]])
 		}
 	}
-	static pcol(colindex,data) {
+	static pcol(colindex,data,weighted = false) {
 		let s = 0;
 		let count = 0
 		for (let r = 0 ; r < data.length ; r++ ) {
 			let row = data[r]
 			s += Number(row[colindex])
-			count += Number(row[0])
+			count += weighted ? Number(row[0]) : 1
 		}
 		return s / count
 	}
@@ -122,6 +136,32 @@ class Stats {
 			if (i<r.length) ret += '\n'
 		}
 		return ret
+	}
+	static kv2marginalmatrix(rows) {	//	+2024.5
+		let {xhead,yhead,z} = Stats.kv2matrix(rows)
+		z = z.map(row => [...row,Stats.average(row)])
+		z = math.transpose(z)
+		z = z.map(row => [...row,Stats.average(row)])
+		z = math.transpose(z)
+		z.unshift([...yhead,''])
+		z = math.transpose(z)
+		z.unshift(['',...xhead,''])
+		z = math.transpose(z)
+		return z
+	}
+	static headmatrix2marginalmatrix(head,matrix) {	//	+2024.6
+		let xhead = head.xhead
+		let yhead = head.yhead
+		let z = matrix
+		z = z.map(row => [...row,Stats.average(row)])
+		z = math.transpose(z)
+		z = z.map(row => [...row,Stats.average(row)])
+		z = math.transpose(z)
+		z.unshift([...yhead,''])
+		z = math.transpose(z)
+		z.unshift(['',...xhead,''])
+		z = math.transpose(z)
+		return z
 	}
 	static marginalsort(matrix,order=-1) {
 		let ret = Stats.rowmarginalsort(matrix,order)

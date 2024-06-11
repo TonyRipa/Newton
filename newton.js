@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	5/10/2024
+	Date:	6/10/2024
 	Newton:	An A.I. for Math
 */
 
@@ -63,13 +63,30 @@ class Newton {
 		}
 	}
 
+	static gf(x) {
+		return {'1':1,'x':'1,0','x^2':'1,0,0','.5x^2':'.5,0,0'}[x]
+	}
+
+	static igf(x) {
+		return {'1':1,'x':'1,0','x^2':'1,0,0','.5x^2':'.5,0,0'}[x]
+	}
+
+	static egf(x) {	//	+2024.6
+		return {'0':0,'1':1,'1.5':1.5,'2':2,'0,1':'x','0,0,1':'.5x^2','0,0,2':'x^2',                                  '1,1':'1+x','2,1':'2+h','4,4,2':'4+4h+h^2','0,4,2'     :'4h+h^2','4,1'            :'4+h','1/1,-1':'exp(x)','1/1,1':'exp(-x)','1/1,-2':'exp(2x)','1/1,-i':'cis(x)','1/1,i':'cis(-x)','1/1,0,1':'cos(x)','1/1,0,16':'cos(4x)','0,1/1,0,1':'sin(x)','0,3/1,0,9':'sin(3x)','0,1/1,0,-1':'sinh(x)','0,5/1,0,-25':'sinh(5x)','1/1,0,-1':'cosh(x)','1/1,0,-36':'cosh(6x)'}[x]
+	}
+
+	static iegf(x) {
+		return {'0':0,'1':1,'1.5':1.5,'2':2,'x':'0,1','.5x^2':'0,0,1','x^2':'0,0,2','x*x':'0,0,2','x/x':'1','(x^2-1)/(x-1)':'1,1','2+h':'2,1','(2+h)^2': '4,4,2','(2+h)^2-2^2':'0,4,2','((2+h)^2-2^2)/h':'4,1','exp(x)':'1/1,-1','exp(-x)':'1/1,1','exp(2x)':'1/1,-2','cis(x)':'1/1,-i','cis(-x)':'1/1,i','cos(x)':'1/1,0,1','cos(4x)':'1/1,0,16','sin(x)':'0,1/1,0,1','sin(3x)':'0,3/1,0,9','sinh(x)':'0,1/1,0,-1','sinh(5x)':'0,5/1,0,-25','cosh(x)':'1/1,0,-1','cosh(6x)':'1/1,0,-36'}[x]
+	}
+
 	static sample(exp) {
 		let vars = Expression.getvars(exp)
 		if (vars.length == 0) vars  = ['x']
 		return vars[0] + '\n' + [0,1,2,3].map(x=>math.evaluate(exp,{[vars[0]]:x})).map(x=>x?.toString().replace('NaN','%')).join('\n')
 	}
 
-	static regress(vari,...exp) {
+	static regress(variexp) {
+		let [vari,...exp] = variexp.split('\n')
 		return new polynomial1(vari,new wholeplacevalue(exp.map(rational.parse)).unpointeval()).toString()
 	}
 

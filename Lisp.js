@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2024.04.15
+	Date:	2024.05.15
 	Lisp:	A Constraint Solver
 */
 
@@ -96,6 +96,27 @@ class Lisp {
 			var myvar = l
 			var mytype = symboltable[myvar]
 			var ret = Lisp.simplify(r, mytype)
+		}
+		if (isvar(r) && !ground(l) && !isvar(l)) return Lisp.solvelisp(['=',r,l], symboltable)	//	+2024.5
+		if (isvar(l) && type(r)=='OperatorNode') {	//	+2024.5
+			let myop = op(r)
+			let [L,R] = args(r)
+			if (!ground(L) && ground(R)) return Lisp.solvelisp(['=',l,[myop,R,L]], symboltable)
+			if (l == R && atomic(L)) {
+				var myvar = l
+				var mytype = symboltable[myvar]
+				if (myop == '+') {
+					if (L == 0) ret = 0/0
+					else if (type(L) == 'ConstantNode') ret = 1/0
+					else ret = 1/0
+				}
+				if (myop == '*') {
+					if (L == 0) ret = 0
+					else if (L == 1) ret = 0/0
+					else if (type(L) == 'ConstantNode') ret=[0, 1/0]
+					else ret = 0
+				}
+			}
 		}
 		if (type(l)=='OperatorNode' && ground(r)) {
 			let anti = {'+': '-', '*': '/'}[op(l)]

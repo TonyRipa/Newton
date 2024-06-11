@@ -1,7 +1,7 @@
 
 <!--
 	Author: Anthony John Ripa
-	Date:	5/10/2024
+	Date:	6/10/2024
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -13,11 +13,12 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.30.0/plotly.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/digit.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/rational.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/complex.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/rationalcomplex.js"></script>
-		<script src="wholeplacevalue.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/wholeplacevalue.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/placevalueratio.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/abstractpolynomial.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/polynomial1.js"></script>
@@ -25,6 +26,7 @@
 		<script src="expression.js"></script>
 		<script src="newton.js"></script>
 		<script src="Lisp.js"></script>
+		<script src="frame.js"></script>
 		<script src="plot.js"></script>
 		<script src="helper.js"></script>
 		<script src="stats.js"></script>
@@ -35,16 +37,30 @@
 		<center>
 			<h1>Newton</h1>
 			<select onchange='$("#netstr").val($(this).val())'>
-				<option>exprdata→input→sample→regress</option>
-				<option>exprdata→input→trigpoly→polytrig</option>
-				<option>input,econdata→filter→plot</option>
-				<option>symdata→plot3</option>
-				<option>symdata→plots</option>
-				<option>eqndata→input→solve</option>
-				<option>probdata→prob2oddstable</option>
-				<option>oddsdata→oddschain2oddstable</option>
+				<optgroup label='Algebra'>
+					<option>exprdata→input→iegf→egf</option>
+					<option>exprdata→input→trigpoly→polytrig</option>
+					<option>exprdata→input→sample→regress</option>
+					<option>eqndata→input→solve</option>
+				</optgroup>
+				<optgroup label='Bias'>
+					<option>symdata→inputbig→plot23</option>
+					<option>symdata→inputbig→plot2</option>
+					<option>hiredata→plot2layer</option>
+					<option>hiredata→plot2</option>
+					<option>wagedata→plot2</option>
+					<option>input,wagedata→filter→plot</option>
+					<option>agedata→plot2</option>
+				</optgroup>
+				<optgroup label='Econ'>
+					<option>input,econdata→filter→plot</option>
+				</optgroup>
+				<optgroup label='Stats'>
+					<option>probdata→prob2oddstable</option>
+					<option>oddsdata→oddschain2oddstable</option>
+				</optgroup>
 			</select>
-			<input id='netstr' value='exprdata→input→sample→regress' size=30>
+			<input id='netstr' value='exprdata→input→iegf→egf' size=30>
 			<button onclick='ui.makenet()'>Make Net</button><br>
 			<br>
 			<hr>
