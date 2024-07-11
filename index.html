@@ -1,7 +1,7 @@
 
 <!--
 	Author: Anthony John Ripa
-	Date:	6/10/2024
+	Date:	7/9/2024
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -18,7 +18,7 @@
 		<script src="https://tonyripa.github.io/PlaceValue/rational.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/complex.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/rationalcomplex.js"></script>
-		<script src="https://tonyripa.github.io/PlaceValue/wholeplacevalue.js"></script>
+		<script src="wholeplacevalue.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/placevalueratio.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/abstractpolynomial.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/polynomial1.js"></script>
@@ -26,6 +26,7 @@
 		<script src="expression.js"></script>
 		<script src="newton.js"></script>
 		<script src="Lisp.js"></script>
+		<script src="model.js"></script>
 		<script src="frame.js"></script>
 		<script src="plot.js"></script>
 		<script src="helper.js"></script>
@@ -38,29 +39,48 @@
 			<h1>Newton</h1>
 			<select onchange='$("#netstr").val($(this).val())'>
 				<optgroup label='Algebra'>
-					<option>exprdata→input→iegf→egf</option>
-					<option>exprdata→input→trigpoly→polytrig</option>
-					<option>exprdata→input→sample→regress</option>
-					<option>eqndata→input→solve</option>
+					<option>datas.expr→input→iegf→egf</option>
+					<option>datas.expr→input→trigpoly→polytrig</option>
+					<option>datas.expr→input→sample→regress</option>
+					<option>datas.eqn→input→solve</option>
 				</optgroup>
 				<optgroup label='Bias'>
-					<option>symdata→inputbig→plot23</option>
-					<option>symdata→inputbig→plot2</option>
-					<option>hiredata→plot2layer</option>
-					<option>hiredata→plot2</option>
-					<option>wagedata→plot2</option>
-					<option>input,wagedata→filter→plot</option>
-					<option>agedata→plot2</option>
+					<optgroup label='&nbsp;&nbsp;&nbsp;&nbsp;Mediator'>
+						<option>datas.sym→inputbig→plot23</option>
+						<option>datas.sym→inputbig→plot2</option>
+						<option>data.wage→plot2</option>
+						<option>input,data.wage→filter→plot</option>
+					</optgroup>
+					<optgroup label='&nbsp;&nbsp;&nbsp;&nbsp;Confounder'>
+						<option>data.chol→plot2layer</option>
+						<option>data.chol→cause;data.chol→plot2layer</option>
+						<option>data.drug→plot2layer</option>
+						<option>data.kill→plot2layer</option>
+						<option>data.stone→plot2layer</option>
+						<option>data.day→plot2</option>
+						<option>data.kill→plot23</option>
+					</optgroup>
+					<optgroup label='&nbsp;&nbsp;&nbsp;&nbsp;Collider'>
+						<option>data.coin→plot2layer</option>
+						<option>data.car→plot2layer</option>
+						<option>data.hire→plot2layer</option>
+						<option>data.hire→plot2</option>
+					</optgroup>
+					<optgroup label='&nbsp;&nbsp;&nbsp;&nbsp;Misc.'>
+						<option>data.gap→plot2</option>
+						<option>data.french→plot2layer</option>
+						<option>data.age→plot2</option>
+					</optgroup>
 				</optgroup>
 				<optgroup label='Econ'>
-					<option>input,econdata→filter→plot</option>
+					<option>input,data.econ→filter→plot</option>
 				</optgroup>
 				<optgroup label='Stats'>
-					<option>probdata→prob2oddstable</option>
-					<option>oddsdata→oddschain2oddstable</option>
+					<option>data.prob→prob2oddstable</option>
+					<option>data.odds→oddschain2oddstable</option>
 				</optgroup>
 			</select>
-			<input id='netstr' value='exprdata→input→iegf→egf' size=30>
+			<input id='netstr' value='datas.expr→input→iegf→egf' size=30>
 			<button onclick='ui.makenet()'>Make Net</button><br>
 			<br>
 			<hr>

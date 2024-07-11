@@ -1,11 +1,13 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/1/2024
+	Date:	7/8/2024
 	Helper:	A utility library
 */
 
 let log = console.log
+function logo(x) { return log(JSON.stringify(x)) }
+function alerto(x) { alert(JSON.stringify(x)) }
 function show(x) { alert(JSON.stringify(x)) }
 function get_input(id) { return document.getElementById(id).value }
 function putval(id,val) { document.getElementById(id).value = val.replace(/\\n/g,'\n') }
@@ -17,6 +19,11 @@ function id2array(id,sep=',') { return csv2array(id2text(id),sep) }
 function id2text(id) { return document.getElementById(id).value }
 function csv2array(csv,sep=',') {
 	return csv.trim().replace(new RegExp('\n'+sep+'*\n','g'),'\n').split('\n').map(row=>row.split(sep).map(e=>unquoteifposs(e)))
+}
+function csv2dict(csv,sep=',') {
+	let [head,...rows] = csv2array(csv,sep)
+	let cols = math.transpose(rows)
+	return Object.fromEntries(_.unzip([head,cols]))
 }
 function unquoteifposs(x) {
 	let ret

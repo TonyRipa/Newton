@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2024.05.15
+	Date:	2024.06.11
 	Lisp:	A Constraint Solver
 */
 
@@ -127,8 +127,9 @@ class Lisp {
 				var mytype = symboltable[myvar]
 				var ret = Lisp.simplify([anti, r, R], mytype)
 			}
-			if (!ground(L) && !ground(R) && symboltable[L]!='Any' && symboltable[R]=='Any')	return reverse()	//	+2024.2
-			if (!ground(L) && !ground(R) && symboltable[R]!='Any') {	//	+2024.1
+			// if (!ground(L) && !ground(R) && symboltable[L]!='Any' && symboltable[R]=='Any')	return reverse()	//	+2024.2	//	-2024.6
+			// if (!ground(L) && !ground(R) && symboltable[R]!='Any') {	//	+2024.1												//	-2024.6
+			if (!ground(L) && !ground(R)) {	//	+2024.6
 				var myvar = L
 				var mytype = symboltable[myvar]
 				var ret = Lisp.simplify([anti, r, R], mytype)
@@ -139,7 +140,8 @@ class Lisp {
 		if (ret == undefined) return Lisp.toinfix(lisp)
 		let set = solution_intersect_mytype(ret, mytype)
 		if (typeof myvars != 'undefined') {								//	+2024.1
-			return myvars[0] + ' ∈ ' + symboltable[myvars[0]] + '<br><br>' + myvars[1] + ' ∈ ' + set
+			//return myvars[0] + ' ∈ ' + symboltable[myvars[0]] + '<br><br>' + myvars[1] + ' ∈ ' + set	//	-2024.6
+			return myvars[0] + ' ∈ ' + symboltable[myvars[0]] + '\n' + myvars[1] + ' ∈ ' + set	//	-2024.6
 		} else {
 			return myvar + ' ∈ ' + set
 		}
