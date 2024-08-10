@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2024.06.11
+	Date:	2024.07.12
 	Lisp:	A Constraint Solver
 */
 
@@ -102,21 +102,28 @@ class Lisp {
 			let myop = op(r)
 			let [L,R] = args(r)
 			if (!ground(L) && ground(R)) return Lisp.solvelisp(['=',l,[myop,R,L]], symboltable)
-			if (l == R && atomic(L)) {
-				var myvar = l
-				var mytype = symboltable[myvar]
-				if (myop == '+') {
-					if (L == 0) ret = 0/0
-					else if (type(L) == 'ConstantNode') ret = 1/0
-					else ret = 1/0
+			//if (l == R && atomic(L)) {//	-2024.7
+			if (atomic(L))				//	+2024.7
+				if (l == R) {
+					var myvar = l
+					var mytype = symboltable[myvar]
+					if (myop == '+') {
+						if (L == 0) ret = 0/0
+						else if (type(L) == 'ConstantNode') ret = 1/0
+						else ret = 1/0
+					}
+					if (myop == '*') {
+						if (L == 0) ret = 0
+						else if (L == 1) ret = 0/0
+						else if (type(L) == 'ConstantNode') ret=[0, 1/0]
+						else ret = 0
+					}
+				} else {
+					var myvar = l
+					var mytype = symboltable[myvar]
+					var ret = Lisp.simplify([myop, L, R], mytype)
+					var myvars = [R, l]
 				}
-				if (myop == '*') {
-					if (L == 0) ret = 0
-					else if (L == 1) ret = 0/0
-					else if (type(L) == 'ConstantNode') ret=[0, 1/0]
-					else ret = 0
-				}
-			}
 		}
 		if (type(l)=='OperatorNode' && ground(r)) {
 			let anti = {'+': '-', '*': '/'}[op(l)]

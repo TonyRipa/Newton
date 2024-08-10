@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/10/2024
+	Date:	7/30/2024
 	Plot:	A plotting library
 */
 
@@ -262,7 +262,7 @@ class Plot {
 		log(steps)
 		let layout = {
 			// autosize: true ,
-			//margin: { l: 0, r: 0, b: 0, t: 0 } ,
+			margin: { l: 40, r: 0, b: 0, t: 0 } ,
 			xaxis: { title: {text:xhead} , categoryorder: 'array' , categoryarray: xvalues , range: getrange(xvalues) } ,
 			yaxis: { title: {text:yhead} , categoryorder: 'array' , categoryarray: yvalues , range: getrange(yvalues) } ,
 			showlegend: false ,

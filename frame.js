@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/10/2024
+	Date:	8/4/2024
 	Stats:	A data-frame library
 */
 
@@ -21,8 +21,11 @@ class Frame {
 		return Frame.dict2frame(dict)
 	}
 
-	static fromString(str) {
-		return Frame.str2frame(str)
+	static fromString(str) { return Frame.str2frame(str) }
+	static fromstr(str) { return Frame.fromString(str) }
+
+	static fromDict(str) {
+		return Frame.dict2frame(str)
 	}
 
 	static headCols2dict(head,cols) { return Object.fromEntries(_.unzip([head,cols])) }
@@ -86,9 +89,10 @@ class Frame {
 	}
 
 	where(key,value) {
+		if (arguments.length == 1 && math.typeOf(arguments[0]) == 'string' && arguments[0].includes('=')) [key,value] = arguments[0].split('=')
 		if (math.typeOf(key) == 'number') return this.wherebyint(key,value)
 		if (math.typeOf(key) == 'string') return this.wherebystr(key,value)
-		alert('Frame.where() key should be int or string')
+		alert('Frame.where() key should be int or string, but is ' + math.typeOf(key))
 	}
 	wherebystr(colname,value) {
 		let colindex = this.head().indexOf(colname)
@@ -116,14 +120,14 @@ class Frame {
 	copy() { return Frame.fromString(this.toString()) }
 
 	multiplicity() {
-		let ret = this.toString().split('\n').slice(1).map(row=>this.multiplicity1(row))
+		let rowsstr = this.toString()
+		let rowstrs = rowsstr.split('\n')
+		let ret = rowstrs.slice(1).map(rowstr=>this.multiplicity1(rowstr,rowstrs))
 		return ret
 	}
 
-	multiplicity1(row) {
-		let rowsstr = this.toString()
-		let rowsstrs = rowsstr.split('\n')
-		let matches = rowsstrs.filter(r=>r==row)
+	multiplicity1(rowstr,rowstrs) {
+		let matches = rowstrs.filter(r=>r==rowstr)
 		return matches.length
 	}
 
@@ -227,8 +231,12 @@ class Frame {
 		return this
 	}
 
-	values() {
-		return this.getcols().map(col=>[...new Set(col)])
+	values(colindex) {
+		if (colindex == undefined) {
+			return this.getcols().map(col=>[...new Set(col)])
+		} else {
+			return this.values()[colindex]
+		}
 	}
 
 	valuesdict() {

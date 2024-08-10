@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/10/2024
+	Date:	8/9/2024
 	UI:	A user interface library
 */
 
@@ -79,6 +79,7 @@ class ui {
 			case 'input': return ui.makeinput(ids,id)
 			case 'inputbig': return ui.makeinputbig(ids,id)
 			case 'filter': return ui.makefilter(ids,id)
+			case 'where': return ui.makewhere(ids,id)
 			case 'plot': return ui.makeplot(ids,id)
 			case 'plot2': return ui.makeplot2(ids,id)
 			case 'plot23': return ui.makeplot23(ids,id)
@@ -96,6 +97,7 @@ class ui {
 			case 'oddschain2oddstable': return ui.makeoddschain2oddstable(ids,id)
 			case 'sample': return ui.makef(ids,id,Newton.sample)
 			case 'regress': return ui.makef(ids,id,Newton.regress)
+			case 'laplace': return ui.makef(ids,id,Newton.laplace)
 		}
 		alert(`ui.make() : id ${id} not found`)
 	}
@@ -133,6 +135,12 @@ class ui {
 		let {par,kid} = ui.me2parkid(ids,me)
 		$('#net').append(`<textarea id='${me}' cols='50' rows='7' placeholder='${me}'></textarea>`)
 		return ()=>set_textarea(me,Stats.p(get_input(par.split(',')[0]),id2array(par.split(',')[1])))
+	}
+
+	static makewhere(ids,me) {
+		let {par,kid} = ui.me2parkid(ids,me)
+		$('#net').append(`<textarea id='${me}' cols='150' rows='7' placeholder='${me}'></textarea>`)
+		return ()=>set_textarea(me,Frame.fromstr(get_input(par.split(',')[1])).where(get_input(par.split(',')[0])))
 	}
 
 	static makeoddschain2oddstable(ids,me) {
@@ -238,7 +246,7 @@ class ui {
 		return () => {
 			$('#'+me).empty()
 			$('#'+me).removeAttr('style')
-			$('#'+me).append(`<table><tr><td id='${me}1' width='500px'></td><td id='${me}2' width='500px'></td><td id='${me}3' width='500px'></td></tr></table>`)
+			$('#'+me).append(`<table><tr><td id='${me}2' width='500px'></td></tr></table>`)
 			Plot.fromString(get_input(par)).plot2layer(me+2)
 		}
 	}

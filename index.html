@@ -1,7 +1,7 @@
 
 <!--
 	Author: Anthony John Ripa
-	Date:	7/9/2024
+	Date:	8/10/2024
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -16,11 +16,12 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/digit.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/rational.js"></script>
-		<script src="https://tonyripa.github.io/PlaceValue/complex.js"></script>
+		<script src="complex.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/rationalcomplex.js"></script>
-		<script src="wholeplacevalue.js"></script>
-		<script src="https://tonyripa.github.io/PlaceValue/placevalueratio.js"></script>
-		<script src="https://tonyripa.github.io/PlaceValue/abstractpolynomial.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/wholeplacevalue.js"></script>
+		<script src="placevalueratio.js"></script>
+		<script src="abstractpolynomial.js"></script>
+		<script src="laplacering.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/polynomial1.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/polynomialratio1.js"></script>
 		<script src="expression.js"></script>
@@ -39,10 +40,11 @@
 			<h1>Newton</h1>
 			<select onchange='$("#netstr").val($(this).val())'>
 				<optgroup label='Algebra'>
+					<option>datas.expr→input→laplace</option>
 					<option>datas.expr→input→iegf→egf</option>
+					<option>datas.eqn→input→solve</option>
 					<option>datas.expr→input→trigpoly→polytrig</option>
 					<option>datas.expr→input→sample→regress</option>
-					<option>datas.eqn→input→solve</option>
 				</optgroup>
 				<optgroup label='Bias'>
 					<optgroup label='&nbsp;&nbsp;&nbsp;&nbsp;Mediator'>
@@ -55,12 +57,15 @@
 						<option>data.chol→plot2layer</option>
 						<option>data.chol→cause;data.chol→plot2layer</option>
 						<option>data.drug→plot2layer</option>
-						<option>data.kill→plot2layer</option>
+						<option>data.kill→cause;data.kill→plot2layer</option>
 						<option>data.stone→plot2layer</option>
 						<option>data.day→plot2</option>
 						<option>data.kill→plot23</option>
 					</optgroup>
 					<optgroup label='&nbsp;&nbsp;&nbsp;&nbsp;Collider'>
+						<option>data.or0→cause;data.or0→plot2layer</option>
+						<option>data.or1→cause;data.or1→plot2layer</option>
+						<option>data.or2→cause;data.or2→plot2layer</option>
 						<option>data.coin→plot2layer</option>
 						<option>data.car→plot2layer</option>
 						<option>data.hire→plot2layer</option>
@@ -80,7 +85,7 @@
 					<option>data.odds→oddschain2oddstable</option>
 				</optgroup>
 			</select>
-			<input id='netstr' value='datas.expr→input→iegf→egf' size=30>
+			<input id='netstr' value='datas.expr→input→laplace' size=30>
 			<button onclick='ui.makenet()'>Make Net</button><br>
 			<br>
 			<hr>
