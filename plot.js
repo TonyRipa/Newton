@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/30/2024
+	Date:	8/15/2024
 	Plot:	A plotting library
 */
 
@@ -29,34 +29,30 @@ class Plot {
 		return new Plot(x,y,head)
 	}
 
-	static help2(rows) {	//	Each row's 1st entry is a list of independent variables, and 2nd entry the dependent variable
-		let z = Stats.kv2marginalmatrix(rows)
-		z = Stats.marginalsort(z)
-		return Plot.table(z)
-	}
-
-	static help3(rows) {	//	Each row's 1st entry is a list of independent variables, and 2nd entry the dependent variable
-		let {xhead,yhead,zhead,f} = Stats.kv2tensor(rows)
-		return f.map(
-				(matrix,i)=> {
-					let z = Stats.headmatrix2marginalmatrix({xhead:yhead,yhead:zhead},matrix)
-					return Plot.table(z)
-				}
-			).join()
-	}
-
 	static table(rows) {
 		return '<table border><tr>' + rows.map(row=>'<td>'+row.join('</td><td>')+'</td>').join('</tr><tr>') + '</tr></table>'
 	}
 
 	table2(id) {
 		let results = _.zip(this.x,this.y)
-		set_div(id,Plot.help2(results))
+		set_div(id,help2(results))
+		function help2(rows) {	//	Each row's 1st entry is a list of independent variables, and 2nd entry the dependent variable
+			let z = Stats.kv2marginalmatrix(rows)
+			z = Stats.marginalsort(z)
+			return Plot.table(z)
+		}
 	}
 
 	table3(id) {
 		let results = _.zip(this.x,this.y)
-		set_div(id,Plot.help3(results))
+		set_div(id,help3(results))
+		function help3(rows) {	//	Each row's 1st entry is a list of independent variables, and 2nd entry the dependent variable
+			let {xhead,yhead,zhead,f} = Stats.kv2tensor(rows)
+			return f.map((matrix,i)=>Stats.headmatrix2marginalmatrix({xhead:yhead,yhead:zhead,title:xhead[i]},matrix))
+					.sort((m1,m2)=>str2num(last(last(m2)))-str2num(last(last(m1))))
+					.map(z=>Plot.table(z))
+					.join()
+		}
 	}
 
 	plot1(id) {
@@ -317,6 +313,71 @@ class Plot {
 			
 			return ({ label: label, method: 'restyle', args: [retrace] })
 
+		}
+	}
+
+	static plotnetwork(id,expression) {
+		if (!window.godiagram) {
+			window.godiagram = new go.Diagram(id)
+			window.godiagram.layout = new go.LayeredDigraphLayout(id)
+			window.godiagram.nodeTemplate = new go.Node('Spot')
+				.add(
+					new go.Panel('Auto')
+						.add(
+							new go.Shape('RoundedRectangle', {fill: 'transparent'}),
+							new go.Panel('Vertical',{alignment: new go.Spot(0,0,0,8)})
+								.add(new go.TextBlock().bind('text','name'),new go.Picture({height: 15, width: 30}))
+						),
+					new go.Panel('Vertical', {alignment: new go.Spot(0,0.33,0,7), itemTemplate: makeItemTemplate()}).bind('itemArray', 'inservices'),
+					new go.Panel('Vertical', {alignment: new go.Spot(1,0.30,0,7), itemTemplate: makeItemTemplate()}).bind('itemArray', 'outservices')
+				)
+			window.godiagram.linkTemplate = new go.Link().add(new go.Shape())
+			function makeItemTemplate() {
+				return new go.Panel('Auto', { margin: new go.Margin(1, 0) })
+					.add(
+						new go.Shape({
+							geometryString: 'F1 m 0,0 l 5,0 1,4 -1,4 -5,0 1,-4 -1,-4 z',
+							toSpot: go.Spot.Left,
+							fromSpot: go.Spot.Right
+						}).bind('portId', 'name')
+					)
+			}
+		}
+		window.godiagram.model = new go.GraphLinksModel(Plot.networkhelp(expression))
+	}
+
+	static networkhelp(data) {
+		let lisp = Lisp.strto(data)
+		let nodelinks = lisp2nodelinks(lisp)
+		log(nodelinks)
+		let network = ({linkFromPortIdProperty:'fromPort',linkToPortIdProperty:'toPort',nodeDataArray:nodelinks.nodes,linkDataArray:nodelinks.links})
+		return network
+		function lisp2nodelinks(lisp,key='1') {
+			let filter = true
+			if (!Array.isArray(lisp)) {
+				let name = lisp
+				if (filter) if (math.typeOf(name) == 'string' && name == name.toUpperCase()) key = name
+				if (math.typeOf(name) == 'string' && name == name.toUpperCase()) name = ''
+				let nodes = []
+				let links = []
+				let node = { key, name, inservices: [], outservices: [{ name: 'o1' }] }
+				nodes.push(node)
+				return {nodes, links, key}
+			}
+			if (Array.isArray(lisp)) {
+				if (lisp.length == 3) {
+						let [op,left,right] = lisp
+						let kid1 = lisp2nodelinks(left ,key+'1')
+						let kid2 = lisp2nodelinks(right,key+'2')
+						let node = { key, name:op, inservices: [{ name: 's1' }, { name: 's2' }], outservices: [{ name: 'o1' }] }
+						let linkkid1me = { from: kid1.key, fromPort: 'o1', to: key, toPort: 's1' }
+						let linkkid2me = { from: kid2.key, fromPort: 'o1', to: key, toPort: 's2' }
+						let nodes = [ node , ...kid1.nodes , ...kid2.nodes ]
+						if (filter) nodes = nodes.filter((e,i)=>nodes.map(node=>node.key).indexOf(e.key)===i)
+						let links = [ linkkid1me , linkkid2me , ...kid1.links , ...kid2.links ]
+						return {nodes, links, key}
+				}
+			}
 		}
 	}
 

@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/9/2024
+	Date:	8/11/2024
 	Stats:	A statistics library
 */
 
@@ -150,8 +150,7 @@ class Stats {
 		return z
 	}
 	static headmatrix2marginalmatrix(head,matrix) {	//	+2024.6
-		let xhead = head.xhead
-		let yhead = head.yhead
+		let {xhead,yhead,title} = head
 		let z = matrix
 		z = z.map(row => [...row,Stats.average(row)])
 		z = math.transpose(z)
@@ -159,7 +158,7 @@ class Stats {
 		z = math.transpose(z)
 		z.unshift([...yhead,''])
 		z = math.transpose(z)
-		z.unshift(['',...xhead,''])
+		z.unshift([title,...xhead,''])
 		z = math.transpose(z)
 		return z
 	}

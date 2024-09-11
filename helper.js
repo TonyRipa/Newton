@@ -1,11 +1,12 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/8/2024
+	Date:	8/11/2024
 	Helper:	A utility library
 */
 
 let log = console.log
+function last(x) { return x.slice(-1)[0] }
 function logo(x) { return log(JSON.stringify(x)) }
 function alerto(x) { alert(JSON.stringify(x)) }
 function show(x) { alert(JSON.stringify(x)) }
@@ -54,4 +55,8 @@ function lookup(key,data) {
 	for (let datum of data) {
 		if (JSON.stringify(key)==JSON.stringify(datum[0])) return datum[1]
 	}
+}
+function str2num(str) {
+	if (str.endsWith('‰')) return str2num(str.slice(0,-1))
+	return Number(str)
 }

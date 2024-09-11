@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2024.07.12
+	Date:	2024.08.15
 	Lisp:	A Constraint Solver
 */
 
@@ -122,7 +122,8 @@ class Lisp {
 					var myvar = l
 					var mytype = symboltable[myvar]
 					var ret = Lisp.simplify([myop, L, R], mytype)
-					var myvars = [R, l]
+					if (isvar(R))	//	+2024.8
+						var myvars = [R, l]
 				}
 		}
 		if (type(l)=='OperatorNode' && ground(r)) {

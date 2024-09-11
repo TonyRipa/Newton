@@ -1,6 +1,6 @@
 ﻿
 // Author:	Anthony John Ripa
-// Date:	8/10/2024
+// Date:	9/10/2024
 // Complex:	A data-type for representing Complex Numbers
 
 class complex extends digit {		//	2019.11	Added
@@ -67,7 +67,6 @@ class complex extends digit {		//	2019.11	Added
 	}
 
 	static regex() {   //  2017.10
-		//var literal = '[⅛⅙⅕¼⅓⅜⅖½⅗⅔¾⅘⅚iI]';	//	-2020.5
 		var literal = '[e⅛⅙⅕¼⅓⅜⅖½⅗⅔¾⅘⅚iI]';		//	+2020.5
 		var dec = String.raw`(\d+\.\d*|\d*\.\d+|\d+)`;
 		var num = '(' + literal + '|' + dec + ')';
@@ -120,7 +119,6 @@ class complex extends digit {		//	2019.11	Added
 		var imag = digit[1];
 		var a = Math.round(real * 1000) / 1000
 		var b = Math.round(imag * 1000) / 1000
-		//if (-.01 < imag && imag < .01) return long ? a : this.digithelp(real, NEGBEG, NEGEND, true);	//	-2020.5
 		if (-.01 < imag && imag < .01) return long ? a : this.digithelp(real, NEGBEG, NEGEND, long);	//	+2020.5
 		if (real == 0) {
 			if (long == 'medium') return b == 1 ? 'i' : '(' + a + ',' + b + ')';   //  2017.4  medium
@@ -150,7 +148,9 @@ class complex extends digit {		//	2019.11	Added
 
 	dec() { return new this.constructor(this.r - 1, this.i) }								//	+2024.8
 	inc() { return new this.constructor(this.r + 1, this.i) }								//	+2024.8
-	fact() { return new this.constructor(math.factorial(this.r), 0) }						//	+2024.8
+	//fact() { return new this.constructor(math.factorial(this.r), 0) }						//	+2024.8	//	-2024.9
+	factorial() { return new this.constructor(math.factorial(this.r), 0) }					//	+2024.9
+	fact() { return new this.constructor(this.r<0 ? 1 : math.factorial(this.r), 0) }		//	+2024.9
 	min(other) { return (this.below(other) ? this : other).clone() }						//	2019.5	Added
 	add(other) { return new complex(this.r + other.r, this.i + other.i); }
 	sub(other) { return new complex(this.r - other.r, this.i - other.i); }

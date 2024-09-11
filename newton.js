@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2024
+	Date:	9/3/2024
 	Newton:	An A.I. for Math
 */
 
@@ -119,7 +119,11 @@ class Newton {
 	}
 
 	static laplace(x) {	//	+2024.8
-		return new laplacering().parse(x).toString()
+		return new laplacering().parse(x).toStringS()
+	}
+
+	static invlaplace(x) {	//	+2024.9
+		return new laplacering().parseS(x).toString()
 	}
 
 }

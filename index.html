@@ -1,7 +1,7 @@
 
 <!--
 	Author: Anthony John Ripa
-	Date:	8/10/2024
+	Date:	9/9/2024
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -14,13 +14,14 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.30.0/plotly.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+		<script src="https://unpkg.com/gojs@3.0.9/release/go.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/digit.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/rational.js"></script>
 		<script src="complex.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/rationalcomplex.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/wholeplacevalue.js"></script>
-		<script src="placevalueratio.js"></script>
-		<script src="abstractpolynomial.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/placevalueratio.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/abstractpolynomial.js"></script>
 		<script src="laplacering.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/polynomial1.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/polynomialratio1.js"></script>
@@ -40,9 +41,9 @@
 			<h1>Newton</h1>
 			<select onchange='$("#netstr").val($(this).val())'>
 				<optgroup label='Algebra'>
-					<option>datas.expr→input→laplace</option>
+					<option>datas.expr→input→laplace→invlaplace</option>
+					<option>datas.eqn→input→network;input→solve</option>
 					<option>datas.expr→input→iegf→egf</option>
-					<option>datas.eqn→input→solve</option>
 					<option>datas.expr→input→trigpoly→polytrig</option>
 					<option>datas.expr→input→sample→regress</option>
 				</optgroup>
@@ -85,7 +86,7 @@
 					<option>data.odds→oddschain2oddstable</option>
 				</optgroup>
 			</select>
-			<input id='netstr' value='datas.expr→input→laplace' size=30>
+			<input id='netstr' value='datas.expr→input→laplace→invlaplace' size=30>
 			<button onclick='ui.makenet()'>Make Net</button><br>
 			<br>
 			<hr>

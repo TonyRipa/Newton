@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/9/2024
+	Date:	9/3/2024
 	UI:	A user interface library
 */
 
@@ -57,11 +57,11 @@ class ui {
 			for (let i = 0 ; i < ids.length ; i++) {
 				if (i != 0) {
 					if (par[ids[i]] == undefined) par[ids[i]] = [ids[i-1]]
-					else {par[ids[i]].push([ids[i-1]])}
+					else par[ids[i]].push(ids[i-1])
 				}
 				if (i != ids.length-1) {
 					if (kid[ids[i]] == undefined) kid[ids[i]] = [ids[i+1]]
-					else kid[ids[i]].push([ids[i-1]])
+					else kid[ids[i]].push(ids[i+1])
 				}
 			}
 		}
@@ -98,6 +98,8 @@ class ui {
 			case 'sample': return ui.makef(ids,id,Newton.sample)
 			case 'regress': return ui.makef(ids,id,Newton.regress)
 			case 'laplace': return ui.makef(ids,id,Newton.laplace)
+			case 'invlaplace': return ui.makef(ids,id,Newton.invlaplace)
+			case 'network': return ui.makenetwork(ids,id)
 		}
 		alert(`ui.make() : id ${id} not found`)
 	}
@@ -187,6 +189,12 @@ class ui {
 		}
 	}
 
+	static makenetwork(ids,me) {
+		let {par,kid} = ui.me2parkid(ids,me)
+		$('#net').append(`<div id='${me}' style='border:thin solid black;width:640px;height:400px;color:#999'>${me}</div>`)
+		return () => Plot.plotnetwork(me,get_input(par))
+	}
+
 	static makeplots(ids,me) {
 		let {par,kid} = ui.me2parkid(ids,me)
 		$('#net').append(`<div id='${me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${me}</div>`)
@@ -266,7 +274,7 @@ class ui {
 
 	static makef(ids,me,f) {
 		let {par,kid} = ui.me2parkid(ids,me)
-		$('#net').append(`<textarea id='${me}' placeholder='${me}'></textarea>`)
+		$('#net').append(`<textarea id='${me}' placeholder='${me}' cols='30'></textarea>`)
 		return ()=>$('#'+me).text(f($('#'+par).val()))
 	}
 

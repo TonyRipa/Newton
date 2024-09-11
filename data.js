@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2024
+	Date:	9/10/2024
 	Data:	A data library
 */
 
@@ -13,7 +13,7 @@ class Data {
 	}
 
 	static expr() {
-		return [0,1,2,12/8,'x','x*x','x/x','(x^2-1)/(x-1)','(x-1)/(x^2-1)','2+h','(2+h)^2','(2+h)^2-2^2','((2+h)^2-2^2)/h','((2+h)^2-2^2)/h|0','exp(x)','exp(2x)','sin(x)','sin(3x)','cos(x)','cos(4x)','sinh(x)','sinh(5x)','cosh(x)','cosh(6x)']
+		return [0,1,2,12/8,'x','x*x','x/x','(x^2-1)/(x-1)','(x-1)/(x^2-1)','2+h','(2+h)^2','(2+h)^2-2^2','((2+h)^2-2^2)/h','((2+h)^2-2^2)/h|0','exp(x)','exp(2x)','sin(x)','sin(3x)','cos(x)','cos(4x)','sinh(x)','sinh(5x)','cosh(x)','cosh(6x)','δ(x)']
 	}
 
 	static eqn() {
