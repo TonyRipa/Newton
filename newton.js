@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	9/3/2024
+	Date:	10/9/2024
 	Newton:	An A.I. for Math
 */
 
@@ -110,12 +110,13 @@ class Newton {
 	static sample(exp) {
 		let vars = Expression.getvars(exp)
 		if (vars.length == 0) vars  = ['x']
-		return vars[0] + '\n' + [0,1,2,3].map(x=>math.evaluate(exp,{[vars[0]]:x})).map(x=>x?.toString().replace('NaN','%')).join('\n')
+		vars.push(exp)
+		return vars + '\n' + [0,1,2,3].map(x=>x+','+math.evaluate(exp,{[vars[0]]:x})).map(x=>x?.toString().replace('NaN','%')).join('\n')
 	}
 
 	static regress(variexp) {
 		let [vari,...exp] = variexp.split('\n')
-		return new polynomial1(vari,new wholeplacevalue(exp.map(rational.parse)).unpointeval()).toString()
+		return new polynomial1(vari[0],new wholeplacevalue(exp.map(r=>r.split(',')[1]).map(rational.parse)).unpointeval()).toString()
 	}
 
 	static laplace(x) {	//	+2024.8

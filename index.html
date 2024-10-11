@@ -1,7 +1,7 @@
 
 <!--
 	Author: Anthony John Ripa
-	Date:	9/9/2024
+	Date:	10/9/2024
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -17,7 +17,7 @@
 		<script src="https://unpkg.com/gojs@3.0.9/release/go.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/digit.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/rational.js"></script>
-		<script src="complex.js"></script>
+		<script src="https://tonyripa.github.io/PlaceValue/complex.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/rationalcomplex.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/wholeplacevalue.js"></script>
 		<script src="https://tonyripa.github.io/PlaceValue/placevalueratio.js"></script>
@@ -41,11 +41,12 @@
 			<h1>Newton</h1>
 			<select onchange='$("#netstr").val($(this).val())'>
 				<optgroup label='Algebra'>
+					<option>datas.expr→input→sample→plot1;sample→regress</option>
 					<option>datas.expr→input→laplace→invlaplace</option>
-					<option>datas.eqn→input→network;input→solve</option>
 					<option>datas.expr→input→iegf→egf</option>
 					<option>datas.expr→input→trigpoly→polytrig</option>
-					<option>datas.expr→input→sample→regress</option>
+					<option>datas.eqn→input→network;input→solve</option>
+					<option>datas.eqn→input→eq2json→json2net;input→solve</option>
 				</optgroup>
 				<optgroup label='Bias'>
 					<optgroup label='&nbsp;&nbsp;&nbsp;&nbsp;Mediator'>
@@ -86,7 +87,7 @@
 					<option>data.odds→oddschain2oddstable</option>
 				</optgroup>
 			</select>
-			<input id='netstr' value='datas.expr→input→laplace→invlaplace' size=30>
+			<input id='netstr' value='datas.expr→input→sample→plot1;sample→regress' size=40>
 			<button onclick='ui.makenet()'>Make Net</button><br>
 			<br>
 			<hr>

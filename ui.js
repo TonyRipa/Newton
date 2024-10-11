@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	9/3/2024
+	Date:	10/9/2024
 	UI:	A user interface library
 */
 
@@ -81,6 +81,7 @@ class ui {
 			case 'filter': return ui.makefilter(ids,id)
 			case 'where': return ui.makewhere(ids,id)
 			case 'plot': return ui.makeplot(ids,id)
+			case 'plot1': return ui.makeplot1(ids,id)
 			case 'plot2': return ui.makeplot2(ids,id)
 			case 'plot23': return ui.makeplot23(ids,id)
 			case 'plot2layer': return ui.makeplot2layer(ids,id)
@@ -100,6 +101,10 @@ class ui {
 			case 'laplace': return ui.makef(ids,id,Newton.laplace)
 			case 'invlaplace': return ui.makef(ids,id,Newton.invlaplace)
 			case 'network': return ui.makenetwork(ids,id)
+			case 'eq2json': return ui.makef(ids,id,x=>JSON.stringify(Plot.eq2json(x),null,2))
+			case 'json2net': return ui.makejson2net(ids,id,Plot.plotjson)
+			case 'json2eq': return ui.makef(ids,id,Plot.json2eq)
+			//case 'json2net': return ui.makejson2net(ids,id)
 		}
 		alert(`ui.make() : id ${id} not found`)
 	}
@@ -190,9 +195,17 @@ class ui {
 	}
 
 	static makenetwork(ids,me) {
+		window.godiagram = null
 		let {par,kid} = ui.me2parkid(ids,me)
 		$('#net').append(`<div id='${me}' style='border:thin solid black;width:640px;height:400px;color:#999'>${me}</div>`)
 		return () => Plot.plotnetwork(me,get_input(par))
+	}
+
+	static makejson2net(ids,me) {
+		window.godiagram = null
+		let {par,kid} = ui.me2parkid(ids,me)
+		$('#net').append(`<div id='${me}' style='border:thin solid black;width:640px;height:400px;color:#999'>${me}</div>`)
+		return () => Plot.json2net(me,get_input(par))
 	}
 
 	static makeplots(ids,me) {
@@ -209,6 +222,18 @@ class ui {
 				Plot.fromFrame(frame1).plot1(me+1)
 				Plot.fromFrame(frame2).plot1(me+2)
 			}			
+		}
+	}
+
+	static makeplot1(ids,me) {
+		let {par,kid} = ui.me2parkid(ids,me)
+		$('#net').append(`<div id='${me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${me}</div>`)
+		return () => {
+			let frame = Frame.fromString(get_input(par))
+			$('#'+me).empty()
+			$('#'+me).removeAttr('style')
+			$('#'+me).append(`<table><tr><td id='${me}2' width='500px'></td></tr></table>`)
+			Plot.fromFrame(frame).plot1(me+'2')
 		}
 	}
 
