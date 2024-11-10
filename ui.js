@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	10/9/2024
+	Date:	11/10/2024
 	UI:	A user interface library
 */
 
@@ -9,15 +9,17 @@ class ui {
 
 	static makenet() {
 		$('#net').empty()
-		let net = $('#netstr').val()
+		let net = nodot($('#netstr').val())
 		let ids = ui.net2ids(net)
 		let dag = ui.str2dag(net)
 		let fs = []
 		for (let i = 0 ; i < ids.length ; i++) {
 			fs.push(...ui.makes(dag,ids[i]))
-			ui.makebrs()
+			ui.makebr()
 		}
-		ui.makego(fs)
+		for (let i = ids.length-1 ; i >= 0 ; i--) {
+			ui.makego(ids[i-1],fs.slice(i))
+		}
 	}
 
 	static net2ids(str) {
@@ -73,8 +75,8 @@ class ui {
 	}
 
 	static make(ids,id) {
-		if (id.startsWith('datas.')) return ui.makeselect(ids,id,Data.get(id))
-		if (id.startsWith('data.')) return ui.makeinputbig(ids,id,Data.get(id))
+		if (id.startsWith('datas_')) return ui.makeselect(ids,id,Data.get(id))
+		if (id.startsWith('data_')) return ui.makeinputbig(ids,id,Data.get(id))
 		switch(id) {
 			case 'input': return ui.makeinput(ids,id)
 			case 'inputbig': return ui.makeinputbig(ids,id)
@@ -103,6 +105,7 @@ class ui {
 			case 'network': return ui.makenetwork(ids,id)
 			case 'eq2json': return ui.makef(ids,id,x=>JSON.stringify(Plot.eq2json(x),null,2))
 			case 'json2net': return ui.makejson2net(ids,id,Plot.plotjson)
+			case 'net2json': return ui.makef(ids,id,Plot.net2json)
 			case 'json2eq': return ui.makef(ids,id,Plot.json2eq)
 			//case 'json2net': return ui.makejson2net(ids,id)
 		}
@@ -110,7 +113,7 @@ class ui {
 	}
 
 	static makebr() { $('#net').append(`<br>`) }
-	static makebrs() { $('#net').append(`<br><br>`) }
+	static makebrs() { ui.makebr() ; ui.makebr() }
 
 	static me2parkid(ids,me) {
 		let par = ids.par[me]
@@ -123,19 +126,19 @@ class ui {
 	static makeinputbig(ids,me,data) {
 		let {par,kid} = ui.me2parkid(ids,me)
 		$('#net').append(`<textarea id='${me}' cols='180' rows='7'>${data}</textarea>`)
-		return ()=>{}
+		return ()=>{if (par) putval(me,$('#'+par).val())}
 	}
 
 	static makeselect(ids,me,data) {
 		let {par,kid} = ui.me2parkid(ids,me)
-		$('#net').append(`<select id='${me}' onchange="putval('${kid}',$(this).val())">`+data.map(d=>'<option>'+d+'</option>')+`</select>`)
+		$('#net').append(`<select id='${me}'>`+data.map(d=>'<option>'+d+'</option>')+`</select>`)
 		return ()=>{}
 	}
 
 	static makeinput(ids,me,data='') {
 		let {par,kid} = ui.me2parkid(ids,me)
 		$('#net').append(`<input id='${me}' value='${data}' placeholder='${me}'>`)
-		return ()=>{}
+		return ()=>{$('#'+me).val($('#'+par).val())}
 	}
 
 	static makefilter(ids,me) {
@@ -232,7 +235,7 @@ class ui {
 			let frame = Frame.fromString(get_input(par))
 			$('#'+me).empty()
 			$('#'+me).removeAttr('style')
-			$('#'+me).append(`<table><tr><td id='${me}2' width='500px'></td></tr></table>`)
+			$('#'+me).append(`<table><tr><td id='${me}2' width='400px'></td></tr></table>`)
 			Plot.fromFrame(frame).plot1(me+'2')
 		}
 	}
@@ -303,9 +306,10 @@ class ui {
 		return ()=>$('#'+me).text(f($('#'+par).val()))
 	}
 
-	static makego(fs) {
+	static makego(id0,fs) {
+		id0 = id0?.split(',').slice(-1)[0]
 		let id = math.randomInt(1,9999)
-		$('#net').prepend(`<button id='${id}'>Go</button>`)
+		$(`<button id='${id}' style='display:block' title='${id0}\n↓'>↓</button>`).insertAfter('#'+id0)
 		$('#'+id).on('click',()=>{fs.map(f=>f())})
 	}
 

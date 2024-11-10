@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	10/9/2024
+	Date:	11/10/2024
 	Plot:	A plotting library
 */
 
@@ -64,10 +64,11 @@ class Plot {
 		}
 		var data = [trace1]
 		var layout = {
+			margin: { l: 50, r: 0, b: 50, t: 0 } ,
 			xaxis: {title: {text:this.head?.[0]} } ,
 			yaxis: {title: {text:this.head?.[1]} } ,
-			width: 500 ,
-			height: 500 ,
+			width: 400 ,
+			height: 400 ,
 		}
 		Plotly.newPlot(id, data, layout)
 	}
@@ -178,7 +179,6 @@ class Plot {
 		let ys = []
 		for (let i = 0 ; i < this.y.length ; i++ ) {
 			let [x,y,z] = [...this.x[i],this.y[i]]
-			//x = x=='F' ? 0 : x=='M' ? 3 : x
 			if (x != Number(x)) {
 				if (!xs.includes(x)) xs.push(x)
 				x = xs.indexOf(x) * 3
@@ -332,7 +332,7 @@ class Plot {
 						.add(
 							new go.Shape('RoundedRectangle', {fill: 'transparent'}),
 							new go.Panel('Vertical',{alignment: new go.Spot(0,0,0,8)})
-								.add(new go.TextBlock().bind('text','name'),new go.Picture({height: 15, width: 30}))
+								.add(new go.TextBlock({editable:true}).bindTwoWay('text','name'),new go.Picture({height: 15, width: 30}))
 						),
 					new go.Panel('Vertical', {alignment: new go.Spot(0,0.33,0,7), itemTemplate: makeItemTemplate()}).bind('itemArray', 'inservices'),
 					new go.Panel('Vertical', {alignment: new go.Spot(1,0.30,0,7), itemTemplate: makeItemTemplate()}).bind('itemArray', 'outservices')
@@ -350,6 +350,10 @@ class Plot {
 			}
 		}
 		window.godiagram.model = new go.GraphLinksModel(json)
+	}
+
+	static net2json() {
+		return window.godiagram.model.toJson()
 	}
 
 	static eq2json(data) {

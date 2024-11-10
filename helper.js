@@ -1,15 +1,16 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/11/2024
+	Date:	11/02/2024
 	Helper:	A utility library
 */
 
 let log = console.log
 function last(x) { return x.slice(-1)[0] }
-function logo(x) { return log(JSON.stringify(x)) }
-function alerto(x) { alert(JSON.stringify(x)) }
 function show(x) { alert(JSON.stringify(x)) }
+function alerto(x) { alert(JSON.stringify(x)) }
+function nodot(x) { return x?.replace(/\./g,'_') }
+function logo(x) { return log(JSON.stringify(x)) }
 function get_input(id) { return document.getElementById(id).value }
 function putval(id,val) { document.getElementById(id).value = val.replace(/\\n/g,'\n') }
 function set_div(id,val) { if (!Array.isArray(val)) val = [val]; document.getElementById(id).innerHTML = val.join('<br>') }
@@ -57,6 +58,8 @@ function lookup(key,data) {
 	}
 }
 function str2num(str) {
+	if (math.typeOf(str) == 'Array') return str.map(str2num)
+	if (math.typeOf(str) == 'number') return str
 	if (str.endsWith('‰')) return str2num(str.slice(0,-1))
 	return Number(str)
 }

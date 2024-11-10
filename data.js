@@ -1,14 +1,14 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	10/10/2024
+	Date:	11/10/2024
 	Data:	A data library
 */
 
 class Data {
 
 	static get(x) {
-		let [prefix,suffix] = x.split('.')
+		let [prefix,suffix] = x.split('_')
 		return Data[suffix]()
 	}
 
@@ -17,11 +17,11 @@ class Data {
 	}
 
 	static eqn() {
-		return ['X=0','X=1','X+0=0','X+0=1','X+1=0','X+1=1','X*0=0','X*0=1','X*1=0','X*1=1','X*2=1','M*h=(2*x+h)*h','h*M=(2*x+h)*h','X=e-e','Y=2*3','Y=x*3',              '0*1=0','0*X=0','(2*x+h)*h=M*h',                                'Y=X*3','2*X=X','X=X*2','X=2*X','X*2=X',        'X=X',              'Y*X=1']
+		return ['X=0','X=1','X+0=0','X+0=1','X+1=0','X+1=1','X*0=0','X*0=1','X*1=0','X*1=1','X*2=1','M*h=h','M*h=(2*x+h)*h','h*M=(2*x+h)*h','X=e-e','Y=2*3','Y=x*3',              '0*1=0','0*X=0','(2*x+h)*h=M*h',                                'Y=X*3','2*X=X','X=X*2','X=2*X','X*2=X',        'X=X',              'Y*X=1']
 	}
 
 	static eqn2() {
-		return ['X=0','X=1','X+0=0','X+0=1','X+1=0','X+1=1','X*0=0','X*0=1','X*1=0','X*1=1','X*2=1','M*h=(2*x+h)*h','h*M=(2*x+h)*h','X=e-e','Y=2*3','Y=x*3','X*y*g=y*3*g','0*1=0','0*X=0','(2*x+h)*h=M*h','(2*x+H)*H=M*H','M*H=(2*x+H)*H','Y=X*3','2*X=X','X=X*2','X=2*X','X*2=X','X=Y*X','X=X','Y=(2*x+H)*H','Y*X=1']
+		return ['X=0','X=1','X+0=0','X+0=1','X+1=0','X+1=1','X*0=0','X*0=1','X*1=0','X*1=1','X*2=1','M*h=h','M*h=(2*x+h)*h','h*M=(2*x+h)*h','X=e-e','Y=2*3','Y=x*3','X*y*g=y*3*g','0*1=0','0*X=0','(2*x+h)*h=M*h','(2*x+H)*H=M*H','M*H=(2*x+H)*H','Y=X*3','2*X=X','X=X*2','X=2*X','X*2=X','X=Y*X','X=X','Y=(2*x+H)*H','Y*X=1']
 	}
 
 	static prob() {

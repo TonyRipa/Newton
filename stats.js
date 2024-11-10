@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/11/2024
+	Date:	11/02/2024
 	Stats:	A statistics library
 */
 
@@ -83,38 +83,6 @@ class Stats {
 			return sum / count
 		}
 	}
-	/*
-	static oddschain2oddstable(r) {	//	-2024.5
-		let ret = ''
-		for (let i = 0 ; i <= r.length ; i++) {
-			for (let j = 0 ; j <= r.length ; j++) {
-				let odds
-				if (i==j) {
-					odds = 1
-				} else if (i==j-1) {
-					odds = r[i]
-				} else if (i==j-2) {
-					odds = r[i]*r[i+1]
-				} else if (i==j-3) {
-					odds = r[i]*r[i+1]*r[i+2]
-				} else if (i==j+1) {
-					odds = 1/r[j]
-				} else if (i==j+2) {
-					odds = 1/(r[j]*r[j+1])
-				} else if (i==j+3) {
-					odds = 1/(r[j]*r[j+1]*r[j+2])
-				}
-				odds = isNaN(odds) ? '%' : odds
-				odds = odds==1/0 ? '∞' : odds
-				odds = odds==-1/0 ? '-∞' : odds
-				ret += odds
-				if (j<r.length) ret += '\t'
-			}
-			if (i<r.length) ret += '\n'
-		}
-		return ret
-	}
-	*/
 	static oddschain2oddstable(r) {	//	+2024.5
 		let ret = ''
 		for (let i = 0 ; i <= r.length ; i++) {
@@ -173,8 +141,8 @@ class Stats {
 		let body = matrix.slice(1,-1)
 		let marg = matrix.slice(-1)[0]
 		console.log(body)
-		if (order==+1) body.sort((Ra,Rb)=>Rb.slice(-1)[0]<Ra.slice(-1)[0])
-		if (order==-1) body.sort((Ra,Rb)=>Rb.slice(-1)[0]>Ra.slice(-1)[0])
+		if (order==+1) body.sort((Ra,Rb)=>str2num(last(Rb))<str2num(last(Ra)))
+		if (order==-1) body.sort((Ra,Rb)=>str2num(last(Rb))>str2num(last(Ra)))
 		return [head,...body,marg]
 	}
 	static kv2matrix(rows) {
