@@ -1,15 +1,15 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/4/2024
+	Date:	12/10/2024
 	Stats:	A data-frame library
 */
 
 class Frame {
 
-	constructor(dict) {
-		if (arguments.length != 1) alert('Frame.constructor() expects 1 argument but got ' + arguments.length)
+	constructor(dict, keys = Object.keys(dict)) {
 		this.dict = dict
+		this.keys = keys
 	}
 
 	static dict2frame(dict) {
@@ -17,8 +17,9 @@ class Frame {
 	}
 
 	static str2frame(str) {
+		let keys = str.split('\n')[0].split(',')
 		let dict = csv2dict(str)
-		return Frame.dict2frame(dict)
+		return new Frame(dict,keys)
 	}
 
 	static fromString(str) { return Frame.str2frame(str) }
@@ -32,9 +33,9 @@ class Frame {
 
 	static fromHeadCols(head,cols) { return Frame.dict2frame(Frame.headCols2dict(head,cols)) }
 
-	head() { return Object.keys(this.dict) }
+	head() { return this.keys }
 
-	cols() { return Object.values(this.dict) }
+	cols() { return this.keys.map(key => this.dict[key]) }
 
 	rows() { return math.transpose(this.cols()) }
 
@@ -59,7 +60,7 @@ class Frame {
 	}
 
 	getcols() {
-		return Object.values(this.dict)
+		return this.cols()
 	}
 
 	getcolsdict() {
@@ -85,6 +86,7 @@ class Frame {
 	}
 	removecolbystr(colname) {
 		delete this.dict[colname]
+		this.keys = this.keys.filter(key => key!=colname)
 		return this
 	}
 
@@ -193,6 +195,7 @@ class Frame {
 	}
 
 	prependcol(col,head) {
+		this.keys = [head, ...this.keys]
 		this.dict = {[head]:col , ...this.dict}
 		return this
 	}
@@ -228,6 +231,7 @@ class Frame {
 				rows.push(oldrows[i].slice(1))
 		}
 		this.dict = Frame.headCols2dict(head,math.transpose(rows))
+		this.keys = head
 		return this
 	}
 

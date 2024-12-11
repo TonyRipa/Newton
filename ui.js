@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	11/10/2024
+	Date:	11/18/2024
 	UI:	A user interface library
 */
 
@@ -18,7 +18,7 @@ class ui {
 			ui.makebr()
 		}
 		for (let i = ids.length-1 ; i >= 0 ; i--) {
-			ui.makego(ids[i-1],fs.slice(i))
+			ui.makego(ids[i-1],fs.slice(i-ids.length))
 		}
 	}
 
@@ -107,6 +107,7 @@ class ui {
 			case 'json2net': return ui.makejson2net(ids,id,Plot.plotjson)
 			case 'net2json': return ui.makef(ids,id,Plot.net2json)
 			case 'json2eq': return ui.makef(ids,id,Plot.json2eq)
+			case 'prolog': return ui.makeprolog(ids,id)
 			//case 'json2net': return ui.makejson2net(ids,id)
 		}
 		alert(`ui.make() : id ${id} not found`)
@@ -145,6 +146,13 @@ class ui {
 		let {par,kid} = ui.me2parkid(ids,me)
 		$('#net').append(`<textarea id='${me}' cols='50' rows='7' placeholder='${me}'></textarea>`)
 		return ()=>set_textarea(me,Stats.p(get_input(par.split(',')[0]),id2array(par.split(',')[1])))
+	}
+
+	static makeprolog(ids,me) {
+		let {par,kid} = ui.me2parkid(ids,me)
+		$('#net').append(`<textarea id='${me}' cols='50' rows='7' placeholder='${me}'></textarea>`)
+		return ()=>{let s=pl.create();s.consult(get_input(par.split(',')[1])+'\n');s.query(get_input(par.split(',')[0]));s.answer({success:x=>set_textarea(me,s.format_answer(x))})
+		}
 	}
 
 	static makewhere(ids,me) {
@@ -303,7 +311,7 @@ class ui {
 	static makef(ids,me,f) {
 		let {par,kid} = ui.me2parkid(ids,me)
 		$('#net').append(`<textarea id='${me}' placeholder='${me}' cols='30'></textarea>`)
-		return ()=>$('#'+me).text(f($('#'+par).val()))
+		return ()=>$('#'+me).val(f($('#'+par).val()))
 	}
 
 	static makego(id0,fs) {

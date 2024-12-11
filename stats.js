@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	11/02/2024
+	Date:	11/23/2024
 	Stats:	A statistics library
 */
 
@@ -9,7 +9,8 @@ class Stats {
 
 	static p(query,data) {
 		let [head,...body] = data
-		body = Stats.pbody(query, body)
+		let weighted = head[0] == '_Count'
+		body = Stats.pbody(query, body, weighted)
 		if (!Array.isArray(body)) body = [body]
 		return [Stats.phead(query).map(i=>head[i]), ...body]
 	}
@@ -21,16 +22,16 @@ class Stats {
 			return [query]
 		}
 	}
-	static pbody(query,data) {
+	static pbody(query,data,weighted) {
 		let [colindex,condition] = query.split('|')
 		if (condition == undefined) {
-			return Stats.pcol(colindex,data)
+			return Stats.pcol(colindex,data,weighted)
 		} else if (condition?.includes('=')) {
 			let [conditioncolindex,conditioncolvalue] = condition.split('=')
 			data = Stats.filter(data,[conditioncolindex])[conditioncolvalue]
-			return Stats.pcol(colindex,data)
+			return Stats.pcol(colindex,data,weighted)
 		} else {
-			return Stats.pcols(data,condition,colindex).sort((r1,r2)=>isNaN(r1[1])?+1:isNaN(r2[1])?-1:r2[1]-r1[1]).map(xy=>[JSON.parse(xy[0]),xy[1]])
+			return Stats.pcols(data,condition,colindex,weighted).sort((r1,r2)=>isNaN(r1[1])?+1:isNaN(r2[1])?-1:r2[1]-r1[1]).map(xy=>[JSON.parse(xy[0]),xy[1]])
 		}
 	}
 	static pcol(colindex,data,weighted = false) {
@@ -43,12 +44,12 @@ class Stats {
 		}
 		return s / count
 	}
-	static pcols(data,condition,output_index) {
+	static pcols(data,condition,output_index,weighted) {
 		let colindexes = condition.split(',').map(Number)
 		let filtered = Stats.filter(data,colindexes)
 		let valsi = colindexes.map(colindex=>colvals(data,colindex))
 		let cp = cartesianProductOf(...valsi)
-		let groups = cp.map(val=>Stats.pcol(output_index,filtered[JSON.stringify(val)]))
+		let groups = cp.map(val=>Stats.pcol(output_index,filtered[JSON.stringify(val)],weighted))
 		return math.transpose([cp.map(JSON.stringify),groups])
 	}
 	static filter(data,colindexes) {

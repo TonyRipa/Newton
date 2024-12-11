@@ -1,7 +1,7 @@
 
 <!--
 	Author: Anthony John Ripa
-	Date:	11/04/2024
+	Date:	12/10/2024
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -9,6 +9,7 @@
 <html>
 	<head>
 		<title>Newton</title>
+		<script src="https://cdn.jsdelivr.net/npm/tau-prolog@0.3.4/modules/core.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js"></script>
@@ -45,6 +46,7 @@
 					<option>datas.expr→input→laplace→invlaplace</option>
 					<option>datas.expr→input→iegf→egf</option>
 					<option>datas.expr→input→trigpoly→polytrig</option>
+					<option>input,data.prog→prolog</option>
 					<option>datas.eqn→input→eq2json→json2net→net2json→json2eq→solve</option>
 					<option>datas.eqn→input→network;input→solve</option>
 				</optgroup>
@@ -72,6 +74,7 @@
 						<option>data.car→plot2layer</option>
 						<option>data.hire→plot2layer</option>
 						<option>data.hire→plot2</option>
+						<option>data.test→plot2layer</option>
 					</optgroup>
 					<optgroup label='&nbsp;&nbsp;&nbsp;&nbsp;Misc.'>
 						<option>data.gap→plot2</option>

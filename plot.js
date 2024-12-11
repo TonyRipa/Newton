@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	11/10/2024
+	Date:	11/11/2024
 	Plot:	A plotting library
 */
 
@@ -332,12 +332,26 @@ class Plot {
 						.add(
 							new go.Shape('RoundedRectangle', {fill: 'transparent'}),
 							new go.Panel('Vertical',{alignment: new go.Spot(0,0,0,8)})
-								.add(new go.TextBlock({editable:true}).bindTwoWay('text','name'),new go.Picture({height: 15, width: 30}))
+								.add(new go.TextBlock({editable:true,minSize:new go.Size(5,NaN)}).bindTwoWay('text','name'),new go.Picture({height: 15, width: 30}))
 						),
 					new go.Panel('Vertical', {alignment: new go.Spot(0,0.33,0,7), itemTemplate: makeItemTemplate()}).bind('itemArray', 'inservices'),
 					new go.Panel('Vertical', {alignment: new go.Spot(1,0.30,0,7), itemTemplate: makeItemTemplate()}).bind('itemArray', 'outservices')
 				)
 			window.godiagram.linkTemplate = new go.Link().add(new go.Shape())
+			window.godiagram.addDiagramListener("textEdited", e => {
+				let textBlock = e.subject
+				let node = textBlock.part
+				let key = node.data.key
+				let newValue = textBlock.text
+				let oldValue = e.parameter
+				if ('+-*/'.includes(oldValue) && !('+-*/'.includes(newValue))) {
+					let model = window.godiagram.model.toJson()
+					let newmodel = Plot.nokid(model,key)
+					newmodel = Plot.eq2json(Plot.json2eq(newmodel))
+					log(key,oldValue,newValue,model,newmodel)
+					setTimeout(()=>{window.godiagram.model = new go.GraphLinksModel(newmodel)},1000)
+				}
+			})
 			function makeItemTemplate() {
 				return new go.Panel('Auto', { margin: new go.Margin(1, 0) })
 					.add(
@@ -350,6 +364,18 @@ class Plot {
 			}
 		}
 		window.godiagram.model = new go.GraphLinksModel(json)
+	}
+
+	static nokid(json,node) {
+		if (math.typeOf(json) == "string") json = JSON.parse(json)
+		let {linkDataArray} = json
+		let newlinkDataArray = []
+		for (let link of linkDataArray) {
+			if (link.to != node)
+				newlinkDataArray.push(link)
+		}
+		json.linkDataArray = newlinkDataArray
+		return json
 	}
 
 	static net2json() {
