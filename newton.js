@@ -1,14 +1,14 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	10/9/2024
+	Date:	1/10/2025
 	Newton:	An A.I. for Math
 */
 
 class Newton {
 
 	static simplify(input) {	//	+2024.4
-		return Newton.poly2trig(Newton.trig2poly(input))
+		return Newton.invlaplace(Newton.laplace(input))	//	2025.1
 	}
 
 	static trig2poly(input) {

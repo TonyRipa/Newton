@@ -1,13 +1,13 @@
 
 // Author:	Anthony John Ripa
-// Date:	10/10/2024
+// Date:	1/10/2025
 // LaplaceRing: a datatype for representing the Laplace Transform
 
 class laplacering extends abstractpolynomial {
 
 	constructor(arg) {
 		var arr, base
-		if (arguments.length == 0) [base,arr] = [1,[]]
+		if (arguments.length == 0) [base,arr] = ['x',[]]
 		if (arguments.length == 1) [base,arr] = Array.isArray(arg) ? ['x',arg] : [arg,[]]
 		if (arguments.length == 2) [base,arr] = arguments;
 		super()
@@ -61,7 +61,7 @@ class laplacering extends abstractpolynomial {
 		terms = terms.split('+')
 		terms = terms.map(term=>term.replace(/\(sp/g, '(s+').replace(/\(sm/g, '(s-').replace(/pm/g, '^-'))
 		terms = terms.map(processterm)
-		return new this.constructor(terms)
+		return new this.constructor(this.base,terms)
 		function processterm(term) {
 			let [num,den] = term.split('/')
 			let c = num

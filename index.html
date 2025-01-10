@@ -1,7 +1,7 @@
 
 <!--
 	Author: Anthony John Ripa
-	Date:	12/10/2024
+	Date:	1/10/2025
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -42,7 +42,7 @@
 			<h1>Newton</h1>
 			<select onchange='$("#netstr").val($(this).val())'>
 				<optgroup label='Algebra'>
-					<option>datas.expr→input→sample→plot1;sample→regress</option>
+					<option>datas.expr→input→sample→regress;sample→plot1</option>
 					<option>datas.expr→input→laplace→invlaplace</option>
 					<option>datas.expr→input→iegf→egf</option>
 					<option>datas.expr→input→trigpoly→polytrig</option>
@@ -90,7 +90,7 @@
 					<option>data.odds→oddschain2oddstable</option>
 				</optgroup>
 			</select>
-			<input id='netstr' value='datas.expr→input→sample→plot1;sample→regress' size=50>
+			<input id='netstr' value='datas.expr→input→sample→regress;sample→plot1' size=50>
 			<button onclick='ui.makenet()'>Make Net</button><br>
 			<br>
 			<hr>

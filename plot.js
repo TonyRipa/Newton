@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	11/11/2024
+	Date:	12/15/2024
 	Plot:	A plotting library
 */
 
@@ -337,7 +337,7 @@ class Plot {
 					new go.Panel('Vertical', {alignment: new go.Spot(0,0.33,0,7), itemTemplate: makeItemTemplate()}).bind('itemArray', 'inservices'),
 					new go.Panel('Vertical', {alignment: new go.Spot(1,0.30,0,7), itemTemplate: makeItemTemplate()}).bind('itemArray', 'outservices')
 				)
-			window.godiagram.linkTemplate = new go.Link().add(new go.Shape())
+			window.godiagram.linkTemplate = new go.Link({relinkableFrom:true,relinkableTo:true}).add(new go.Shape())
 			window.godiagram.addDiagramListener("textEdited", e => {
 				let textBlock = e.subject
 				let node = textBlock.part
@@ -357,6 +357,7 @@ class Plot {
 					.add(
 						new go.Shape({
 							geometryString: 'F1 m 0,0 l 5,0 1,4 -1,4 -5,0 1,-4 -1,-4 z',
+							fromLinkable:true,toLinkable:true,
 							toSpot: go.Spot.Left,
 							fromSpot: go.Spot.Right
 						}).bind('portId', 'name')
