@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	1/10/2024
+	Date:	2/10/2024
 	Data:	A data library
 */
 
@@ -26,12 +26,11 @@ class Data {
 
 	static prog() {//1,57,58,59
 		return String.raw`
-:- op(1000,xfx,@).
-:- op(1100,xfx,<-).
-:- op(1200,xfx,<--).
+:- op(0900,xfx,@).
+:- op(1000,xfx,<-).
+:- op(1100,xfx,<--).
+:- op(1200,xfx,<---).
 
-%simp(0/0, _, S) :- write([S,7]) , S>0 , ! , fail.	%	0/0 is a non-terminal
-%simp(0/0, 0/0, S) :- write([S,8]) , S>0 , ! .		%	0/0 is a terminal
 simp(X/X, 1, S) :- write([S,9,X/X=1,trying]) , S>0 , X\=0 , ! , write([S,9,X/X=1,succeed]).
 
 simp(X*1, Ans, S) :- write([S,11,X*1=Ans,trying]) , S>0 , S2 is S-1 , simp(X, Ans, S2) , ! , write([S,11,X,succeed]).
@@ -80,9 +79,21 @@ simp(X, X, S):- write([S,52,X=X,succeed]).
 last([X],X):- ! .
 last([H|T],X):- last(T,X) , ! .
 
-<--(Answers,X) :- write("Depth Limiting") , bagof(Answer,simp(X,Answer,25),Answers).	%	Depth Limited
+<---(Answers,X) :- write("Depth Limiting") , bagof(Answer,simp(X,Answer,25),Answers).	%	Depth Limited
 
-<-(Answer,X) :- write("Pick Best") , <--(Answers,X) , last(Answers,Answer).	%	Pick Best
+<--(Answer,X) :- write("Pick Best") , <---(Answers,X) , last(Answers,Answer).	%	Pick Best
+
+<-(Answer,X) :- write("Factoring") , <--(Best,X) , factor(Best,Answer).	%	Factor Best
+
+factor(X+X, 2*X1) :- factor(X, X1) , ! .
+factor(N*X+X, N2*X) :- number(N) , N2 is N+1 , ! .
+factor(A+B, Ans) :- factor(A, A1) , A\=A1 , factor(A1+B, Ans) , ! .
+factor(A+B, Ans) :- factor(B, B1) , B\=B1 , factor(A+B1, Ans) , ! .
+factor(X*X, X^2) :- ! .
+factor(X^N*X, X^N2) :- number(N) , N2 is N+1 , ! .
+factor(A*B, Ans) :- factor(A, A1) , A\=A1 , factor(A1*B, Ans) , ! .
+factor(A*B, Ans) :- factor(B, B1) , B\=B1 , factor(A*B1, Ans) , ! .
+factor(X, X).
 `
 	}
 

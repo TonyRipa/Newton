@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	12/15/2024
+	Date:	1/15/2025
 	Plot:	A plotting library
 */
 
@@ -351,6 +351,13 @@ class Plot {
 					log(key,oldValue,newValue,model,newmodel)
 					setTimeout(()=>{window.godiagram.model = new go.GraphLinksModel(newmodel)},1000)
 				}
+				if ('+-*/'.includes(newValue) && (oldValue=='' || !('+-*/'.includes(oldValue)))) {
+					let model = window.godiagram.model.toJson()
+					let newmodel = Plot.addkids(model,key)
+					newmodel = Plot.eq2json(Plot.json2eq(newmodel))
+					log(key,oldValue,newValue,model,newmodel)
+					setTimeout(()=>{window.godiagram.model = new go.GraphLinksModel(newmodel)},1000)
+				}
 			})
 			function makeItemTemplate() {
 				return new go.Panel('Auto', { margin: new go.Margin(1, 0) })
@@ -365,6 +372,30 @@ class Plot {
 			}
 		}
 		window.godiagram.model = new go.GraphLinksModel(json)
+	}
+
+	static addkids(json,key) {
+		if (math.typeOf(json) == "string") json = JSON.parse(json)
+		let {linkDataArray,nodeDataArray} = json
+		let kid1 = addkid(nodeDataArray)
+		nodeDataArray.push(kid1)
+		let kid2 = addkid(nodeDataArray)
+		nodeDataArray.push(kid2)
+		let linkkid1me = { from: kid1.key, fromPort: 'o1', to: key, toPort: 's1' }
+		let linkkid2me = { from: kid2.key, fromPort: 'o1', to: key, toPort: 's2' }
+		linkDataArray.push(linkkid1me)
+		linkDataArray.push(linkkid2me)
+		json.nodeDataArray = nodeDataArray
+		json.linkDataArray = linkDataArray
+		return json
+		function addkid(nodeDataArray) {
+			let keys = nodeDataArray.map(n=>n.key)
+			let kid
+			do {
+				kid = { key: String.fromCharCode(math.randomInt(65,65+26)), name: '', inservices: [], outservices: [{ name: 'o1' }] }
+			} while (keys.includes(kid.key))
+			return kid
+		}
 	}
 
 	static nokid(json,node) {

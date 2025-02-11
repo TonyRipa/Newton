@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	1/10/2025
+	Date:	2/10/2025
 	UI:	A user interface library
 */
 
@@ -10,86 +10,30 @@ class ui {
 	static makenet() {
 		$('#net').empty()
 		let net = nodot($('#netstr').val())
-		let ids = ui.net2ids(net)
-		let dag = ui.str2dag(net)
-		let rank = ui.ids2rank(ids,dag)
-		let fs = []
-		for (let row of rank) {
-			for (let col of row) {
-				fs.push(...ui.makes(dag,col))
-			}
-			ui.makebr()
-		}
+		let ids = Graph.net2ids(net)
+		let dag = Graph.str2dag(net)
+		let rank = Graph.dag2rank(dag)
+		let fs = makess(dag)
 		for (let i = ids.length-1 ; i > 0 ; i--) {
-			ui.makego(ids[i],fs.slice(i-ids.length))
+			// if (!rank[0].includes(ids[i]))
+			let numpars = dag.par[ids[i]]?.length
+			if (numpars > 0)
+				ui.makego(ids[i],fs.slice(i-ids.length),numpars)
 		}
-	}
-
-	static ids2rank(ids,dag) {
-		let ret = []
-		let roots = ids2roots(ids,dag)
-		if (roots.length == 0) return ret
-		ret.push(roots)
-		for ( let kids = roots2kids(roots,dag) ; kids.length > 0 ; kids = roots2kids(kids,dag) )
-			ret.push(kids)
-		return ret
-		function ids2roots(ids,dag) {
-			let {par,kid} = dag
-			let parkeys = Object.keys(par)
-			let kidkeys = Object.keys(kid)
-			return kidkeys.filter(x=>!parkeys.includes(x))
-		}
-		function roots2kids(roots,dag) {
-			return roots.map(root=>dag.kid[root]).flat().filter(x=>x!=undefined)
-		}
-	}
-
-	static net2ids(str) {
-		let ids = []
-		let nodes = str2nodes(str)
-		let graph = ui.str2dag(str)
-		if (nodes.length < 2) return nodes
-		while (nodes.length > 1) {
-			let nodeskids = nodes.map(node=>graph.kid[node])
-			let node
-			for (let i = 0; i < nodes.length ; i++) {
-				if (nodeskids[i]==undefined || nodeskids[i].length==0) {
-					node = nodes[i]
-					ids.unshift(node)
-					nodes = nodes.filter(n=>n!=node)
-					let pars = graph.par[node]
-					if (pars != undefined) pars.map(function(par){graph.kid[par]=graph.kid[par].filter(k=>k!=node)})
+		function makess(dag) {
+			let fs = []
+			let tempids = []
+			for (let row of rank) {
+				for (let col of row) {
+					if (!tempids.includes(col)) {
+						tempids.push(col)
+						fs.push(...ui.makes(dag,col))
+					}
 				}
+				ui.makebr()
 			}
+			return fs
 		}
-		ids = [...nodes,...ids]
-		return ids
-		function str2nodes(str) {
-			let paths = str.split(';')
-			paths.reverse()
-			let nodes = paths.map(path=>path.split('→')).flat()
-			return [...new Set(nodes)]
-		}
-	}
-
-	static str2dag(str) {
-		let par = {}
-		let kid = {}
-		let edges = str.split(';')
-		for (let edge of edges) {
-			let ids = edge.split('→')
-			for (let i = 0 ; i < ids.length ; i++) {
-				if (i != 0) {
-					if (par[ids[i]] == undefined) par[ids[i]] = [ids[i-1]]
-					else par[ids[i]].push(ids[i-1])
-				}
-				if (i != ids.length-1) {
-					if (kid[ids[i]] == undefined) kid[ids[i]] = [ids[i+1]]
-					else kid[ids[i]].push(ids[i+1])
-				}
-			}
-		}
-		return {par,kid}
 	}
 
 	static makes(dag,me) {
@@ -101,7 +45,8 @@ class ui {
 		if (id.startsWith('datas_')) return ui.makeselect(dag,id,Data.get(id))
 		if (id.startsWith('data_')) return ui.makeinputbig(dag,id,Data.get(id))
 		switch(id) {
-			case 'input': return ui.makeinput(dag,id)
+			case 'input':
+			case 'input2': return ui.makeinput(dag,id)
 			case 'inputbig': return ui.makeinputbig(dag,id)
 			case 'filter': return ui.makefilter(dag,id)
 			case 'where': return ui.makewhere(dag,id)
@@ -162,7 +107,7 @@ class ui {
 	static makeinput(dag,me,data='') {
 		let {par,kid} = ui.me2parkid(dag,me)
 		$('.cont:last-of-type').append(`<input id='${me}' value='${data}' placeholder='${me}'>`)
-		return ()=>{$('#'+me).val($('#'+par).val())}
+		return ()=>{if (par) $('#'+me).val($('#'+par).val())}
 	}
 
 	static makefilter(dag,me) {
@@ -333,14 +278,16 @@ class ui {
 
 	static makef(dag,me,f) {
 		let {par,kid} = ui.me2parkid(dag,me)
+		let pars = par.split(',')
 		$('.cont:last-of-type').append(`<textarea id='${me}' placeholder='${me}' cols='30'></textarea>`)
-		return ()=>$('#'+me).val(f($('#'+par).val()))
+		return ()=>$('#'+me).val(f(...pars.map(p=>$('#'+p).val())))
 	}
 
-	static makego(id0,fs) {
+	static makego(id0,fs,numpars) {
 		id0 = id0?.split(',').slice(-1)[0]
 		let id = math.randomInt(1,9999)
-		$(`<button id='${id}' title='↓\n${id0}'>↓</button><br>`).insertBefore('#'+id0)
+		let arrows = ['','↓','↘ ↙'][numpars]
+		$(`<button id='${id}' title='${arrows}\n${id0}'>${arrows}</button><br>`).insertBefore('#'+id0)
 		$('#'+id).on('click',()=>{fs.map(f=>f())})
 	}
 
