@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	1/15/2025
+	Date:	2/15/2025
 	Plot:	A plotting library
 */
 
@@ -466,6 +466,7 @@ class Plot {
 			let right = infix(kids[1])
 			if (name == '*' && lop == '+') left =  '(' + left  + ')'
 			if (name == '*' && rop == '+') right = '(' + right + ')'
+			if (name == '*' && rop == '*') right = '(' + right + ')'
 			return left + op + right
 		}
 		function getname(key) {

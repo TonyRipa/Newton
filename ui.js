@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2/10/2025
+	Date:	3/10/2025
 	UI:	A user interface library
 */
 
@@ -15,7 +15,6 @@ class ui {
 		let rank = Graph.dag2rank(dag)
 		let fs = makess(dag)
 		for (let i = ids.length-1 ; i > 0 ; i--) {
-			// if (!rank[0].includes(ids[i]))
 			let numpars = dag.par[ids[i]]?.length
 			if (numpars > 0)
 				ui.makego(ids[i],fs.slice(i-ids.length),numpars)
@@ -77,6 +76,7 @@ class ui {
 			case 'json2eq': return ui.makef(dag,id,Plot.json2eq)
 			case 'prolog': return ui.makeprolog(dag,id)
 			case 'var': return ui.makef(dag,id,Expression.getvars)
+			case 'template': return ui.makef(dag,id,x=>x.split('|')[0])
 		}
 		alert(`ui.make() : id ${id} not found`)
 	}
@@ -118,8 +118,9 @@ class ui {
 
 	static makeprolog(dag,me) {
 		let {par,kid} = ui.me2parkid(dag,me)
+		let pars = par.split(',')
 		$('.cont:last-of-type').append(`<textarea id='${me}' cols='50' rows='7' placeholder='${me}'></textarea>`)
-		return ()=>{let s=pl.create();s.consult(get_input(par.split(',')[1])+'\n');s.query(get_input(par.split(',')[0]));s.answer({success:x=>set_textarea(me,s.format_answer(x))})
+		return ()=>{let s=pl.create();s.consult(Data.prolog()+get_input(pars[1])+'\n');s.query(get_input(pars[0]));s.answer({success:x=>set_textarea(me,s.format_answer(x))})
 		}
 	}
 

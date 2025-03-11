@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2/10/2024
+	Date:	3/10/2024
 	Data:	A data library
 */
 
@@ -24,66 +24,77 @@ class Data {
 		return ['X=0','X=1','X+0=0','X+0=1','X+1=0','X+1=1','X*0=0','X*0=1','X*1=0','X*1=1','X*2=1','M*h=h','M*h=(2*x+h)*h','h*M=(2*x+h)*h','X=e-e','Y=2*3','Y=x*3','X*y*g=y*3*g','0*1=0','0*X=0','(2*x+h)*h=M*h','(2*x+H)*H=M*H','M*H=(2*x+H)*H','Y=X*3','2*X=X','X=X*2','X=2*X','X*2=X','X=Y*X','X=X','Y=(2*x+H)*H','Y*X=1']
 	}
 
-	static prog() {//1,57,58,59
+	static prolog() {
 		return String.raw`
-:- op(0900,xfx,@).
-:- op(1000,xfx,<-).
-:- op(1100,xfx,<--).
-:- op(1200,xfx,<---).
-
-simp(X/X, 1, S) :- write([S,9,X/X=1,trying]) , S>0 , X\=0 , ! , write([S,9,X/X=1,succeed]).
-
-simp(X*1, Ans, S) :- write([S,11,X*1=Ans,trying]) , S>0 , S2 is S-1 , simp(X, Ans, S2) , ! , write([S,11,X,succeed]).
-simp(1*X, Ans, S) :- write([S,12,X]) , S>0 , S2 is S-1 , simp(X, Ans, S2) , ! , write([S,12,X,succeed]).
-simp(X*0, 0, S) :- write([S,13,X]) , S>0 , ! , write([S,13,X,succeed]).
-simp(0*X, 0, S) :- write([S,14,X]) , S>0 , ! , write([S,14,X,succeed]).
-simp(A*B, Ans, S) :- write([S,15,A,B]) , S>0, S2 is S-1 , simp(A, A1, S2) , A\=A1 , simp(A1*B, Ans, S2) , ! , write([S,15,A,B,succeed]).
-simp(A*B, Ans, S) :- write([S,16,A,B]) , S>0 , S2 is S-1 , simp(B, B1, S2) , B\=B1 , simp(A*B1, Ans, S2) , ! , write([S,16,A,B,succeed]).
-
-simp(X+0, Ans, S) :- write([S,18,X]) , S>0 , S2 is S-1 , simp(X, Ans, S2) , ! .
-simp(0+X, Ans, S) :- write([S,19,X]) , S>0 , S2 is S-1 , simp(X, Ans, S2) , ! .
-simp(A+B, Ans, S) :- write([S,20,A,B]) , S>0 , S2 is S-1 , simp(A, A1, S2) , A\=A1 , simp(A1+B, Ans, S2) , ! .
-simp(A+B, Ans, S) :- write([S,21,A,B]) , S>0 , S2 is S-1 , simp(B, B1, S2) , B\=B1 , simp(A+B1, Ans, S2) , ! .
-simp(C*(A+B), Ans, S) :- write([S,22,A,B,C]) , S>0 , S2 is S-1 , simp(C*A+C*B, Ans, S2) , ! .
-simp((A+B)*C, Ans, S) :- write([S,23,A,B,C]) , S>0 , S2 is S-1 , simp(A*C+B*C, Ans, S2) , ! .
-
-simp(A+B-C, Ans, S) :- write([S,25,A,B,C]) , S>0 , S2 is S-1 , simp(B,B1,S2) , simp(C,C1,S2) , B1=C1 , simp(A, Ans, S2) , ! .
-simp(A+B-C, Ans, S) :- write([S,26,A,B,C]) , S>0 , S2 is S-1 , simp(A-C,Z,S2) , simp(Z+B, Ans, S2) , ! .
-simp(A-B, Ans, S) :- write([S,27,A,B]) , S>0 , S2 is S-1 , simp(A, A1+A2,S2) , simp(A1+A2-B,Ans,S2) , ! .
-simp(A-B, Ans, S) :- write([S,28,A,B]), S>0 , S2 is S-1 , simp(A, A1, S2) , simp(B,B1,S2) , simp(B1+Ans, A1,S2) , ! .
-simp(A-B, Ans, S) :- write([S,29,A,B]) , S>0 , S2 is S-1 , simp(A, A1, S2) , simp(B,B1,S2) , simp(Ans+B1, A1,S2) , ! .
-
-simp( X ^ 0 , 1, S) :- write([S,31,X]) , S>0 , ! .
-simp(X^N, Ans, S) :- write([S,32,X,N]) , S>0 , S2 is S-1 , N1 is N-1 , simp(X^N1, XN1, S2) , simp(XN1*X, Ans, S2) , ! .
-
-simp(A*B/C, Ans, S) :- write([S,34,A]) , S>0 , S2 is S-1 , simp(B,B1,S2) , simp(C,C1,S2) , B1=C1 , simp(A, Ans, S2) , ! .
-simp(A*B/C, Ans, S) :- write([S,35,A]) , S>0 , S2 is S-1 , simp(A/C,Z,S2) , simp(Z*B, Ans, S2) , ! .
-simp(N/D, Ans, S) :- write([S,36,N,D]) , S>0 , S2 is S-1 , D\=0 , simp(N,N1,S2) , simp(Ans*D, N1, S2) , write([S,36,N/D=Ans,succeed]).
-simp(A/B, Ans, S) :- write([S,37,A,B]) , S>0 , S2 is S-1 , simp(A,A1,S2) , A\=A1 , simp(A1/B, Ans, S2) , ! , write([S,37,A/B=Ans,succeed]) .
-simp((A+B)/C, Ans, S) :- write([S,38,A,B,C]) , S>0 , S2 is S-1 , simp(A/C+B/C, Ans, S2) , ! .
-simp((A-B)/C, Ans, S) :- write([S,39,A,B,C]) , S>0 , S2 is S-1 , simp(A/C-B/C, Ans, S2) , ! .
-
-
-simp(@(Num, _ = _ ), Num, S) :- write([S,42]) , S>0 , number(Num) , ! .
-simp(@(Var,Var=Con), Con, S) :- write([S,43]) , S>0 , !.
-simp(@(Ato, _ = _ ), Ato, S) :- write([S,44]) , S>0 , atom(Ato) , ! .
-simp(@(X+Y,Var=Con), Ans, S) :- write([S,45]) , S>0 , S2 is S-1 , simp(@(X,Var=Con),X1,S2) , simp(@(Y,Var=Con),Y1,S2) , simp(X1+Y1,Ans,S2) , ! .
-simp(@(X*Y,Var=Con), Ans, S) :- write([S,46]) , S>0 , S2 is S-1 , simp(@(X,Var=Con),X1,S2) , simp(@(Y,Var=Con),Y1,S2) , simp(X1*Y1,Ans,S2) , ! .
-simp(@(X/Y,Var=Con), Ans, S) :- write([S,47]) , S>0 , S2 is S-1 , simp(@(X,Var=Con),X1,S2) , simp(@(Y,Var=Con),Y1,S2) , simp(X1/Y1,Ans,S2) , write([S,47,(X/Y@Var=Con)=Ans,succeed]).
-simp(@(Exp,Var=Con), Ans, S) :- write([S,48]) , S>0 , S2 is S-1 , simp(Exp,Exp2,S2) , Exp\=Exp2 , simp(@(Exp2,Var=Con), Ans,S2) , ! .
-
-simp(f(X),Ans,S) :- write([S,50,X]) , S>0 , S2 is S-1 , simp(X^2, Ans, S2) , ! .
-
-simp(X, X, S):- write([S,52,X=X,succeed]).
-
+writeln(X) :- write(X) .
 last([X],X):- ! .
 last([H|T],X):- last(T,X) , ! .
+`
+	}
 
-<---(Answers,X) :- write("Depth Limiting") , bagof(Answer,simp(X,Answer,25),Answers).	%	Depth Limited
+	static prog() {//1,57,58,59
+		return String.raw`
+:- op(0800,xfx,@).
+:- op(0900,xfx,<-).
+:- op(1000,xfx,<--).
+:- op(1100,xfx,<---).
+:- op(1200,xfx,<----).
 
-<--(Answer,X) :- write("Pick Best") , <---(Answers,X) , last(Answers,Answer).	%	Pick Best
+preprocess(f(X),Ans) :- preprocess(X^2, Ans) , ! .
+preprocess( _ ^ 0 , 1) :- ! .
+preprocess(X^N, Ans) :- N1 is N-1 , preprocess(X^N1, XN1) , preprocess(XN1*X, Ans) , ! .
+preprocess(X+Y,X1+Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
+preprocess(X-Y,X1-Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
+preprocess(X*Y,X1*Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
+preprocess(X/Y,X1/Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
+preprocess(X@Y,X1@Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
+preprocess(X,X) :- ! .
 
-<-(Answer,X) :- write("Factoring") , <--(Best,X) , factor(Best,Answer).	%	Factor Best
+simp(X/X, 1, S) :- writeln([S,9,X/X=1,trying]) , S>0 , X\=0 , ! , writeln([S,9,X/X=1,succeed]).
+
+simp(X*1, Ans, S) :- writeln([S,11,X*1=Ans,trying]) , S>0 , S2 is S-1 , simp(X, Ans, S2) , ! , writeln([S,11,X,succeed]).
+simp(1*X, Ans, S) :- writeln([S,12,X]) , S>0 , S2 is S-1 , simp(X, Ans, S2) , ! , writeln([S,12,X,succeed]).
+simp(X*0, 0, S) :- writeln([S,13,X]) , S>0 , ! , writeln([S,13,X,succeed]).
+simp(0*X, 0, S) :- writeln([S,14,X]) , S>0 , ! , writeln([S,14,X,succeed]).
+simp(A*B, Ans, S) :- writeln([S,15,A,B]) , S>0, S2 is S-1 , simp(A, A1, S2) , A\=A1 , simp(A1*B, Ans, S2) , ! , writeln([S,15,A,B,succeed]).
+simp(A*B, Ans, S) :- writeln([S,16,A,B]) , S>0 , S2 is S-1 , simp(B, B1, S2) , B\=B1 , simp(A*B1, Ans, S2) , ! , writeln([S,16,A,B,succeed]).
+
+simp(X+0, Ans, S) :- writeln([S,18,X]) , S>0 , S2 is S-1 , simp(X, Ans, S2) , ! .
+simp(0+X, Ans, S) :- writeln([S,19,X]) , S>0 , S2 is S-1 , simp(X, Ans, S2) , ! .
+simp(A+B, Ans, S) :- writeln([S,20,A,B]) , S>0 , S2 is S-1 , simp(A, A1, S2) , A\=A1 , simp(A1+B, Ans, S2) , ! .
+simp(A+B, Ans, S) :- writeln([S,21,A,B]) , S>0 , S2 is S-1 , simp(B, B1, S2) , B\=B1 , simp(A+B1, Ans, S2) , ! .
+simp(C*(A+B), Ans, S) :- writeln([S,22,A,B,C]) , S>0 , S2 is S-1 , simp(C*A+C*B, Ans, S2) , ! .
+simp((A+B)*C, Ans, S) :- writeln([S,23,A,B,C]) , S>0 , S2 is S-1 , simp(A*C+B*C, Ans, S2) , ! .
+
+simp(A+B-C, Ans, S) :- writeln([S,25,A,B,C]) , S>0 , S2 is S-1 , simp(B,B1,S2) , simp(C,C1,S2) , B1=C1 , simp(A, Ans, S2) , ! .
+simp(A+B-C, Ans, S) :- writeln([S,26,A,B,C]) , S>0 , S2 is S-1 , simp(A-C,Z,S2) , simp(Z+B, Ans, S2) , ! .
+simp(A-B, Ans, S) :- writeln([S,27,A,B]) , S>0 , S2 is S-1 , simp(A, A1+A2,S2) , simp(A1+A2-B,Ans,S2) , ! .
+simp(A-B, Ans, S) :- writeln([S,28,A,B]), S>0 , S2 is S-1 , simp(A, A1, S2) , simp(B,B1,S2) , simp(B1+Ans, A1,S2) , ! .
+simp(A-B, Ans, S) :- writeln([S,29,A,B]) , S>0 , S2 is S-1 , simp(A, A1, S2) , simp(B,B1,S2) , simp(Ans+B1, A1,S2) , ! .
+
+simp(A*B/C, Ans, S) :- writeln([S,34,A]) , S>0 , S2 is S-1 , simp(B,B1,S2) , simp(C,C1,S2) , B1=C1 , simp(A, Ans, S2) , ! .
+simp(A*B/C, Ans, S) :- writeln([S,35,A]) , S>0 , S2 is S-1 , simp(A/C,Z,S2) , simp(Z*B, Ans, S2) , ! .
+simp(A/B, Ans, S) :- writeln([S,37,A,B]) , S>0 , S2 is S-1 , simp(A,A1,S2) , A\=A1 , simp(A1/B, Ans, S2) , ! , writeln([S,37,A/B=Ans,succeed]) .
+simp((A+B)/C, Ans, S) :- writeln([S,38,A,B,C]) , S>0 , S2 is S-1 , simp(A/C+B/C, Ans, S2) , ! .
+simp((A-B)/C, Ans, S) :- writeln([S,39,A,B,C]) , S>0 , S2 is S-1 , simp(A/C-B/C, Ans, S2) , ! .
+
+simp(@(Exp,Var=Con), Ans, S) :- writeln([S,48]) , S>0 , S2 is S-1 , simp(Exp,Exp2,S2) , (
+	Exp2 = Var , Ans = Con ;
+	atomic(Exp2) , Ans = Exp2 ;
+	Exp2 = X+Y , simp(@(X,Var=Con),X1,S2) , simp(@(Y,Var=Con),Y1,S2) , simp(X1+Y1,Ans,S2) ;
+	Exp2 = X*Y , simp(@(X,Var=Con),X1,S2) , simp(@(Y,Var=Con),Y1,S2) , simp(X1*Y1,Ans,S2) ;
+	Exp2 = X/Y , simp(@(X,Var=Con),X1,S2) , simp(@(Y,Var=Con),Y1,S2) , simp(X1/Y1,Ans,S2)
+) , ! .
+
+simp(X, X, S):- writeln([S,52,X=X,succeed]).
+
+<----(Answers,X) :- writeln("Depth Limiting") , bagof(Answer,simp(X,Answer,25),Answers).	%	Depth Limited
+
+<---(Answers,X) :- writeln("Preprocessing") , preprocess(X,X1) , <----(Answers,X1).	%	Preprocess
+
+<--(Answer,X) :- writeln("Pick Best") , <---(Answers,X) , last(Answers,Answer).	%	Pick Best
+
+<-(Answer,X) :- writeln("Factoring") , <--(Best,X) , factor(Best,Answer).	%	Factor Best
 
 factor(X+X, 2*X1) :- factor(X, X1) , ! .
 factor(N*X+X, N2*X) :- number(N) , N2 is N+1 , ! .
