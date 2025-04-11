@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	3/10/2025
+	Date:	4/10/2025
 	UI:	A user interface library
 */
 
@@ -15,9 +15,11 @@ class ui {
 		let rank = Graph.dag2rank(dag)
 		let fs = makess(dag)
 		for (let i = ids.length-1 ; i > 0 ; i--) {
-			let numpars = dag.par[ids[i]]?.length
+			let id = ids[i]
+			let numpars = dag.par[id]?.length
+			let row = rank.filter(r=>r.includes(id))[0]
 			if (numpars > 0)
-				ui.makego(ids[i],fs.slice(i-ids.length),numpars)
+				ui.makego(id,fs.slice(i-ids.length),numpars,row)
 		}
 		function makess(dag) {
 			let fs = []
@@ -284,10 +286,14 @@ class ui {
 		return ()=>$('#'+me).val(f(...pars.map(p=>$('#'+p).val())))
 	}
 
-	static makego(id0,fs,numpars) {
+	static makego(id0,fs,numpars,row) {
 		id0 = id0?.split(',').slice(-1)[0]
 		let id = math.randomInt(1,9999)
 		let arrows = ['','↓','↘ ↙'][numpars]
+		if (row.length == 2) {
+			let col = row.indexOf(id0)
+			arrows = ['↙','↘'][col]
+		}
 		$(`<button id='${id}' title='${arrows}\n${id0}'>${arrows}</button><br>`).insertBefore('#'+id0)
 		$('#'+id).on('click',()=>{fs.map(f=>f())})
 	}

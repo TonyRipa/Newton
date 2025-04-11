@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2024.08.15
+	Date:	2025.03.15
 	Lisp:	A Constraint Solver
 */
 
@@ -71,16 +71,21 @@ class Lisp {
 		return Lisp.solvelisp(Lisp.strto(infix), symboltable)
 	}
 
-	static maketable() {	//	+2024.4
+	//static maketable() {	//	+2024.4	//	-2025.3
+	static maketable(type) {			//	+2025.3
+		if (type === undefined || type === '') type = 'Any'	//	+2025.3
 		let symboltable = {}
 		for (let symbol of 'abcdefghijklmnopqrstuvwxyz') {
 			symboltable[symbol] = 'Generic'
-			symboltable[symbol.toUpperCase()] = 'Any'
+			//symboltable[symbol.toUpperCase()] = 'Any'	//	-2025.3
+			symboltable[symbol.toUpperCase()] = type	//	+2025.3
 		}
 		return symboltable
 	}
 
-	static solvelisp(lisp, symboltable = Lisp.maketable()) {	//	+2024.4
+	//static solvelisp(lisp, symboltable = Lisp.maketable()) {	//	+2024.4	//	-2025.3
+	static solvelisp(lisp, mytype) {										//	+2025.3
+		let symboltable = Lisp.maketable(mytype)							//	+2025.3
 		console.log(lisp,symboltable)
 		if (type(lisp) != 'OperatorNode') return lisp
 		if (op(lisp) != '=') return math.simplify(Lisp.toinfix(lisp)).toString()
@@ -102,7 +107,6 @@ class Lisp {
 			let myop = op(r)
 			let [L,R] = args(r)
 			if (!ground(L) && ground(R)) return Lisp.solvelisp(['=',l,[myop,R,L]], symboltable)
-			//if (l == R && atomic(L)) {//	-2024.7
 			if (atomic(L))				//	+2024.7
 				if (l == R) {
 					var myvar = l
@@ -181,6 +185,7 @@ class Lisp {
 			} else if (mytype == 'Any') {
 				//	Accept
 			} else {
+				console.trace()
 				alert('Error: mytype = ' + mytype)
 			}
 			return '{ ' + solution + ' }'
