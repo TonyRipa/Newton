@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2025.03.15
+	Date:	2025.04.15
 	Lisp:	A Constraint Solver
 */
 
@@ -76,7 +76,8 @@ class Lisp {
 		if (type === undefined || type === '') type = 'Any'	//	+2025.3
 		let symboltable = {}
 		for (let symbol of 'abcdefghijklmnopqrstuvwxyz') {
-			symboltable[symbol] = 'Generic'
+			//symboltable[symbol] = 'Generic'		//	-2025.4
+			symboltable[symbol] = 'Indeterminate'	//	+2025.4
 			//symboltable[symbol.toUpperCase()] = 'Any'	//	-2025.3
 			symboltable[symbol.toUpperCase()] = type	//	+2025.3
 		}
@@ -152,7 +153,6 @@ class Lisp {
 		if (ret == undefined) return Lisp.toinfix(lisp)
 		let set = solution_intersect_mytype(ret, mytype)
 		if (typeof myvars != 'undefined') {								//	+2024.1
-			//return myvars[0] + ' ∈ ' + symboltable[myvars[0]] + '<br><br>' + myvars[1] + ' ∈ ' + set	//	-2024.6
 			return myvars[0] + ' ∈ ' + symboltable[myvars[0]] + '\n' + myvars[1] + ' ∈ ' + set	//	-2024.6
 		} else {
 			return myvar + ' ∈ ' + set
@@ -192,7 +192,8 @@ class Lisp {
 		}
 		function compound(lisp) { return type(lisp)=='OperatorNode' }
 		function atomic(lisp) { return !compound(lisp) }
-		function isvar(lisp) { return type(lisp)=='SymbolNode' && symboltable[lisp]!='Generic' }
+		//function isvar(lisp) { return type(lisp)=='SymbolNode' && symboltable[lisp]!='Generic' }		//	-2025.4
+		function isvar(lisp) { return type(lisp)=='SymbolNode' && symboltable[lisp]!='Indeterminate' }	//	+2025.4
 		function ground(lisp) { return atomic(lisp) ? !isvar(lisp) : args(lisp).every(ground) }
 	}
 

@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	4/10/2025
+	Date:	4/15/2025
 	UI:	A user interface library
 */
 
@@ -102,7 +102,11 @@ class ui {
 
 	static makeselect(dag,me,data) {
 		let {par,kid} = ui.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<select id='${me}'>`+data.map(d=>'<option>'+d+'</option>')+`</select>`)
+		if (Array.isArray(data))
+			data = data.map(d=>'<option>'+d+'</option>')
+		else
+			data = Object.keys(data).map(key=>`<optgroup label='${key}'>`+data[key].map(d=>'<option>'+d+'</option>'))
+		$('.cont:last-of-type').append(`<select id='${me}'>${data}</select>`)
 		return ()=>{}
 	}
 

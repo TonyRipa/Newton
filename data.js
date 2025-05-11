@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	4/10/2025
+	Date:	5/10/2025
 	Data:	A data library
 */
 
@@ -13,7 +13,7 @@ class Data {
 	}
 
 	static type() {
-		return ['Any','IEEE754','Real','Boolean','Generic']
+		return {'Variable':['Any','IEEE754','Real','Boolean'],'Constant':['Indeterminate']}
 	}
 
 	static expr() {
@@ -41,11 +41,10 @@ last([H|T],X):- last(T,X) , ! .
 
 	static prog() {//1,57,58,59
 		return String.raw`
-:- op(0800,xfx,@).
-:- op(0900,xfx,<-).
-:- op(1000,xfx,<--).
-:- op(1100,xfx,<---).
-:- op(1200,xfx,<----).
+:- op(0900,xfx,@).
+:- op(1000,xfx,<-).
+:- op(1100,xfx,<--).
+:- op(1200,xfx,<---).
 
 preprocess(f(X),Ans) :- preprocess(X^2, Ans) , ! .
 preprocess( _ ^ 0 , 1) :- ! .
@@ -57,19 +56,24 @@ preprocess(X/Y,X1/Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
 preprocess(X@Y,X1@Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
 preprocess(X,X) :- ! .
 
+simp(A+B, Ans) :- number(A) , number(B) , Ans is A+B , ! , show([3,A+B,succeed]).
+simp(A-B, Ans) :- number(A) , number(B) , Ans is A-B , ! , show([4,A-B,succeed]).
+simp(A*B, Ans) :- number(A) , number(B) , Ans is A*B , ! , show([5,A*B,succeed]).
+simp(A/B, Ans) :- number(A) , number(B) , B\=0 , Ans is A/B , ! , show([6,A/B,succeed]).
+
 simp(X/X, 1) :- show([9,X/X=1,trying]) , X\=0 , ! , show([9,X/X=1,succeed]).
 
 simp(X*1, Ans) :- show([11,X*1=Ans,trying]) , simp(X, Ans) , ! , show([11,X,succeed]).
 simp(1*X, Ans) :- show([12,X]) , simp(X, Ans) , ! , show([12,X,succeed]).
 simp(X*0, 0) :- show([13,X]) , ! , show([13,X,succeed]).
 simp(0*X, 0) :- show([14,X]) , ! , show([14,X,succeed]).
-simp(A*B, Ans) :- show([15,A,B]) , simp(A, A1) , A\=A1 , simp(A1*B, Ans) , ! , show([15,A,B,succeed]).
-simp(A*B, Ans) :- show([16,A,B]) , simp(B, B1) , B\=B1 , simp(A*B1, Ans) , ! , show([16,A,B,succeed]).
+simp(A*B, Ans) :- show([15,A,B]) , \+atomic(A) , simp(A, A1) , A\=A1 , simp(A1*B, Ans) , ! , show([15,A,B,succeed]).
+simp(A*B, Ans) :- show([16,A,B]) , \+atomic(B) , simp(B, B1) , B\=B1 , simp(A*B1, Ans) , ! , show([16,A,B,succeed]).
 
 simp(X+0, Ans) :- show([18,X]) , simp(X, Ans) , ! .
 simp(0+X, Ans) :- show([19,X]) , simp(X, Ans) , ! .
-simp(A+B, Ans) :- show([20,A,B]) , ground(A) , simp(A, A1) , A\=A1 , simp(A1+B, Ans) , ! .
-simp(A+B, Ans) :- show([21,A,B]) , ground(B) , simp(B, B1) , B\=B1 , simp(A+B1, Ans) , ! .
+simp(A+B, Ans) :- show([20,A,B]) , ground(A) , \+atomic(A) , simp(A, A1) , A\=A1 , simp(A1+B, Ans) , ! .
+simp(A+B, Ans) :- show([21,A,B]) , ground(B) , \+atomic(B) , simp(B, B1) , B\=B1 , simp(A+B1, Ans) , ! .
 simp(C*(A+B), Ans) :- show([22,A,B,C]) , simp(C*A+C*B, Ans) , ! .
 simp((A+B)*C, Ans) :- show([23,A,B,C]) , simp(A*C+B*C, Ans) , ! .
 
@@ -95,15 +99,13 @@ simp(@(Exp,Var=Con), Ans) :- show([48]) , simp(Exp,Exp2) , (
 
 simp(X, X):- show([52,X=X,succeed]).
 
-<----(Answer,X) :- nb_setval(see,true) , show("Preprocessing") , preprocess(X,Answer) .	%	Preprocess
+<---(Answer,X) :- show("Preprocessing") , preprocess(X,Answer) .	%	Preprocess
 
-<---(Answer,X) :- nb_setval(see,true) , <----(P,X) , show("Simplifying") , simp(P,Answer) .	%	Simplify
+<--(Answer,X) :- <---(P,X) , show("Simplifying") , simp(P,Answer) .	%	Simplify
 
-<--(Answer,X) :- nb_setval(see,true) , <---(Simp,X) , show("Factoring") , factor(Simp,Answer) .	%	Factor
+<-(Answer,X) :- <--(Simp,X) , show("Factoring") , factor(Simp,Answer) .	%	Factor
 
-<-(Answer,X) :- nb_setval(see,false) , preprocess(X,P) , simp(P,Simp) , factor(Simp,Answer) .	%	Quiet
-
-show(Text) :- nb_getval(see,See) , See -> writeln(Text) ; ! .
+show(Text) :- writeln(Text) .
 
 factor(X+X, 2*X1) :- factor(X, X1) , ! .
 factor(N*X+X, N2*X) :- number(N) , N2 is N+1 , ! .

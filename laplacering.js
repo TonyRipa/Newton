@@ -1,6 +1,6 @@
 
 // Author:	Anthony John Ripa
-// Date:	1/10/2025
+// Date:	5/10/2025
 // LaplaceRing: a datatype for representing the Laplace Transform
 
 class laplacering extends abstractpolynomial {
@@ -86,6 +86,7 @@ class laplacering extends abstractpolynomial {
 	}
 
 	parse(strornode) {
+		try { strornode = new polynomialratio1().parse(strornode).toString() } catch(e) {}
 		console.log('<strornode>')
 		console.log(strornode)
 		console.log('</strornode>')
