@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2025.04.15
+	Date:	2025.05.15
 	Lisp:	A Constraint Solver
 */
 
@@ -67,10 +67,18 @@ class Lisp {
 		return math.simplify('(' + left + ')' + op + '(' + right + ')')
 	}
 
+	/*	-2025.5
 	static solve(infix, symboltable) {	//	+2024.4
 		return Lisp.solvelisp(Lisp.strto(infix), symboltable)
 	}
+	*/
 
+	static solve(infix, mytype) {	//	+2025.5
+		let symboltable = Lisp.maketable(mytype)
+		return Lisp.solvelisp(Lisp.strto(infix), symboltable)
+	}
+
+	/*	-2025.5
 	//static maketable() {	//	+2024.4	//	-2025.3
 	static maketable(type) {			//	+2025.3
 		if (type === undefined || type === '') type = 'Any'	//	+2025.3
@@ -83,10 +91,16 @@ class Lisp {
 		}
 		return symboltable
 	}
+	*/
 
-	//static solvelisp(lisp, symboltable = Lisp.maketable()) {	//	+2024.4	//	-2025.3
-	static solvelisp(lisp, mytype) {										//	+2025.3
-		let symboltable = Lisp.maketable(mytype)							//	+2025.3
+	static maketable(type) {			//	+2025.5
+		if (type === undefined || type === '') type = 'Any'	//	+2025.3
+		return x => x==x.toUpperCase() ? type : 'Indeterminate'
+	}
+
+	static solvelisp(lisp, symboltable = Lisp.maketable()) {	//	~2025.5
+	//static solvelisp(lisp, mytype) {							//	~2025.5
+	//	let symboltable = Lisp.maketable(mytype)				//	~2025.5
 		console.log(lisp,symboltable)
 		if (type(lisp) != 'OperatorNode') return lisp
 		if (op(lisp) != '=') return math.simplify(Lisp.toinfix(lisp)).toString()
@@ -95,12 +109,12 @@ class Lisp {
 		if (ground(l) &&  ground(r)) return (math.simplify(Lisp.toinfix(l)).toString() == math.simplify(Lisp.toinfix(r))).toString()
 		if ( isvar(l) &&  l==r) {	//	+2024.3
 			var myvar = l
-			var mytype = symboltable[myvar]
+			var mytype = symboltable(myvar)
 			var ret = 0/0
 		}
 		if ( isvar(l) &&  ground(r)) {
 			var myvar = l
-			var mytype = symboltable[myvar]
+			var mytype = symboltable(myvar)
 			var ret = Lisp.simplify(r, mytype)
 		}
 		if (isvar(r) && !ground(l) && !isvar(l)) return Lisp.solvelisp(['=',r,l], symboltable)	//	+2024.5
@@ -111,7 +125,7 @@ class Lisp {
 			if (atomic(L))				//	+2024.7
 				if (l == R) {
 					var myvar = l
-					var mytype = symboltable[myvar]
+					var mytype = symboltable(myvar)
 					if (myop == '+') {
 						if (L == 0) ret = 0/0
 						else if (type(L) == 'ConstantNode') ret = 1/0
@@ -125,7 +139,7 @@ class Lisp {
 					}
 				} else {
 					var myvar = l
-					var mytype = symboltable[myvar]
+					var mytype = symboltable(myvar)
 					var ret = Lisp.simplify([myop, L, R], mytype)
 					if (isvar(R))	//	+2024.8
 						var myvars = [R, l]
@@ -137,14 +151,13 @@ class Lisp {
 			if ( ground(L) && !ground(R)) return Lisp.solvelisp(['=',[op(l),R,L],r], symboltable)
 			if (!ground(L) &&  ground(R)) {
 				var myvar = L
-				var mytype = symboltable[myvar]
+				var mytype = symboltable(myvar)
 				var ret = Lisp.simplify([anti, r, R], mytype)
 			}
-			// if (!ground(L) && !ground(R) && symboltable[L]!='Any' && symboltable[R]=='Any')	return reverse()	//	+2024.2	//	-2024.6
 			// if (!ground(L) && !ground(R) && symboltable[R]!='Any') {	//	+2024.1												//	-2024.6
 			if (!ground(L) && !ground(R)) {	//	+2024.6
 				var myvar = L
-				var mytype = symboltable[myvar]
+				var mytype = symboltable(myvar)
 				var ret = Lisp.simplify([anti, r, R], mytype)
 				var myvars = [R, L]
 			}
@@ -153,7 +166,7 @@ class Lisp {
 		if (ret == undefined) return Lisp.toinfix(lisp)
 		let set = solution_intersect_mytype(ret, mytype)
 		if (typeof myvars != 'undefined') {								//	+2024.1
-			return myvars[0] + ' ∈ ' + symboltable[myvars[0]] + '\n' + myvars[1] + ' ∈ ' + set	//	-2024.6
+			return myvars[0] + ' ∈ ' + symboltable(myvars[0]) + '\n' + myvars[1] + ' ∈ ' + set	//	-2024.6
 		} else {
 			return myvar + ' ∈ ' + set
 		}
@@ -193,7 +206,7 @@ class Lisp {
 		function compound(lisp) { return type(lisp)=='OperatorNode' }
 		function atomic(lisp) { return !compound(lisp) }
 		//function isvar(lisp) { return type(lisp)=='SymbolNode' && symboltable[lisp]!='Generic' }		//	-2025.4
-		function isvar(lisp) { return type(lisp)=='SymbolNode' && symboltable[lisp]!='Indeterminate' }	//	+2025.4
+		function isvar(lisp) { return type(lisp)=='SymbolNode' && symboltable(lisp)!='Indeterminate' }	//	+2025.4
 		function ground(lisp) { return atomic(lisp) ? !isvar(lisp) : args(lisp).every(ground) }
 	}
 

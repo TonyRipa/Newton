@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	4/15/2025
+	Date:	5/20/2025
 	UI:	A user interface library
 */
 
@@ -126,8 +126,7 @@ class ui {
 		let {par,kid} = ui.me2parkid(dag,me)
 		let pars = par.split(',')
 		$('.cont:last-of-type').append(`<textarea id='${me}' cols='50' rows='7' placeholder='${me}'></textarea>`)
-		return ()=>{let s=pl.create();s.consult(Data.prolog()+get_input(pars[1])+'\n');s.query(get_input(pars[0]));s.answer({success:x=>set_textarea(me,s.format_answer(x))})
-		}
+		return () => {prolog.do(pars[0],pars[1],me)}
 	}
 
 	static makewhere(dag,me) {
