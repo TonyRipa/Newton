@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2/15/2025
+	Date:	6/15/2025
 	Plot:	A plotting library
 */
 
@@ -457,6 +457,10 @@ class Plot {
 		return infix(rootkey)
 		function infix(key) {
 			let name = getname(key)
+			if (name === key) {
+				if (65 <= key.charCodeAt(0) && key.charCodeAt(0) <= 90) return key
+				return String.fromCharCode(math.randomInt(65,65+26))
+			}
 			let kids = getkids(key)
 			if (kids.length == 0) return name
 			let op = name

@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/10/2025
+	Date:	7/10/2025
 	Data:	A data library
 */
 
@@ -28,17 +28,6 @@ class Data {
 		return ['X=0','X=1','X+0=0','X+0=1','X+1=0','X+1=1','X*0=0','X*0=1','X*1=0','X*1=1','X*2=1','M*h=h','M*h=(2*x+h)*h','h*M=(2*x+h)*h','X=e-e','Y=2*3','Y=x*3','X*y*g=y*3*g','0*1=0','0*X=0','(2*x+h)*h=M*h','(2*x+H)*H=M*H','M*H=(2*x+H)*H','Y=X*3','2*X=X','X=X*2','X=2*X','X*2=X','X=Y*X','X=X','Y=(2*x+H)*H','Y*X=1']
 	}
 
-	static prolog() {
-		return String.raw`
-:- dynamic(global_var/2).
-nb_setval(Name, Value) :- assertz(global_var(Name, Value)).
-nb_getval(Name, Value) :- global_var(Name, Value).
-writeln(X) :- write(X) .
-last([X],X):- ! .
-last([H|T],X):- last(T,X) , ! .
-`
-	}
-
 	static prog() {//1,57,58,59
 		return String.raw`
 :- op(0800,xfx,@).
@@ -53,73 +42,50 @@ if(Condition,Statement) :- Condition->Statement ; true .
 
 show(Text) :- if(see, writeln(Text)) .
 
-preprocess(f(X),Ans) :- preprocess(X^2, Ans) , ! .
-preprocess( _ ^ 0 , 1) :- ! .
-preprocess(X^N, Ans) :- N1 is N-1 , preprocess(X^N1, XN1) , preprocess(XN1*X, Ans) , ! .
-preprocess(X+Y,X1+Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
-preprocess(X-Y,X1-Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
-preprocess(X*Y,X1*Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
-preprocess(X/Y,X1/Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
-preprocess(X@Y,X1@Y1) :- preprocess(X,X1) , preprocess(Y,Y1) , ! .
-preprocess(X,X) :- ! .
+prepro(0,sum([])) :- show(('PrePro1',0)) , ! .
+prepro(1,prod([])) :- show(('PrePro2',1)) , ! .
+prepro(f(X),Ans) :- show(('PrePro3',f(X))) , prepro(X*X, Ans) , ! .
+prepro(A+B,Ans) :- show(('PrePro4',A+B)) , prepro(A,AP) , prepro(B,BP) , makesum(AP,sum(AL)) , makesum(BP,sum(BL)) , conc(AL,BL,LR) , prepro(sum(LR),Ans) , ! .
+prepro(A*B,Ans) :- show(('PrePro5',A*B)) , prepro(A,AP) , prepro(B,BP) , makeprod(AP,prod(AL)) , makeprod(BP,prod(BL)) , conc(AL,BL,LR) , prepro(prod(LR),Ans) , ! .
+prepro(A-B,AS-BS) :- show(('PrePro6',A-B)) , prepro(A,AP) , prepro(B,BP) , makesum(AP,AS) , makesum(BP,BS) , ! .
+prepro(A/B,AM/BM) :- show(('PrePro7',A/B)) , prepro(A,AP) , prepro(B,BP) , makeprod(AP,AM) , makeprod(BP,BM) , ! .
+prepro(A@B=C, AP@B=CP) :- show(('PrePro8',A/B)) , prepro(A,AP) , prepro(C,CP) , ! .
+prepro(X,X) :- show(('PrePro9',X)) , ! .
 
-simp(A+B, Ans) :- number(A) , number(B) , Ans is A+B , ! , show([3,A+B,succeed]).
-simp(A-B, Ans) :- number(A) , number(B) , Ans is A-B , ! , show([4,A-B,succeed]).
-simp(A*B, Ans) :- number(A) , number(B) , Ans is A*B , ! , show([5,A*B,succeed]).
-simp(A/B, Ans) :- number(A) , number(B) , B\=0 , Ans is A/B , ! , show([6,A/B,succeed]).
+makesum(sum(A),sum(A)) :- ! .
+makesum(A,sum([A])) :- ! .
 
-simp(X/X, 1) :- show([9,X/X=1,trying]) , X\=0 , ! , show([9,X/X=1,succeed]).
+makeprod(prod(A),prod(A)) :- ! .
+makeprod(A,prod([A])) :- ! .
 
-simp(X*1, Ans) :- show([11,X*1=Ans,trying]) , simp(X, Ans) , ! , show([11,X,succeed]).
-simp(1*X, Ans) :- show([12,X]) , simp(X, Ans) , ! , show([12,X,succeed]).
-simp(X*0, 0) :- show([13,X]) , ! , show([13,X,succeed]).
-simp(0*X, 0) :- show([14,X]) , ! , show([14,X,succeed]).
-simp(A*B, Ans) :- show([15,A,B]) , \+atomic(A) , simp(A, A1) , A\=A1 , simp(A1*B, Ans) , ! , show([15,A,B,succeed]).
-simp(A*B, Ans) :- show([16,A,B]) , \+atomic(B) , simp(B, B1) , B\=B1 , simp(A*B1, Ans) , ! , show([16,A,B,succeed]).
+conc(A,B,Ans) :- append(A,B,C) , msort(C,S) , reverse(S,Ans) .
 
-simp(X+0, Ans) :- show([18,X]) , simp(X, Ans) , ! .
-simp(0+X, Ans) :- show([19,X]) , simp(X, Ans) , ! .
-simp(A+B, Ans) :- show([20,A,B]) , ground(A) , \+atomic(A) , simp(A, A1) , A\=A1 , simp(A1+B, Ans) , ! .
-simp(A+B, Ans) :- show([21,A,B]) , ground(B) , \+atomic(B) , simp(B, B1) , B\=B1 , simp(A+B1, Ans) , ! .
-simp(C*(A+B), Ans) :- show([22,A,B,C]) , simp(C*A+C*B, Ans) , ! .
-simp((A+B)*C, Ans) :- show([23,A,B,C]) , simp(A*C+B*C, Ans) , ! .
+go(prod(L),Ans) :- show(('Go1',prod(L))) , conc(L,[],LR) , L\=LR , go(prod(LR),Ans) , ! .
+go(prod([A]),Ans) :- show(('Go2',prod([A]))) , go(A,Ans) , ! .
+go(prod([sum([]),B]),sum([])) :- show(('Go3',prod([sum([]),B]))) , ! .
+go(prod([sum([H|T]),B]),Ans) :- show(('Go4',prod([sum([H|T]),B]))) , SH=prod([H,B]) , go(prod([sum(T),B]),ST) , go(sum([SH|[ST]]),Ans) , ! .
+go(prod([A,B,C]),Ans) :- show(('Go5',prod([A,B,C]))) , go(prod([A,B]),AB) , go(prod([AB,C]),Ans) , ! .
+go(sum([H]),Ans) :- show(('Go6',su([H]))) , go(H,Ans) , ! .
+go(sum([H|T]),Ans) :- show(('Go7',sum([H|T]))) , go(H,HS) , go(sum(T),TS) , makesum(HS,sum(HL)) , makesum(TS,sum(TL)) , conc(HL,TL,LS) , Ans=sum(LS) , ! .
+go(A-B,Ans) :- show(('Go8',A-B)) , go(A,sum(A1)) , go(B,B1) , select(B1,A1,L) , go(sum(L),Ans) , ! .
+go(A/B,Ans) :- show(('Go9',A/B)) , go(A,prod(A1)) , go(B,B1) , B1\=sum([]) , select(B1,A1,L) , go(prod(L),Ans) , ! .
+go(A/B,Ans) :- show(('Go10',A/B)) , go(A,sum([H])) , go(B,B1) , go(H/B1,H1) , go(sum([H1]),Ans) , ! .
+go(A/B,Ans) :- show(('Go11',A/B)) , go(A,sum([H|T])) , go(B,B1) , go(H/B1,H1) , go(sum(T)/B1,sum(T1)) , go(sum([H1|T1]),Ans) , ! .
+go(A@A=B,B) :- show(('Go12',A@A=B)) , ! .
+go(A@B=C,Ans) :- show(('Go13',A@B=C)) , go(A,sum([H|T])) , go(H@B=C,H1) , go(sum(T)@B=C,sum(T1)) , go(sum([H1|T1]),Ans) , ! .
+go(A@B,Ans) :- show(('Go14',A@B)) , go(A,Ans) , ! .
+go(X,X) :- show(('Go15',X)) , ! .
 
-simp(A+B-C, Ans) :- show([25,A,B,C]) , simp(B,B1) , simp(C,C1) , B1=C1 , simp(A, Ans) , ! .
-simp(A+B-C, Ans) :- show([26,A,B,C]) , simp(A-C,Z) , simp(Z+B, Ans) , ! .
-simp(A-B, Ans) :- show([28,A,B]) , simp(A, A1+A2) , simp(A1+A2-B,Ans) , ! .
-simp(A-B, Ans) :- show([29,A,B]) , simp(A, A1) , simp(B,B1) , simp(B1+Ans, A1) , ! .
-simp(A-B, Ans) :- show([30,A,B]) , simp(A, A1) , simp(B,B1) , simp(Ans+B1, A1) , ! .
+simp(A,Ans) :- go(A,Ans) , ! .
 
-simp(A*B/C, Ans) :- show([34,A]) , simp(B,B1) , simp(C,C1) , B1=C1 , simp(A, Ans) , ! .
-simp(A*B/C, Ans) :- show([35,A]) , simp(A/C,Z) , simp(Z*B, Ans) , ! .
-simp(A/B, Ans) :- show([37,A,B]) , simp(A,A1) , A\=A1 , simp(A1/B, Ans) , ! , show([37,A/B=Ans,succeed]) .
-simp((A+B)/C, Ans) :- show([38,A,B,C]) , simp(A/C+B/C, Ans) , ! .
-simp((A-B)/C, Ans) :- show([39,A,B,C]) , simp(A/C-B/C, Ans) , ! .
+postpro(prod([]),1) :- show(('PostPro1',prod([]))) , ! .
+postpro(sum([]),0) :- show(('PostPro2',sum([]))) , ! .
+postpro(X,X) :- show(('PostPro3',X)) , ! .
 
-simp(@(Exp,Var=Con), Ans) :- show([48]) , simp(Exp,Exp2) , (
-	Exp2 = Var , Ans = Con ;
-	atomic(Exp2) , Ans = Exp2 ;
-	Exp2 = X+Y , simp(@(X,Var=Con),X1) , simp(@(Y,Var=Con),Y1) , simp(X1+Y1,Ans) ;
-	Exp2 = X*Y , simp(@(X,Var=Con),X1) , simp(@(Y,Var=Con),Y1) , simp(X1*Y1,Ans) ;
-	Exp2 = X/Y , simp(@(X,Var=Con),X1) , simp(@(Y,Var=Con),Y1) , simp(X1/Y1,Ans)
-) , ! .
-
-simp(X, X):- show([52,X=X,succeed]).
-
-factor(X+X, 2*X1) :- factor(X, X1) , ! .
-factor(N*X+X, N2*X) :- number(N) , N2 is N+1 , ! .
-factor(A+B, Ans) :- factor(A, A1) , A\=A1 , factor(A1+B, Ans) , ! .
-factor(A+B, Ans) :- factor(B, B1) , B\=B1 , factor(A+B1, Ans) , ! .
-factor(X*X, X^2) :- ! .
-factor(X^N*X, X^N2) :- number(N) , N2 is N+1 , ! .
-factor(A*B, Ans) :- factor(A, A1) , A\=A1 , factor(A1*B, Ans) , ! .
-factor(A*B, Ans) :- factor(B, B1) , B\=B1 , factor(A*B1, Ans) , ! .
-factor(X, X).
-
-<----(Answer,X) :- if(not(see),assert(see)) , show("Preprocessing") , preprocess(X,Answer) .	%	Preprocess
-<---(Answer,X) :- <----(P,X) , show("Simplifying") , simp(P,Answer) .							%	Simplify
-<--(Answer,X) :- <---(Simp,X) , show("Factoring") , factor(Simp,Answer) .						%	Factor
-<-(Answer,X) :- if(see,retract(see)) , preprocess(X,P) , simp(P,Simp) , factor(Simp,Answer) .	%	Quiet
+<----(Answer,X) :- if(not(see),assert(see)) , show("PreProcessing") , prepro(X,Answer) .	%	PreProcess
+<---(Answer,X) :- <----(P,X) , show("Simplifying") , simp(P,Answer) .						%	Simplify
+<--(Answer,X) :- <---(Simp,X) , show("PostProcessing") , postpro(Simp,Answer) .				%	PostProcess
+<-(Answer,X) :- if(see,retract(see)) , prepro(X,P) , simp(P,Simp) , postpro(Simp,Answer) .	%	Quiet
 `
 	}
 
