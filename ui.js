@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	5/20/2025
+	Date:	8/10/2025
 	UI:	A user interface library
 */
 
@@ -14,7 +14,7 @@ class ui {
 		let dag = Graph.str2dag(net)
 		let rank = Graph.dag2rank(dag)
 		let fs = makess(dag)
-		for (let i = ids.length-1 ; i > 0 ; i--) {
+		for (let i = ids.length-1 ; i >= 0 ; i--) {
 			let id = ids[i]
 			let numpars = dag.par[id]?.length
 			let row = rank.filter(r=>r.includes(id))[0]

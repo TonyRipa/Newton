@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/15/2025
+	Date:	7/15/2025
 	Plot:	A plotting library
 */
 
@@ -344,7 +344,7 @@ class Plot {
 				let key = node.data.key
 				let newValue = textBlock.text
 				let oldValue = e.parameter
-				if ('+-*/'.includes(oldValue) && !('+-*/'.includes(newValue))) {
+				if ('+-*/'.includes(oldValue) && !(new Set('+-*/').has(newValue))) {
 					let model = window.godiagram.model.toJson()
 					let newmodel = Plot.nokid(model,key)
 					newmodel = Plot.eq2json(Plot.json2eq(newmodel))
