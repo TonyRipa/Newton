@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/20/2025
+	Date:	9/10/2025
 	Data:	A data library
 */
 
@@ -60,8 +60,10 @@ flat(prod(L),Ans) :- select(prod(A),L,L2) , append(A,L2,L3) , flat(prod(L3),Ans)
 flat(sum(L),Ans) :- select(sum(A),L,L2) , append(A,L2,L3) , flat(sum(L3),Ans) , ! .
 flat(prod(L),prod(L2)) :- maplist(flat,L,L2) , ! .
 flat(sum(L),sum(L2)) :- maplist(flat,L,L2) , ! .
+flat(L,Ans) :- maplist(flat,L,Ans) , ! .
 flat(X,X) :- ! .
 
+getprod(L,Ans) :- maplist(getprod,L,Ans) , ! .
 getprod(A,Ans) :- flat(A,prod(Ans)) , ! .
 getprod(A,[A1]) :- flat(A,A1) , ! .
 
@@ -70,19 +72,32 @@ getsum(A,[A1]) :- flat(A,A1) , ! .
 
 conc(A,B,Ans) :- append(A,B,C) , msort(C,S) , reverse(S,Ans) .
 
+equal(X,X) :- ! .
+equal(X,Y) :- go(X,Z) , ( Y=Z , ! ; go(Y,Z) ) , ! .
+
+take(E,[H|T],T) :- equal(E,H) , ! .
+take(E,[H|T],[H|T0]) :- take(E,T,T0) , ! .
+
+sub(N1,D1,N0,D0) :- D1=[H|T] , not(equal(H,sum([]))) , take(H,N1,Ni) , sub(Ni,T,N0,D0) , ! .
+sub(N1,D1,N0,D0) :- D1=[H|T] , sub(N1,T,N0,Di) , D0 = [H|Di] , ! .
+sub(N,D,N,D) :- ! .
+
+subd(N1,D1,N0,D0) :- sub(N1,D1,N0,D0) , N1\=N0 , ! .
+
 go(prod(L),Ans) :- show(('01',prod(L))) , conc(L,[],LR) , L\=LR , go(prod(LR),Ans) , succ(('01',Ans)) , ! .
 go(prod([sum([]),B]),sum([])) :- show(('02',prod([sum([]),B]))) , succ(('02',sum([]))) , ! .
 go(prod([sum([H|T]),B]),Ans) :- show(('03',prod([sum([H|T]),B]))) , SH=prod([H,B]) , go(prod([sum(T),B]),ST) , go(sum([SH|[ST]]),Ans) , succ(('03',Ans)) , ! .
 go(prod([A,B,C|T]),Ans) :- show(('04',prod([A,B,C]))) , go(prod([A,B]),AB) , go(prod([AB,C|T]),Ans) , succ(('04',Ans)) , ! .
 go(sum([H|T]),Ans) :- show(('05',sum([H|T]))) , go(H,HS) , go(sum(T),TS) , getsum(HS,HL) , getsum(TS,TL) , conc(HL,TL,LS) , Ans=sum(LS) , succ(('05',Ans)) , ! .
 go(A-B,Ans) :- show(('06',A-B)) , go(A,A0) , getsum(A0,A1) , go(B,B0) , getsum(B0,[B1]) , select(B1,A1,L) , go(sum(L),Ans) , succ(('06',Ans)) , ! .
-go(N/D,Ans) :- show(('07',N/D)) , go(N,N0) , getprod(N0,N1) , go(D,D1) , D1\=sum([]) , select(D1,N1,L) , go(prod(L),Ans) , succ(('07',Ans)) , ! .
-go(N/D,Ans) :- show(('08',N/D)) , go(N,sum([H|T])) , go(D,D1) , go(H/D1,H1) , go(sum(T)/D1,T0) , getsum(T0,T1) , go(sum([H1|T1]),Ans) , succ(('08',Ans)) , ! .
-go(A@A=B,B) :- show(('09',A@A=B)) , succ(('09',B)) , ! .
-go(A@B=C,Ans) :- show(('10',A@B=C)) , go(A,sum([H|T])) , go(H@B=C,H1) , go(sum(T)@B=C,sum(T1)) , go(sum([H1|T1]),Ans) , succ(('10',Ans)) , ! .
-go(A@B=C,Ans) :- show(('11',A@B=C)) , go(A,prod([H|T])) , go(H@B=C,H1) , go(prod(T)@B=C,prod(T1)) , go(prod([H1|T1]),Ans) , succ(('11',Ans)) , ! .
-go(A@B,Ans) :- show(('12',A@B)) , go(A,Ans) , succ(('12',Ans)) , ! .
-go(X,X) :- show(('13',X)) , succ(('13',X)) , ! .
+go(N/One,Ans) :- show(('07',N/One)) , equal(One,prod([])) , go(N,Ans) , succ(('07',Ans)) , ! .
+go(N/D,Ans) :- show(('08',N/D)) , getprod([N,D],[N1,D1]) , subd(N1,D1,N0,D0) , flat([prod(N0),prod(D0)],[N2,D2]) , go(N2/D2,Ans) , succ(('08',Ans)) , ! .
+go(N/D,Ans) :- show(('09',N/D)) , go(N,sum([H|T])) , go(D,D1) , go(H/D1,H1) , go(sum(T)/D1,T0) , getsum(T0,T1) , go(sum([H1|T1]),Ans) , succ(('09',Ans)) , ! .
+go(A@A=B,B) :- show(('10',A@A=B)) , succ(('10',B)) , ! .
+go(A@B=C,Ans) :- show(('11',A@B=C)) , go(A,sum([H|T])) , go(H@B=C,H1) , go(sum(T)@B=C,sum(T1)) , go(sum([H1|T1]),Ans) , succ(('11',Ans)) , ! .
+go(A@B=C,Ans) :- show(('12',A@B=C)) , go(A,prod([H|T])) , go(H@B=C,H1) , go(prod(T)@B=C,prod(T1)) , go(prod([H1|T1]),Ans) , succ(('12',Ans)) , ! .
+go(A@B,Ans) :- show(('13',A@B)) , go(A,Ans) , succ(('13',Ans)) , ! .
+go(X,X) :- show(('14',X)) , succ(('14',X)) , ! .
 
 postpro(prod([]),1) :- shop(('1',prod([]))) , ! .
 postpro(sum([]),0) :- shop(('2',sum([]))) , ! .

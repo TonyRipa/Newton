@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/10/2025
+	Date:	9/10/2025
 	UI:	A user interface library
 */
 
@@ -79,6 +79,8 @@ class ui {
 			case 'prolog': return ui.makeprolog(dag,id)
 			case 'var': return ui.makef(dag,id,Expression.getvars)
 			case 'template': return ui.makef(dag,id,x=>x.split('|')[0])
+			case 'substitute': return ui.makef(dag,id,x=>x.split('|')[1])
+			case 'substitution': return ui.makef(dag,id,(x,y)=>y==''?'':math.evaluate(x,{[Expression.getvars(x)[0]]:y}))
 		}
 		alert(`ui.make() : id ${id} not found`)
 	}

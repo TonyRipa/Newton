@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2025.05.15
+	Date:	2025.08.15
 	Lisp:	A Constraint Solver
 */
 
@@ -187,7 +187,8 @@ class Lisp {
 				}
 			} else if (mytype == 'Real') {
 				if (math.typeOf(ret)=='OperatorNode') {
-					return '{ }'
+					if (!arithmetic(Lisp.strto(solution.toString())))	//	+2025.8
+						return '{ }'
 				} else if (1/ret==0) {
 					return '{ }'
 				}
@@ -205,9 +206,10 @@ class Lisp {
 		}
 		function compound(lisp) { return type(lisp)=='OperatorNode' }
 		function atomic(lisp) { return !compound(lisp) }
-		//function isvar(lisp) { return type(lisp)=='SymbolNode' && symboltable[lisp]!='Generic' }		//	-2025.4
 		function isvar(lisp) { return type(lisp)=='SymbolNode' && symboltable(lisp)!='Indeterminate' }	//	+2025.4
 		function ground(lisp) { return atomic(lisp) ? !isvar(lisp) : args(lisp).every(ground) }
+		function numeric(lisp) { return type(lisp)=='ConstantNode' }											//	+2025.8
+		function arithmetic(lisp) { return numeric(lisp) || compound(lisp) && args(lisp).every(arithmetic) }	//	+2025.8
 	}
 
 	static type(lisp) {

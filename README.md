@@ -1,53 +1,74 @@
 
-Newton: An A.I. for Expression Recognition
-========================
+# Newton: An A.I. for Expression Recognition
 
 Author : Anthony John Ripa
 
-Date : 2021.09.10
+Date : 2025.09.10
 
 Live Demo at <a target='_blank' href='http://tonyripa.github.io/Newton/'>http://tonyripa.github.io/Newton/</a>
 
 
-Task Definition: Expression Recognition
--------------------------------------------
+## Prototype
+
+### Task Definition: Expression Recognition
+
 Mathematical expressions are typically simplified using domain-specific algorithms (algebra).  The goal is to replace this domain-specific knowledge, with machine learning.  Ideally, it would simplify better than domain-specific algorithms.
 
-Motivation: Inadequate Algorithms
------------------------------------
+### Motivation: Inadequate Algorithms
+
 The motivating example is the expression ((2+h)^2-2^2)/h for secant lines of f(x)=x^2 through the point x=2.  Classical simplification yields a line with a hole in it: 4+h if h!=0 else undefined.  If you want the tangent (h=0) the result is undefined.  The line should not have a hole.
 
-Goal: Noise-free Approach
-----------------------------
+### Goal: Noise-free Approach
+
 Rather than answers with holes and post-hoc fix with calculus, make a system that reasons smoothly and gets it right the first time.  Machine learning uses reasonable hypothesis spaces and gives reasonable answers.  Sampling and smoothing is the way.
 
-Evaluation Setup
----------------------
+### Evaluation Setup
+
 Evaluation is done by entering in different expressions for `Newton` to recognize (simplify).  Simple expressions like 1, x/x, x, x+1, (x+1)^2, to harder expressions like (x-1)/(x^2-1), x+h, and even the centerpiece of calculus the difference quotient ((x+h)^2-x^2)/h|0.
 
-Results
---------------
+### Results
+
 `Newton` solves the motivating problems. More importantly, it does so without resort to domain-specific approaches (algebra, calculus or limits).  Smoothing (a machine learning concept of broad applicability) does the same thing, without having to resort to domain-specific reasoning.
 
-Analysis
--------------
+### Analysis
+
 The hypothesis space is polynomial and rational functions.  The system works well when the expression is reducible to this form.  Round-off errors are possible.  The system currently uses floating point computation.  Switching to rational numbers would fix this.
 
-Conclusion: Smoothing not Limits
--------------------------------------
+### Conclusion: Smoothing not Limits
+
 `Newton` solves algebraic problems without reliance on domain-specific algorithms. `Newton` does not make the classical algorithm mistake of concluding ((2+h)^2 – 2^2)/h is (4+h if h!=0 else undefined) and instead returns the smooth solution 4+h. `Newton`'s approach to algebra is clean enough to answer questions which would otherwise require a needlessly complicated workaround like calculus.
 
-Extensions
---------------
+## Extensions
+
+### Complexity Comtrol
+
+To fit a dataset of size n, we can always create a model of size n (e.g. a lookup table). Models of this kind have low predictive power outside of the answers that they have memorized. This is called over-learning. A dataset can be well-learned by a model whose complexity is smaller than the data itself. If the model is too small this is called under-learning, where the model cannot even well-model the data it was given. We want to control the complexity of the model. Not too much. Not too little. Just right. This is like Occam's Razor.
+
+In Advanced-Mode, `Newton` has a scalable complexity control in the user interface. The user can scale the complexity to the desired amount, to control over-fitting and under-fitting. In Basic-Mode, the complexity is controlled automatically. It starts with simple models, and tries to fit the data. If it validates, then `Newton` returns that as the answer. If it does not, then `Newton` increments the complexity. And the cycle repeats. If too many cycles progress, and nothing validates, `Newton` returns the best answer it has, and a message about the validation status.
+
+### Laplace-like Preprocessor
+
+#### Integral Transform
+
 `Newton`'s power to recognize functions other than rational functions (like transcendental functions) can be extended by preprocessing the data with a transform that maps a larger space of functions into rational functions. `Newton` can then recognize that rational function. These are in a sense spectacles for Newton. By introducing an optional Laplace-like preprocessing step, `Newton` can recognize a larger class of functions. A possible downside is that it is a bit numerically expensive because it is an integral transform.
 
+#### Differential Transform
+
+##### Real
+
 Complementarily, `Newton` can also do an optional differential transform. The differential transform has 2 advantages. One is that it is cheaper (Time÷Accuracy) to calculate. Two is that it is all-in-one instead of preprocessing. This transform is again Laplace-like. It comes from the observation that the Taylor coefficients without factorial denominators (basically just the derivatives) can be put into (possibly repeating) sequence expansion .f(0)f'(0)f''(0)f'''(0) , and that this sequence is the Laplace transform , which `Newton` can put into fraction-form to look more Laplace-like , since the expansion is a relatively untraditional form . Another (although not necessarily the best) way of looking at this (for those who are already familiar with generating functions) is that the Laplace-Transform is the Generating Function of the nth-derivatives of f.
+
+##### Complex
 
 For increased numerical stability, the differential transform does not use real linear stencils (like c1\*f(x+3h)+c2\*f(x+2h)+c3\*f(x+h)+c4\*f(x) [or even a centered version]), but instead uses complex circular stencils (like c1\*f(x+h)+c2\*f(x+ih)+c3\*f(x-h)+c4\*f(x-ih) ) . Their stencil weight coefficients (c1,c2,...) are obtained from the DFT Matrix, as are the sample points (i.e. the coefficients of h). We take h to be a small positive real, like .01 . Taking h=1 would give just the DFT, which is not actually as good an approximant of the derivatives. These Fourier kind of roots of unity stencils, give far more decimal places of accuracy than their real linear counterpart.
 
 One advantage of the differential transform is that it is not limited to functions that have a closed form in s-space. Consider 1/(1-t). The Laplace transform in integral form yields an integral that cannot be reduced to a closed-form expression. One may suppose this will not matter because we are doing the integration numerically. However, remember that this is a preprocessing step where the results will be fed to a rational function fitter. When this integral preprocessing step is complete, the results are not correctly fittable by the next step's rational function fitter because the results are not points from a rational function. However, the differential transform preprocessor still works. It numerically creates the sequence .f(0)f'(0)f''(0)f'''(0) , which it renders as s^-1 + s^-2 + 2\*s^-3 + 6\*s^-4. This is a useful step because now all it has to do is reverse Laplace Transform a Lorentz series, which `Newton` can do automatically, yielding 1 + t + t^2 + t^3 . Note that while it may look different, it turns out to be an identity for 1/(1-t). This is reassuring if we were already familiar with the identity, and nice that `Newton` can inform us if we didn't know. With repetition recognition, this is automatically recognized as a fraction. Looking back, `Newton` apparently also informed us that the Laplace Transform of 1/(1-t) is s^-1 + s^-2 + 2\*s^-3 + 6\*s^-4. In sum form, this is Σn!s⁻ⁿ. This is an even less commonly known fact, partly because it does not correspond to a convergent sum. In conclusion, `Newton`'s differential transform approach is simple, elegant, and powerful.
 
-## Backtracking
+### Laplace-like Data-Structure
+
+One of the inconveniences of Laplace transforms is dealing with partial fractions. With the appropriate data-structure this is entirely avoided. We simply store everything as a partial fraction and all manipulations remain in partial fraction form.
+
+## Commentary - Backtracking
 
 Backtracking comes up often in computer science. In search, you may search a tree, down a specific branch without solution. Then you would backtrack, and proceed down a different branch. Different languages have different support for backtracking. Prolog has native support for backtracking. Many languages allow throwing an error, exception, or any throwable, which can be seen as a kind of backtracking. In C and C++, the address operator (or pointers in general) can be seen as a kind of backtracking. `Newton` may be thought of as exploiting the benefits of backtracking.
 
@@ -65,11 +86,6 @@ Say that I want to simplify h/h at h=0. We write h/h|0. One way would be to dist
 
 Numerical stability and backtracking have seen widespread adoption in Linear Algebra, due in part to Linear Algebra being a lively field of active research. The idea that if something is inconclusive on one path, then it is objectively inconclusive on all paths, has been replaced in Linear Algebra with Numerical stability and backtracking. On the other hand, Elementary Algebra has changed little over the centuries, due in part to the belief that it was completed. This has led to its stagnation, and other fields like Calculus making up for its short-comings. We may allow Numerical stability and backtracking in Elementary Algebra, just as we do with Linear Algebra. Expressions like h/h|0 can be well-defined. This is more explicit fundamental and less contrived, than the hidden implicit Numerical Stability with Backtracking, found in Calculus law's like L'Hopital's Rule and limit laws in general.
 
-## Complexity Control
-
-To fit a dataset of size n, we can always create a model of size n (e.g. a lookup table). Models of this kind have low predictive power outside of the answers that they have memorized. This is called over-learning. A dataset can be well-learned by a model whose complexity is smaller than the data itself. If the model is too small this is called under-learning, where the model cannot even well-model the data it was given. We want to control the complexity of the model. Not too much. Not too little. Just right. This is like Occam's Razor.
-
-In Advanced-Mode, `Newton` has a scalable complexity control in the user interface. The user can scale the complexity to the desired amount, to control over-fitting and under-fitting. In Basic-Mode, the complexity is controlled automatically. It starts with simple models, and tries to fit the data. If it validates, then `Newton` returns that as the answer. If it does not, then `Newton` increments the complexity. And the cycle repeats. If too many cycles progress, and nothing validates, `Newton` returns the best answer it has, and a message about the validation status.
 
 ## Dependencies
 

@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/20/2025
+	Date:	8/20/2025
 	Prolog:	A prolog library
 */
 
@@ -32,6 +32,8 @@ pairs_values(Pairs, Values) :- findall(V, member(_-V, Pairs), Values) .
 msort(L,S) :- findall(X-X, member(X,L), Ps), keysort(Ps, SPs), pairs_values(SPs, S) .
 r([]) --> []. r([H|T]) --> r(T),[H] . reverse(L1,L2) :- r(L1,L2,[]) .
 select(E,B,L) :- append(F,[E|T],B) , append(F,T,L) .
+maplist(_,[],[]) :- ! . maplist(F,[H|T],[H1|T1]) :- call(F,H,H1) , maplist(F,T,T1) .
+not(X) :- \+ X .
 `
 	}
 
