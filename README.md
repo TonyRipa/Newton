@@ -3,7 +3,7 @@
 
 Author : Anthony John Ripa
 
-Date : 2025.09.10
+Date : 2025.10.10
 
 Live Demo at <a target='_blank' href='http://tonyripa.github.io/Newton/'>http://tonyripa.github.io/Newton/</a>
 
@@ -63,6 +63,8 @@ Complementarily, `Newton` can also do an optional differential transform. The di
 For increased numerical stability, the differential transform does not use real linear stencils (like c1\*f(x+3h)+c2\*f(x+2h)+c3\*f(x+h)+c4\*f(x) [or even a centered version]), but instead uses complex circular stencils (like c1\*f(x+h)+c2\*f(x+ih)+c3\*f(x-h)+c4\*f(x-ih) ) . Their stencil weight coefficients (c1,c2,...) are obtained from the DFT Matrix, as are the sample points (i.e. the coefficients of h). We take h to be a small positive real, like .01 . Taking h=1 would give just the DFT, which is not actually as good an approximant of the derivatives. These Fourier kind of roots of unity stencils, give far more decimal places of accuracy than their real linear counterpart.
 
 One advantage of the differential transform is that it is not limited to functions that have a closed form in s-space. Consider 1/(1-t). The Laplace transform in integral form yields an integral that cannot be reduced to a closed-form expression. One may suppose this will not matter because we are doing the integration numerically. However, remember that this is a preprocessing step where the results will be fed to a rational function fitter. When this integral preprocessing step is complete, the results are not correctly fittable by the next step's rational function fitter because the results are not points from a rational function. However, the differential transform preprocessor still works. It numerically creates the sequence .f(0)f'(0)f''(0)f'''(0) , which it renders as s^-1 + s^-2 + 2\*s^-3 + 6\*s^-4. This is a useful step because now all it has to do is reverse Laplace Transform a Lorentz series, which `Newton` can do automatically, yielding 1 + t + t^2 + t^3 . Note that while it may look different, it turns out to be an identity for 1/(1-t). This is reassuring if we were already familiar with the identity, and nice that `Newton` can inform us if we didn't know. With repetition recognition, this is automatically recognized as a fraction. Looking back, `Newton` apparently also informed us that the Laplace Transform of 1/(1-t) is s^-1 + s^-2 + 2\*s^-3 + 6\*s^-4. In sum form, this is Σn!s⁻ⁿ. This is an even less commonly known fact, partly because it does not correspond to a convergent sum. In conclusion, `Newton`'s differential transform approach is simple, elegant, and powerful.
+
+Alternatively, we can say Laplace[1/(1-t)] exists and is -e^s\*Ei(-s), where Ei is the Exponential Integral. For example, -e^s*Ei(-s)|s=10 = .09156333393978808187 . Unfortunately, our s^-1 - s^-2 + 2s^-3 - 3!s^-4 + ... |s=10 diverges to infinity. Though, we may consider this an [Asymptotic Expansion](https://en.wikipedia.org/wiki/Asymptotic_expansion). That is an expansion that in the short-term limits on the right answer, but in the long-term diverges. For example, the first few partial sums are .1, .09, .092, .0914, .09164, .09152, .091592, .0915416, .09158192, .091545632, .091509344, .09158192, .0915420032, .09158990336, .091527633152, .0916148114432, .0914840440064, 0.09169327190528, .09133758447718403 . As you can see, the partial sums approach .09156333393978808187, until the 17th partial sum, and diverge thereafter.
 
 ### Laplace-like Data-Structure
 

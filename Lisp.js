@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2025.08.15
+	Date:	2025.09.15
 	Lisp:	A Constraint Solver
 */
 
@@ -66,12 +66,6 @@ class Lisp {
 		if (math.simplify('('+left+')') == 0 && math.simplify('('+right+')') == 0 && op == '/') return 0/0	//	+2024.4
 		return math.simplify('(' + left + ')' + op + '(' + right + ')')
 	}
-
-	/*	-2025.5
-	static solve(infix, symboltable) {	//	+2024.4
-		return Lisp.solvelisp(Lisp.strto(infix), symboltable)
-	}
-	*/
 
 	static solve(infix, mytype) {	//	+2025.5
 		let symboltable = Lisp.maketable(mytype)
@@ -194,7 +188,8 @@ class Lisp {
 				}
 			} else if (mytype == 'IEEE754') {
 				if (math.typeOf(ret)=='OperatorNode') {
-					return '{ }'
+					if (!arithmetic(Lisp.strto(solution.toString())))	//	+2025.9
+						return '{ }'
 				}
 			} else if (mytype == 'Any') {
 				//	Accept

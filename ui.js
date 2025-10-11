@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	9/10/2025
+	Date:	10/10/2025
 	UI:	A user interface library
 */
 
@@ -13,6 +13,7 @@ class ui {
 		let ids = Graph.net2ids(net)
 		let dag = Graph.str2dag(net)
 		let rank = Graph.dag2rank(dag)
+		ids = rank.flat()  // Rebuild ids from flattened rank to match fs order
 		let fs = makess(dag)
 		for (let i = ids.length-1 ; i >= 0 ; i--) {
 			let id = ids[i]
