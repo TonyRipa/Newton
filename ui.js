@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	10/10/2025
+	Date:	11/10/2025
 	UI:	A user interface library
 */
 
@@ -22,6 +22,7 @@ class ui {
 			if (numpars > 0)
 				ui.makego(id,fs.slice(i-ids.length),numpars,row)
 		}
+		ui.drawEdges(dag)
 		function makess(dag) {
 			let fs = []
 			let tempids = []
@@ -302,6 +303,53 @@ class ui {
 		}
 		$(`<button id='${id}' title='${arrows}\n${id0}'>${arrows}</button><br>`).insertBefore('#'+id0)
 		$('#'+id).on('click',()=>{fs.map(f=>f())})
+	}
+
+	static drawEdges(dag) {
+		let $net = $('#net')
+		if ($net.length === 0) return
+		// Make sure #net is a positioned container so .position() is relative to it
+		if ($net.css('position') === 'static') $net.css('position','relative')
+
+		// Remove any old edge overlay
+		$('#net-edges').remove()
+
+		// Determine size for the SVG overlay
+		let width = $net.innerWidth()
+		let height = $net.innerHeight()
+		if (!width) width = $net[0].scrollWidth || 0
+		if (!height) height = $net[0].scrollHeight || 0
+
+		// Create SVG overlay for edges
+		let svg = $(`<svg id='net-edges' style='position:absolute;top:0;left:0;width:${width}px;height:${height}px;pointer-events:none;overflow:visible'></svg>`)
+		$net.append(svg)
+		let svgEl = svg[0]
+		if (!svgEl || !dag || !dag.par) return
+
+		// Draw a line from each parent widget to each child widget
+		for (let child in dag.par) {
+			let parents = dag.par[child] || []
+			let $child = $('#'+child)
+			if ($child.length === 0) continue
+			let co = $child.position()
+			let cx = co.left + $child.outerWidth()/2
+			let cy = co.top + $child.outerHeight()/2
+			for (let p of parents) {
+				let $p = $('#'+p)
+				if ($p.length === 0) continue
+				let po = $p.position()
+				let px = po.left + $p.outerWidth()/2
+				let py = po.top + $p.outerHeight()/2
+				let line = document.createElementNS('http://www.w3.org/2000/svg','line')
+				line.setAttribute('x1', px)
+				line.setAttribute('y1', py)
+				line.setAttribute('x2', cx)
+				line.setAttribute('y2', cy)
+				line.setAttribute('stroke', '#aaa')
+				line.setAttribute('stroke-width', '1')
+				svgEl.appendChild(line)
+			}
+		}
 	}
 
 }

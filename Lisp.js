@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2025.09.15
+	Date:	2025.10.15
 	Lisp:	A Constraint Solver
 */
 
@@ -71,21 +71,6 @@ class Lisp {
 		let symboltable = Lisp.maketable(mytype)
 		return Lisp.solvelisp(Lisp.strto(infix), symboltable)
 	}
-
-	/*	-2025.5
-	//static maketable() {	//	+2024.4	//	-2025.3
-	static maketable(type) {			//	+2025.3
-		if (type === undefined || type === '') type = 'Any'	//	+2025.3
-		let symboltable = {}
-		for (let symbol of 'abcdefghijklmnopqrstuvwxyz') {
-			//symboltable[symbol] = 'Generic'		//	-2025.4
-			symboltable[symbol] = 'Indeterminate'	//	+2025.4
-			//symboltable[symbol.toUpperCase()] = 'Any'	//	-2025.3
-			symboltable[symbol.toUpperCase()] = type	//	+2025.3
-		}
-		return symboltable
-	}
-	*/
 
 	static maketable(type) {			//	+2025.5
 		if (type === undefined || type === '') type = 'Any'	//	+2025.3
@@ -158,7 +143,13 @@ class Lisp {
 			function reverse() { return Lisp.solvelisp(['=',[op(l),R,L],r], symboltable) }	//	+2024.2
 		}
 		if (ret == undefined) return Lisp.toinfix(lisp)
-		let set = solution_intersect_mytype(ret, mytype)
+		// let set = solution_intersect_mytype(ret, mytype)				//	-2025.10
+		let set															//	+2025.10
+			if (math.typeOf(ret)=='Array')								//	+2025.10
+				set = ret.map(solution=>solution_intersect_mytype(solution, mytype)).flat()
+			else
+				set = solution_intersect_mytype(ret, mytype)
+		if (math.typeOf(set)=='Array') set = '{ ' + set.join(',') + ' }'//	+2025.10
 		if (typeof myvars != 'undefined') {								//	+2024.1
 			return myvars[0] + ' ∈ ' + symboltable(myvars[0]) + '\n' + myvars[1] + ' ∈ ' + set	//	-2024.6
 		} else {
@@ -170,26 +161,26 @@ class Lisp {
 		function args(lisp) { return lisp.slice(1) }
 		function op(lisp) { return lisp[0] }
 		function type(lisp) { console.log(lisp); return Lisp.type(lisp) }
-		function solution_intersect_mytype(solution, mytype) {
+		function solution_intersect_mytype(solution, mytype) {	//	+2025.10
 			if (math.typeOf(solution)=='number' && isNaN(solution)) {
 				return name(mytype)
 			} else if (mytype == 'Boolean') {
-				if (math.typeOf(ret)=='OperatorNode') {
-					return '{ }'
-				} else if (1/ret==0) {
-					return '{ }'
+				if (math.typeOf(solution)=='OperatorNode') {
+					return []
+				} else if (1/solution==0) {
+					return []
 				}
 			} else if (mytype == 'Real') {
-				if (math.typeOf(ret)=='OperatorNode') {
-					if (!arithmetic(Lisp.strto(solution.toString())))	//	+2025.8
-						return '{ }'
-				} else if (1/ret==0) {
-					return '{ }'
+				if (math.typeOf(solution)=='OperatorNode') {
+					if (!arithmetic(Lisp.strto(solution.toString())))
+						return []
+				} else if (1/solution==0) {
+					return []
 				}
 			} else if (mytype == 'IEEE754') {
-				if (math.typeOf(ret)=='OperatorNode') {
-					if (!arithmetic(Lisp.strto(solution.toString())))	//	+2025.9
-						return '{ }'
+				if (math.typeOf(solution)=='OperatorNode') {
+					if (!arithmetic(Lisp.strto(solution.toString())))
+						return []
 				}
 			} else if (mytype == 'Any') {
 				//	Accept
@@ -197,8 +188,37 @@ class Lisp {
 				console.trace()
 				alert('Error: mytype = ' + mytype)
 			}
-			return '{ ' + solution + ' }'
+			return [solution]
 		}
+		// function solution_intersect_mytype(solution, mytype) {	//	-2025.10
+		// 	if (math.typeOf(solution)=='number' && isNaN(solution)) {
+		// 		return name(mytype)
+		// 	} else if (mytype == 'Boolean') {
+		// 		if (math.typeOf(ret)=='OperatorNode') {
+		// 			return '{ }'
+		// 		} else if (1/ret==0) {
+		// 			return '{ }'
+		// 		}
+		// 	} else if (mytype == 'Real') {
+		// 		if (math.typeOf(ret)=='OperatorNode') {
+		// 			if (!arithmetic(Lisp.strto(solution.toString())))	//	+2025.8
+		// 				return '{ }'
+		// 		} else if (1/ret==0) {
+		// 			return '{ }'
+		// 		}
+		// 	} else if (mytype == 'IEEE754') {
+		// 		if (math.typeOf(ret)=='OperatorNode') {
+		// 			if (!arithmetic(Lisp.strto(solution.toString())))	//	+2025.9
+		// 				return '{ }'
+		// 		}
+		// 	} else if (mytype == 'Any') {
+		// 		//	Accept
+		// 	} else {
+		// 		console.trace()
+		// 		alert('Error: mytype = ' + mytype)
+		// 	}
+		// 	return '{ ' + solution + ' }'
+		// }
 		function compound(lisp) { return type(lisp)=='OperatorNode' }
 		function atomic(lisp) { return !compound(lisp) }
 		function isvar(lisp) { return type(lisp)=='SymbolNode' && symboltable(lisp)!='Indeterminate' }	//	+2025.4
