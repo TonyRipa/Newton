@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2025.10.15
+	Date:	2025.11.15
 	Lisp:	A Constraint Solver
 */
 
@@ -94,7 +94,11 @@ class Lisp {
 		if ( isvar(l) &&  ground(r)) {
 			var myvar = l
 			var mytype = symboltable(myvar)
-			var ret = Lisp.simplify(r, mytype)
+			try {	//	+2025.11
+				var ret = Lisp.simplify(r, mytype)
+			} catch {
+				var ret = []
+			}
 		}
 		if (isvar(r) && !ground(l) && !isvar(l)) return Lisp.solvelisp(['=',r,l], symboltable)	//	+2024.5
 		if (isvar(l) && type(r)=='OperatorNode') {	//	+2024.5
@@ -119,7 +123,11 @@ class Lisp {
 				} else {
 					var myvar = l
 					var mytype = symboltable(myvar)
-					var ret = Lisp.simplify([myop, L, R], mytype)
+					try {	//	+2025.11
+						var ret = Lisp.simplify([myop, L, R], mytype)
+					} catch {
+						var ret = []
+					}
 					if (isvar(R))	//	+2024.8
 						var myvars = [R, l]
 				}
@@ -131,9 +139,12 @@ class Lisp {
 			if (!ground(L) &&  ground(R)) {
 				var myvar = L
 				var mytype = symboltable(myvar)
-				var ret = Lisp.simplify([anti, r, R], mytype)
+				try {	//	+2025.11
+					var ret = Lisp.simplify([anti, r, R], mytype)
+				} catch {
+					var ret = []
+				}
 			}
-			// if (!ground(L) && !ground(R) && symboltable[R]!='Any') {	//	+2024.1												//	-2024.6
 			if (!ground(L) && !ground(R)) {	//	+2024.6
 				var myvar = L
 				var mytype = symboltable(myvar)
