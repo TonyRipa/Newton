@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	12/10/2025
+	Date:	1/10/2026
 	Data:	A data library
 */
 
@@ -96,7 +96,7 @@ expand(X,X) :- ! .
 expand1(sum([]),prod(_),sum([])) :- ! .
 expand1(sum([SH|ST]),prod(P),sum(E)) :- append([SH],P,EH) , expand1(sum(ST),prod(P),sum(ET)) , append([prod(EH)],ET,E) , ! .
 
-go(prod(L),Ans) :- show(('01',prod(L))) , flat(prod(L),F) , prod(L)\=F , go(F,Ans) , succ(('01',Ans)) , ! .
+go(prod(L),Ans) :- show(('01',prod(L))) , maplist(go,L,S) , flat(prod(S),F) , prod(L)\=F , go(F,Ans) , succ(('01',Ans)) , ! .
 go(prod(L),sum([])) :- show(('02',prod([sum([])]))) , member(sum([]),L) , succ(('02',sum([]))) , ! .
 go(sum([H|T]),Ans) :- show(('03',sum([H|T]))) , go(H,HS) , go(sum(T),TS) , getsum(HS,HL) , getsum(TS,TL) , append(HL,TL,LS) , Ans=sum(LS) , succ(('03',Ans)) , ! .
 go(A-B,Ans) :- show(('04',A-B)) , expandf(A,A0) , getsum(A0,A1) , expandf(B,B0) , getsum(B0,[B1]) , select(B1,A1,L) , go(sum(L),Ans) , succ(('04',Ans)) , ! .
@@ -122,8 +122,9 @@ postpro(prod([A]),AP) :- shop(('05',prod([A]))) , postpro(A,AP) , ! .
 postpro(prod(L),AP*BP) :- shop(('06',prod(L))) , append(L1,[E],L) , postpro(prod(L1),AP) , postpro(E,BP) , ! .
 postpro(A-B,AP-BP) :- shop(('07',A-B)) , postpro(A,AP) , postpro(B,BP) , ! .
 postpro(A/B,AP/BP) :- shop(('08',A/B)) , postpro(A,AP) , postpro(B,BP) , ! .
-postpro(traction(A,B),AP-BP) :- shop(('09',A-B)) , postpro(sum(A),AP) , postpro(sum(B),BP) , ! .
-postpro(X,X) :- shop(('10',X)) , ! .
+postpro(fraction(A,B),AP/BP) :- shop(('09',A/B)) , postpro(prod(A),AP) , postpro(prod(B),BP) , ! .
+postpro(traction(A,B),AP-BP) :- shop(('10',A-B)) , postpro(sum(A),AP) , postpro(sum(B),BP) , ! .
+postpro(X,X) :- shop(('11',X)) , ! .
 
 <----(Answer,X) :- if(not(see),assert(see)) , show("PreProcessing") , prepro(X,Answer) .	%	PreProcess
 <---(Answer,X) :- <----(P,X) , show("Simplifying") , go(P,Answer) .							%	Simplify
