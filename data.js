@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	1/10/2026
+	Date:	1/17/2026
 	Data:	A data library
 */
 
@@ -96,6 +96,24 @@ expand(X,X) :- ! .
 expand1(sum([]),prod(_),sum([])) :- ! .
 expand1(sum([SH|ST]),prod(P),sum(E)) :- append([SH],P,EH) , expand1(sum(ST),prod(P),sum(ET)) , append([prod(EH)],ET,E) , ! .
 
+reduce(_,[H],H) .
+reduce(F,[H|T],R) :- reduce(F,T,RL) , call(F,H,RL,R) .
+
+multi_intersect([],_,[]) :- ! .
+multi_intersect([H|T],L,[H|A]) :- append(F,[H|B],L) , append(F,B,L2) , multi_intersect(T,L2,A) , ! .
+multi_intersect([_|T],L,A) :- multi_intersect(T,L,A) , ! .
+
+multi_diff([],N,N) :- ! .
+multi_diff([H|T],N,A) :- append(F,[H|B],N) , append(F,B,N2) , multi_diff(T,N2,A) , ! .
+multi_diff([_|T],N,A) :- multi_diff(T,N,A) , ! .
+
+factors(N,[N]) :- number(N) , ! .
+factors(prod([F]),A) :- factors(F,A) , ! .
+factors(prod(F),F) :- ! .
+factors(sum(S),[prod(D1),sum(N3)]) :- maplist(factors,S,N1) , reduce(multi_intersect,N1,D1) , maplist(multi_diff(D1),N1,N2) , setof(prod(X),member(X,N2),N3) , ! .
+
+factor(E,A) :- factors(E,F) , flat(prod(F),A) , ! .
+
 go(prod(L),Ans) :- show(('01',prod(L))) , maplist(go,L,S) , flat(prod(S),F) , prod(L)\=F , go(F,Ans) , succ(('01',Ans)) , ! .
 go(prod(L),sum([])) :- show(('02',prod([sum([])]))) , member(sum([]),L) , succ(('02',sum([]))) , ! .
 go(sum([H|T]),Ans) :- show(('03',sum([H|T]))) , go(H,HS) , go(sum(T),TS) , getsum(HS,HL) , getsum(TS,TL) , append(HL,TL,LS) , Ans=sum(LS) , succ(('03',Ans)) , ! .
@@ -103,7 +121,7 @@ go(A-B,Ans) :- show(('04',A-B)) , expandf(A,A0) , getsum(A0,A1) , expandf(B,B0) 
 go(N-Zero,Ans) :- show(('05',N-Zero)) , equal(Zero,sum([])) , go(N,Ans) , succ(('05',Ans)) , ! .
 go(N/One,Ans) :- show(('06',N/One)) , equal(One,prod([])) , go(N,Ans) , succ(('06',Ans)) , ! .
 go(Zero/D,sum([])) :- show(('07',Zero/D)) , equal(Zero,sum([])) , not(equal(D,sum([]))) , succ(('07',sum([]))) , ! .
-go(N/D,Ans) :- show(('08',N/D)) , getprod([N,D],[N1,D1]) , subd(N1,D1,N0,D0) , flat([prod(N0),prod(D0)],[N2,D2]) , go(N2/D2,Ans) , succ(('08',Ans)) , ! .
+go(N/D,Ans) :- show(('08',N/D)) , factor(N,F) , getprod([F,D],[N1,D1]) , subd(N1,D1,N0,D0) , flat([prod(N0),prod(D0)],[A,B]) , go(A/B,Ans) , succ(('08',Ans)) , ! .
 go(N-D,Ans) :- show(('09',N-D)) , getsum([N,D],[N1,D1]) , subd(N1,D1,N0,D0) , flat([sum(N0),sum(D0)],[N2,D2]) , go(N2-D2,Ans) , succ(('09',Ans)) , ! .
 go(N/D,Ans) :- show(('10',N/D)) , go(N,sum([H|T])) , go(D,D1) , go(H/D1,H1) , go(sum(T)/D1,T0) , getsum(T0,T1) , go(sum([H1|T1]),Ans) , succ(('10',Ans)) , ! .
 go(fraction(N,D),Ans) :- show(('11',f(N/D))) , go(prod(N)/prod(D),Ans) , succ(('11',Ans)) , ! .

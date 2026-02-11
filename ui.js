@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	1/10/2026
+	Date:	1/20/2026
 	UI:	A user interface library
 */
 
@@ -10,6 +10,7 @@ class ui {
 	static makenet() {
 		$('#net').empty()
 		let net = nodot($('#netstr').val())
+		net = ui.prepro(net)
 		let ids = Graph.net2ids(net)
 		let dag = Graph.str2dag(net)
 		let rank = Graph.dag2rank(dag)
@@ -36,6 +37,20 @@ class ui {
 				ui.makebr()
 			}
 			return fs
+		}
+	}
+
+	static prepro(net) {
+		let edges = net.split(';')
+		edges = edges.map(splitedge)
+		return edges.join(';')
+		function splitedge(edge) {
+			if (!edge.includes(',')) return edge
+			let [heads,tail] = edge.split('→')
+			let newedges = []
+			for (let head of heads.split(','))
+				newedges.push(head + '→' + tail)
+			return newedges.join(';')
 		}
 	}
 
@@ -96,10 +111,6 @@ class ui {
 		id0 = id0?.split(',').slice(-1)[0]
 		let id = math.randomInt(1,9999)
 		let arrows = ['','↓','↘ ↙'][numpars]
-		if (row.length == 2) {
-			let col = row.indexOf(id0)
-			arrows = ['↙','↘'][col]
-		}
 		$(`<button id='${id}' title='${arrows}\n${id0}'>${arrows}</button><br>`).insertBefore('#'+id0)
 		$('#'+id).on('click',()=>{fs.map(f=>f())})
 	}
