@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	1/20/2026
+	Date:	3/10/2026
 	UI:	A user interface library
 */
 
@@ -31,7 +31,7 @@ class ui {
 				for (let col of row) {
 					if (!tempids.includes(col)) {
 						tempids.push(col)
-						fs.push(...ui.makes(dag,col))
+						fs.push(ui.make(dag,col))
 					}
 				}
 				ui.makebr()
@@ -54,54 +54,13 @@ class ui {
 		}
 	}
 
-	static makes(dag,me) {
-		return me.split(',').map(id=>ui.make(dag,id))
-	}
-
 	static make(dag,id) {
+		let view = new View(dag,id)
 		// wrap container for layout; we tag it with data-node so ELK can place it later
-		$('#net').append(`<span class='cont' data-node='${id}' style='display:inline-block;margin:10px;vertical-align:top'></span>`)
-		// NOTE: all existing widget creation logic remains identical
-		if (id.startsWith('datas_')) return View.makeselect(dag,id,Data.get(id))
-		if (id.startsWith('data_')) return View.makeinputbig(dag,id,Data.get(id))
-		switch(id) {
-			case 'input':
-			case 'input2': return View.makeinput(dag,id)
-			case 'inputbig': return View.makeinputbig(dag,id)
-			case 'filter': return View.makefilter(dag,id)
-			case 'where': return View.makewhere(dag,id)
-			case 'plot': return View.makeplot(dag,id)
-			case 'plot1': return View.makeplot1(dag,id)
-			case 'plot2': return View.makeplot2(dag,id)
-			case 'plot23': return View.makeplot23(dag,id)
-			case 'plot2layer': return View.makeplot2layer(dag,id)
-			case 'cause': return View.makecause(dag,id)
-			case 'plots': return View.makeplots(dag,id)
-			case 'trigpoly': return View.makef(dag,id,Newton.trig2poly)
-			case 'polytrig': return View.makef(dag,id,Newton.poly2trig)
-			case 'gf': return View.makef(dag,id,Newton.gf)
-			case 'igf': return View.makef(dag,id,Newton.igf)
-			case 'egf': return View.makef(dag,id,Newton.egf)
-			case 'iegf': return View.makef(dag,id,Newton.iegf)
-			case 'solve': return View.makef(dag,id,Lisp.solve)
-			case 'prob2oddstable': return View.makeprob2oddstable(dag,id)
-			case 'oddschain2oddstable': return View.makeoddschain2oddstable(dag,id)
-			case 'sample': return View.makef(dag,id,Newton.sample)
-			case 'regress': return View.makef(dag,id,Newton.regress)
-			case 'laplace': return View.makef(dag,id,Newton.laplace)
-			case 'invlaplace': return View.makef(dag,id,Newton.invlaplace)
-			case 'network': return View.makenetwork(dag,id)
-			case 'eq2json': return View.makef(dag,id,x=>JSON.stringify(Plot.eq2json(x),null,2))
-			case 'json2net': return View.makejson2net(dag,id,Plot.plotjson)
-			case 'net2json': return View.makef(dag,id,Plot.net2json)
-			case 'json2eq': return View.makef(dag,id,Plot.json2eq)
-			case 'prolog': return View.makeprolog(dag,id)
-			case 'var': return View.makef(dag,id,Expression.getvars)
-			case 'template': return View.makef(dag,id,x=>x.split('|')[0])
-			case 'substitute': return View.makef(dag,id,x=>x.split('|')[1])
-			case 'substitution': return View.makef(dag,id,(x,y)=>y===''?'':math.evaluate(x,{[Expression.getvars(x)[0]]:y}))
-		}
-		alert(`ui.make() : id ${id} not found`)
+		let $cont = $(`<span class='cont' data-node='${id}' style='display:inline-block;margin:10px;vertical-align:top'></span>`)
+		$('#net').append($cont)
+		$cont.append(view.html)
+		return view.f
 	}
 
 	static makebr() { $('#net').append(`<br>`) }

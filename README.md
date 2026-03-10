@@ -3,7 +3,7 @@
 
 Author : Anthony John Ripa
 
-Date : 2026.02.10
+Date : 2026.03.10
 
 Live Demo at <a target='_blank' href='http://tonyripa.github.io/Newton/'>http://tonyripa.github.io/Newton/</a>
 
@@ -16,7 +16,7 @@ Mathematical expressions are typically simplified using domain-specific algorith
 
 ### Motivation: Inadequate Algorithms
 
-The motivating example is the expression ((2+h)^2-2^2)/h for secant lines of f(x)=x^2 through the point x=2.  Classical simplification yields a line with a hole in it: 4+h if h!=0 else undefined.  If you want the tangent (h=0) the result is undefined.  The line should not have a hole.
+The motivating example is the expression ((2+h)^2-2^2)/h for secant lines of f(x)=x^2 through the point x=2.  Classical simplification yields a line with a hole in it: 4+h if h≠0 else undefined.  If you want the tangent (h=0) the result is undefined.  The line should not have a hole.
 
 ### Goal: Noise-free Approach
 

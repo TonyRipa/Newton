@@ -1,77 +1,111 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	12/15/2025
+	Date:	3/10/2026
 	View:	A view library
 */
 
 class View {
 
-	static me2parkid(dag,me) {
-		let par = dag.par[me]
-		let kid = dag.kid[me]
-		par = par?.join()
-		kid = kid?.join()
-		return {par,kid}
+	constructor(dag, me) {
+		this.dag = dag
+		this.me = me
+		this.par = dag.par[me]
+		this.kid = dag.kid[me]
+		this.init()
 	}
 
-	static makeinputbig(dag,me,data) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<textarea id='${me}' cols='180' rows='7'>${data}</textarea>`)
-		return ()=>{if (par) putval(me,$('#'+par).val())}
+	init() {
+		if (this.me.startsWith('datas_')) this.select(Data.get(this.me))
+		if (this.me.startsWith('data_')) this.inputbig(Data.get(this.me))
+		switch(this.me) {
+			case 'input':
+			case 'input2': this.input() ; break
+			case 'inputbig': this.inputbig() ; break
+			case 'filter': this.filter() ; break
+			case 'where': this.where() ; break
+			case 'plot': this.plot() ; break
+			case 'plot1': this.plot1() ; break
+			case 'plot2': this.plot2() ; break
+			case 'plot23': this.plot23() ; break
+			case 'plot2layer': this.plot2layer() ; break
+			case 'cause': this.cause() ; break
+			case 'plots': this.plots() ; break
+			case 'trigpoly': this.func(Newton.trig2poly) ; break
+			case 'polytrig': this.func(Newton.poly2trig) ; break
+			case 'gf': this.func(Newton.gf) ; break
+			case 'igf': this.func(Newton.igf) ; break
+			case 'egf': this.func(Newton.egf) ; break
+			case 'iegf': this.func(Newton.iegf) ; break
+			case 'solve': this.func(Lisp.solve) ; break
+			case 'prob2oddstable': this.prob2oddstable() ; break
+			case 'oddschain2oddstable': this.oddschain2oddstable() ; break
+			case 'sample': this.func(Newton.sample) ; break
+			case 'regress': this.func(Newton.regress) ; break
+			case 'laplace': this.func(Newton.laplace) ; break
+			case 'invlaplace': this.func(Newton.invlaplace) ; break
+			case 'network': this.network() ; break
+			case 'eq2json': this.func(x=>JSON.stringify(Plot.eq2json(x),null,2)) ; break
+			case 'json2net': this.json2net(Plot.plotjson) ; break
+			case 'net2json': this.func(Plot.net2json) ; break
+			case 'json2eq': this.func(Plot.json2eq) ; break
+			case 'prolog': this.prolog() ; break
+			case 'var': this.func(Expression.getvars) ; break
+			case 'template': this.func(x=>x.split('|')[0]) ; break
+			case 'substitute': this.func(x=>x.split('|')[1]) ; break
+			case 'substitution': this.func((x,y)=>y===''?'':math.evaluate(x,{[Expression.getvars(x)[0]]:y})) ; break
+			default: if (!this.me.startsWith('data')) alert(`ui.init() : id ${this.me} not found`)
+		}
 	}
 
-	static makeselect(dag,me,data) {
-		let {par,kid} = View.me2parkid(dag,me)
+	inputbig(data) {
+		this.html = `<textarea id='${this.me}' cols='180' rows='7'>${data}</textarea>`
+		this.f = ()=>{if (this.par) putval(this.me,$('#'+this.par).val())}
+	}
+
+	select(data) {
 		if (Array.isArray(data))
 			data = data.map(d=>'<option>'+d+'</option>')
 		else
 			data = Object.keys(data).map(key=>`<optgroup label='${key}'>`+data[key].map(d=>'<option>'+d+'</option>'))
-		$('.cont:last-of-type').append(`<select id='${me}'>${data}</select>`)
-		return ()=>{}
+		this.html = `<select id='${this.me}'>${data}</select>`
+		this.f = ()=>{}
 	}
 
-	static makeinput(dag,me,data='') {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<input id='${me}' value='${data}' placeholder='${me}'>`)
-		return ()=>{if (par) $('#'+me).val($('#'+par).val())}
+	input(data='') {
+		this.html = `<input id='${this.me}' value='${data}' placeholder='${this.me}'>`
+		this.f = ()=>{if (this.par) $('#'+this.me).val($('#'+this.par).val())}
 	}
 
-	static makefilter(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<textarea id='${me}' cols='50' rows='7' placeholder='${me}'></textarea>`)
-		return ()=>set_textarea(me,Stats.p(get_input(par.split(',')[0]),id2array(par.split(',')[1])))
+	filter() {
+		this.html = `<textarea id='${this.me}' cols='50' rows='7' placeholder='${this.me}'></textarea>`
+		this.f = ()=>set_textarea(this.me,Stats.p(get_input(this.par[0]),id2array(this.par[1])))
 	}
 
-	static makeprolog(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		let pars = par.split(',')
-		$('.cont:last-of-type').append(`<textarea id='${me}' cols='50' rows='7' placeholder='${me}'></textarea>`)
-		return () => {prolog.do(pars[0],pars[1],me)}
+	prolog() {
+		this.html = `<textarea id='${this.me}' cols='50' rows='7' placeholder='${this.me}'></textarea>`
+		this.f = () => {prolog.do(this.par[0],this.par[1],this.me)}
 	}
 
-	static makewhere(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<textarea id='${me}' cols='150' rows='7' placeholder='${me}'></textarea>`)
-		return ()=>set_textarea(me,Frame.fromstr(get_input(par.split(',')[1])).where(get_input(par.split(',')[0])))
+	where() {
+		this.html = `<textarea id='${this.me}' cols='150' rows='7' placeholder='${this.me}'></textarea>`
+		this.f = ()=>set_textarea(this.me,Frame.fromstr(get_input(this.par[1])).where(get_input(this.par[0])))
 	}
 
-	static makeoddschain2oddstable(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<textarea id='${me}' cols='50' rows='10' placeholder='${me}'></textarea>`)
-		return ()=>{
-			let r = id2array(par,',')[0]
+	oddschain2oddstable() {
+		this.html = `<textarea id='${this.me}' cols='50' rows='10' placeholder='${this.me}'></textarea>`
+		this.f = ()=>{
+			let r = id2array(this.par,',')[0]
 			let ret = Stats.oddschain2oddstable(r)
-			set_textarea(me,ret)
+			set_textarea(this.me,ret)
 		}
 	}
 
-	static makeprob2oddstable(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<textarea id='${me}' cols='30' rows='10' placeholder='${me}'></textarea>`)
-		return ()=>{
+	prob2oddstable() {
+		this.html = `<textarea id='${this.me}' cols='30' rows='10' placeholder='${this.me}'></textarea>`
+		this.f = ()=>{
 			let ret = ''
-			let p = id2array(par,',')[0]
+			let p = id2array(this.par,',')[0]
 			for (let i = 0 ; i < p.length ; i++) {
 				for (let j = 0 ; j < p.length ; j++) {
 					let odds = p[i] / p[j]
@@ -83,131 +117,120 @@ class View {
 				}
 				if (i<p.length-1) ret += '\n'
 			}
-			set_textarea(me,ret)
+			set_textarea(this.me,ret)
 		}
 	}
 
-	static makeplot(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<div id='${me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${me}</div>`)
-		return () => {
-			let frame = Frame.fromString(get_input(par))
-			$('#'+me).empty()
-			$('#'+me).removeAttr('style')
-			if (frame.numcols()==2) Plot.fromFrame(frame).plot1 (me)
-			if (frame.numcols()==3) Plot.fromFrame(frame).table2(me)
-			if (frame.numcols()==4) Plot.fromFrame(frame).table3(me)
+	plot() {
+		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
+		this.f = () => {
+			let frame = Frame.fromString(get_input(this.par))
+			$('#'+this.me).empty()
+			$('#'+this.me).removeAttr('style')
+			if (frame.numcols()==2) Plot.fromFrame(frame).plot1 (this.me)
+			if (frame.numcols()==3) Plot.fromFrame(frame).table2(this.me)
+			if (frame.numcols()==4) Plot.fromFrame(frame).table3(this.me)
 		}
 	}
 
-	static makenetwork(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
+	network() {
 		window.godiagram = null
-		$('.cont:last-of-type').append(`<div id='${me}' style='border:thin solid black;width:640px;height:400px;color:#999'>${me}</div>`)
-		return () => Plot.plotnetwork(me,get_input(par))
+		this.html = `<div id='${this.me}' style='border:thin solid black;width:640px;height:400px;color:#999'>${this.me}</div>`
+		this.f = () => Plot.plotnetwork(this.me,get_input(this.par))
 	}
 
-	static makejson2net(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
+	json2net() {
 		window.godiagram = null
-		$('.cont:last-of-type').append(`<div id='${me}' style='border:thin solid black;width:640px;height:400px;color:#999'>${me}</div>`)
-		return () => Plot.json2net(me,get_input(par))
+		this.html = `<div id='${this.me}' style='border:thin solid black;width:640px;height:400px;color:#999'>${this.me}</div>`
+		this.f = () => Plot.json2net(this.me,get_input(this.par))
 	}
 
-	static makeplots(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<div id='${me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${me}</div>`)
-		return () => {
-			let frame = Frame.fromString(get_input(par))
+	plots() {
+		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
+		this.f = () => {
+			let frame = Frame.fromString(get_input(this.par))
 			let frame1 = frame.copy().removecol(1)
 			let frame2 = frame.copy().removecol(0)
 			if (frame.numcols() >= 3) {
-				$('#'+me).empty()
-				$('#'+me).removeAttr('style')
-				$('#'+me).append(`<table><tr><td id='${me}1' width='500px'></td><td id='${me}2' width='500px'></td></tr></table>`)
-				Plot.fromFrame(frame1).plot1(me+1)
-				Plot.fromFrame(frame2).plot1(me+2)
+				$('#'+this.me).empty()
+				$('#'+this.me).removeAttr('style')
+				$('#'+this.me).append(`<table><tr><td id='${this.me}1' width='500px'></td><td id='${this.me}2' width='500px'></td></tr></table>`)
+				Plot.fromFrame(frame1).plot1(this.me+1)
+				Plot.fromFrame(frame2).plot1(this.me+2)
 			}			
 		}
 	}
 
-	static makeplot1(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<span id='${me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${me}</span>`)
-		return () => {
-			let frame = Frame.fromString(get_input(par))
-			$('#'+me).empty()
-			$('#'+me).removeAttr('style')
-			$('#'+me).append(`<table><tr><td id='${me}2' width='400px'></td></tr></table>`)
-			Plot.fromFrame(frame).plot1(me+'2')
+	plot1() {
+		this.html = `<span id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</span>`
+		this.f = () => {
+			let frame = Frame.fromString(get_input(this.par))
+			$('#'+this.me).empty()
+			$('#'+this.me).removeAttr('style')
+			$('#'+this.me).append(`<table><tr><td id='${this.me}2' width='400px'></td></tr></table>`)
+			Plot.fromFrame(frame).plot1(this.me+'2')
 		}
 	}
 
-	static makeplot2(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<div id='${me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${me}</div>`)
-		return () => {
-			let frame = Frame.fromString(get_input(par))
+	plot2() {
+		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
+		this.f = () => {
+			let frame = Frame.fromString(get_input(this.par))
 			let frame1 = frame.copy().removecol(1)
 			let frame2 = frame.copy().removecol(0)
 			if (frame.numcols() >= 3) {
-				$('#'+me).empty()
-				$('#'+me).removeAttr('style')
-				$('#'+me).append(`<table><tr><td id='${me}1' width='500px'></td><td id='${me}2' width='500px'></td><td id='${me}3' width='500px'></td></tr></table>`)
-				Plot.fromFrame(frame1).plot1(me+1)
-				Plot.fromFrame(frame ).plot2(me+2)
-				Plot.fromFrame(frame2).plot1(me+3)
+				$('#'+this.me).empty()
+				$('#'+this.me).removeAttr('style')
+				$('#'+this.me).append(`<table><tr><td id='${this.me}1' width='500px'></td><td id='${this.me}2' width='500px'></td><td id='${this.me}3' width='500px'></td></tr></table>`)
+				Plot.fromFrame(frame1).plot1(this.me+1)
+				Plot.fromFrame(frame ).plot2(this.me+2)
+				Plot.fromFrame(frame2).plot1(this.me+3)
 			}			
 		}
 	}
 
-	static makeplot23(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<div id='${me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${me}</div>`)
-		return () => {
-			let frame = Frame.fromString(get_input(par))
+	plot23() {
+		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
+		this.f = () => {
+			let frame = Frame.fromString(get_input(this.par))
 			let frame1 = frame.copy().removecol(1)
 			let frame2 = frame.copy().removecol(0)
 			if (frame.numcols() >= 3) {
-				$('#'+me).empty()
-				$('#'+me).removeAttr('style')
-				$('#'+me).append(`<table><tr><td id='${me}1' width='500px'></td><td id='${me}2' width='500px'></td><td id='${me}3' width='500px'></td></tr></table>`)
-				Plot.fromFrame(frame1).plot1 (me+1)
-				Plot.fromFrame(frame ).plot23(me+2)
-				Plot.fromFrame(frame2).plot1 (me+3)
+				$('#'+this.me).empty()
+				$('#'+this.me).removeAttr('style')
+				$('#'+this.me).append(`<table><tr><td id='${this.me}1' width='500px'></td><td id='${this.me}2' width='500px'></td><td id='${this.me}3' width='500px'></td></tr></table>`)
+				Plot.fromFrame(frame1).plot1 (this.me+1)
+				Plot.fromFrame(frame ).plot23(this.me+2)
+				Plot.fromFrame(frame2).plot1 (this.me+3)
 			}			
 		}
 	}
 
-	static makeplot2layer(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<div id='${me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${me}</div>`)
-		return () => {
-			$('#'+me).empty()
-			$('#'+me).removeAttr('style')
-			$('#'+me).append(`<table><tr><td id='${me}2' width='500px'></td></tr></table>`)
-			Plot.fromString(get_input(par)).plot2layer(me+2)
+	plot2layer() {
+		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
+		this.f = () => {
+			$('#'+this.me).empty()
+			$('#'+this.me).removeAttr('style')
+			$('#'+this.me).append(`<table><tr><td id='${this.me}2' width='500px'></td></tr></table>`)
+			Plot.fromString(get_input(this.par)).plot2layer(this.me+2)
 		}
 	}
 
-	static makecause(dag,me) {
-		let {par,kid} = View.me2parkid(dag,me)
-		$('.cont:last-of-type').append(`<textarea id='${me}' cols='50' rows='7' placeholder='${me}'></textarea>`)
-		return ()=>{
-			let csv = get_input(par)
+	cause() {
+		this.html = `<textarea id='${this.me}' cols='50' rows='7' placeholder='${this.me}'></textarea>`
+		this.f = ()=>{
+			let csv = get_input(this.par)
 			let model = new Model(Frame.fromString(csv))
 			let middle = model.get_control_name()
 			let ends = model.get_noncontrol_names()
 			let graph = ends[0] + '-' + middle + '-' + ends[1]
-			set_textarea(me,graph)
+			set_textarea(this.me,graph)
 		}
 	}
 
-	static makef(dag,me,f) {
-		let {par,kid} = View.me2parkid(dag,me)
-		let pars = par.split(',')
-		$('.cont:last-of-type').append(`<textarea id='${me}' placeholder='${me}' cols='30'></textarea>`)
-		return ()=>$('#'+me).val(f(...pars.map(p=>$('#'+p).val())))
+	func(f) {
+		this.html = `<textarea id='${this.me}' placeholder='${this.me}' cols='30'></textarea>`
+		this.f = ()=>$('#'+this.me).val(f(...this.par.map(p=>$('#'+p).val())))
 	}
 
 }
