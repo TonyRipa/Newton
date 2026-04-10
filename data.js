@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2/16/2026
+	Date:	3/19/2026
 	Data:	A data library
 */
 
@@ -108,6 +108,7 @@ multi_diff([H|T],N,A) :- append(F,[H|B],N) , append(F,B,N2) , multi_diff(T,N2,A)
 multi_diff([_|T],N,A) :- multi_diff(T,N,A) , ! .
 
 factors(N,[N]) :- number(N) , ! .
+factors(N,[N]) :- atom(N) , ! .
 factors(prod([F]),A) :- factors(F,A) , ! .
 factors(prod(F),F) :- ! .
 factors(sum(S),[prod(D1),sum(N3)]) :- maplist(factors,S,N1) , reduce(multi_intersect,N1,D1) , maplist(multi_diff(D1),N1,N2) , bagof(prod(X),member(X,N2),N3) , ! .

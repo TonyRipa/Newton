@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	3/10/2026
+	Date:	4/10/2026
 	UI:	A user interface library
 */
 
@@ -34,7 +34,6 @@ class ui {
 						fs.push(ui.make(dag,col))
 					}
 				}
-				ui.makebr()
 			}
 			return fs
 		}
@@ -62,9 +61,6 @@ class ui {
 		$cont.append(view.html)
 		return view.f
 	}
-
-	static makebr() { $('#net').append(`<br>`) }
-	static makebrs() { ui.makebr() ; ui.makebr() }
 
 	static makego(id0,fs,numpars,row) {
 		id0 = id0?.split(',').slice(-1)[0]

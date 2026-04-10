@@ -3,7 +3,7 @@
 
 Author : Anthony John Ripa
 
-Date : 2026.03.10
+Date : 2026.04.10
 
 Live Demo at <a target='_blank' href='http://tonyripa.github.io/Newton/'>http://tonyripa.github.io/Newton/</a>
 
@@ -91,4 +91,4 @@ Numerical stability and backtracking have seen widespread adoption in Linear Alg
 
 ## Dependencies
 
-<a href='http://jquery.com'>jQuery</a> , <a href='http://mathjs.org'>math.js</a> , <a href='http://lodash.com'>Lodash</a> , <a href='http://visjs.org'>vis.js</a> and <a href='http://vuejs.org'>Vue.js</a>
+<a href='http://jquery.com'>jQuery</a> , <a href='http://mathjs.org'>math.js</a> , <a href='http://lodash.com'>Lodash</a> and <a href='http://visjs.org'>vis.js</a>

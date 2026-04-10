@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	3/10/2026
+	Date:	3/15/2026
 	View:	A view library
 */
 
@@ -58,9 +58,13 @@ class View {
 		}
 	}
 
+	static get(id) {
+		return $('#'+id).val()
+	}
+
 	inputbig(data) {
 		this.html = `<textarea id='${this.me}' cols='180' rows='7'>${data}</textarea>`
-		this.f = ()=>{if (this.par) putval(this.me,$('#'+this.par).val())}
+		this.f = ()=>{if (this.par) putval(this.me,View.get(this.par))}
 	}
 
 	select(data) {
@@ -74,12 +78,12 @@ class View {
 
 	input(data='') {
 		this.html = `<input id='${this.me}' value='${data}' placeholder='${this.me}'>`
-		this.f = ()=>{if (this.par) $('#'+this.me).val($('#'+this.par).val())}
+		this.f = ()=>{if (this.par) $('#'+this.me).val(View.get(this.par))}
 	}
 
 	filter() {
 		this.html = `<textarea id='${this.me}' cols='50' rows='7' placeholder='${this.me}'></textarea>`
-		this.f = ()=>set_textarea(this.me,Stats.p(get_input(this.par[0]),id2array(this.par[1])))
+		this.f = ()=>set_textarea(this.me,Stats.p(View.get(this.par[0]),id2array(this.par[1])))
 	}
 
 	prolog() {
@@ -89,7 +93,7 @@ class View {
 
 	where() {
 		this.html = `<textarea id='${this.me}' cols='150' rows='7' placeholder='${this.me}'></textarea>`
-		this.f = ()=>set_textarea(this.me,Frame.fromstr(get_input(this.par[1])).where(get_input(this.par[0])))
+		this.f = ()=>set_textarea(this.me,Frame.fromstr(View.get(this.par[1])).where(View.get(this.par[0])))
 	}
 
 	oddschain2oddstable() {
@@ -124,7 +128,7 @@ class View {
 	plot() {
 		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
 		this.f = () => {
-			let frame = Frame.fromString(get_input(this.par))
+			let frame = Frame.fromString(View.get(this.par))
 			$('#'+this.me).empty()
 			$('#'+this.me).removeAttr('style')
 			if (frame.numcols()==2) Plot.fromFrame(frame).plot1 (this.me)
@@ -136,19 +140,19 @@ class View {
 	network() {
 		window.godiagram = null
 		this.html = `<div id='${this.me}' style='border:thin solid black;width:640px;height:400px;color:#999'>${this.me}</div>`
-		this.f = () => Plot.plotnetwork(this.me,get_input(this.par))
+		this.f = () => Plot.plotnetwork(this.me,View.get(this.par))
 	}
 
 	json2net() {
 		window.godiagram = null
 		this.html = `<div id='${this.me}' style='border:thin solid black;width:640px;height:400px;color:#999'>${this.me}</div>`
-		this.f = () => Plot.json2net(this.me,get_input(this.par))
+		this.f = () => Plot.json2net(this.me,View.get(this.par))
 	}
 
 	plots() {
 		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
 		this.f = () => {
-			let frame = Frame.fromString(get_input(this.par))
+			let frame = Frame.fromString(View.get(this.par))
 			let frame1 = frame.copy().removecol(1)
 			let frame2 = frame.copy().removecol(0)
 			if (frame.numcols() >= 3) {
@@ -164,7 +168,7 @@ class View {
 	plot1() {
 		this.html = `<span id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</span>`
 		this.f = () => {
-			let frame = Frame.fromString(get_input(this.par))
+			let frame = Frame.fromString(View.get(this.par))
 			$('#'+this.me).empty()
 			$('#'+this.me).removeAttr('style')
 			$('#'+this.me).append(`<table><tr><td id='${this.me}2' width='400px'></td></tr></table>`)
@@ -175,7 +179,7 @@ class View {
 	plot2() {
 		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
 		this.f = () => {
-			let frame = Frame.fromString(get_input(this.par))
+			let frame = Frame.fromString(View.get(this.par))
 			let frame1 = frame.copy().removecol(1)
 			let frame2 = frame.copy().removecol(0)
 			if (frame.numcols() >= 3) {
@@ -192,7 +196,7 @@ class View {
 	plot23() {
 		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
 		this.f = () => {
-			let frame = Frame.fromString(get_input(this.par))
+			let frame = Frame.fromString(View.get(this.par))
 			let frame1 = frame.copy().removecol(1)
 			let frame2 = frame.copy().removecol(0)
 			if (frame.numcols() >= 3) {
@@ -212,14 +216,14 @@ class View {
 			$('#'+this.me).empty()
 			$('#'+this.me).removeAttr('style')
 			$('#'+this.me).append(`<table><tr><td id='${this.me}2' width='500px'></td></tr></table>`)
-			Plot.fromString(get_input(this.par)).plot2layer(this.me+2)
+			Plot.fromString(View.get(this.par)).plot2layer(this.me+2)
 		}
 	}
 
 	cause() {
 		this.html = `<textarea id='${this.me}' cols='50' rows='7' placeholder='${this.me}'></textarea>`
 		this.f = ()=>{
-			let csv = get_input(this.par)
+			let csv = View.get(this.par)
 			let model = new Model(Frame.fromString(csv))
 			let middle = model.get_control_name()
 			let ends = model.get_noncontrol_names()
@@ -230,7 +234,7 @@ class View {
 
 	func(f) {
 		this.html = `<textarea id='${this.me}' placeholder='${this.me}' cols='30'></textarea>`
-		this.f = ()=>$('#'+this.me).val(f(...this.par.map(p=>$('#'+p).val())))
+		this.f = ()=>$('#'+this.me).val(f(...this.par.map(p=>View.get(p))))
 	}
 
 }
