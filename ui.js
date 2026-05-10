@@ -1,21 +1,26 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	4/10/2026
+	Date:	5/10/2026
 	UI:	A user interface library
 */
 
 class ui {
 
-	static makenet() {
-		$('#net').empty()
+	constructor() {
+		this.stage = $('#net')
+		this.init()
+	}
+
+	init() {
+		this.stage.empty()
 		let net = nodot($('#netstr').val())
 		net = ui.prepro(net)
 		let ids = Graph.net2ids(net)
 		let dag = Graph.str2dag(net)
 		let rank = Graph.dag2rank(dag)
 		ids = rank.flat()  // Rebuild ids from flattened rank to match fs order
-		let fs = makess(dag)
+		let fs = this.makess(dag,rank)
 		for (let i = ids.length-1 ; i >= 0 ; i--) {
 			let id = ids[i]
 			let numpars = dag.par[id]?.length
@@ -23,20 +28,7 @@ class ui {
 			if (numpars > 0)
 				ui.makego(id,fs.slice(i-ids.length),numpars,row)
 		}
-		ui.drawEdges(dag)
-		function makess(dag) {
-			let fs = []
-			let tempids = []
-			for (let row of rank) {
-				for (let col of row) {
-					if (!tempids.includes(col)) {
-						tempids.push(col)
-						fs.push(ui.make(dag,col))
-					}
-				}
-			}
-			return fs
-		}
+		this.drawEdges(dag)
 	}
 
 	static prepro(net) {
@@ -53,11 +45,25 @@ class ui {
 		}
 	}
 
-	static make(dag,id) {
+	makess(dag,rank) {
+		let fs = []
+		let tempids = []
+		for (let row of rank) {
+			for (let col of row) {
+				if (!tempids.includes(col)) {
+					tempids.push(col)
+					fs.push(this.make(dag,col))
+				}
+			}
+		}
+		return fs
+	}
+
+	make(dag,id) {
 		let view = new View(dag,id)
 		// wrap container for layout; we tag it with data-node so ELK can place it later
 		let $cont = $(`<span class='cont' data-node='${id}' style='display:inline-block;margin:10px;vertical-align:top'></span>`)
-		$('#net').append($cont)
+		this.stage.append($cont)
 		$cont.append(view.html)
 		return view.f
 	}
@@ -72,36 +78,28 @@ class ui {
 
 	// ===== ELK INTEGRATION =====
 
-	static drawEdges(dag) {
-		const $net = $('#net')
-		if ($net.length === 0) return
+	drawEdges(dag) {
+		if (this.stage.length === 0) return
 
 		// Ensure positioned container for absolute children + overlay
-		if ($net.css('position') === 'static') $net.css('position','relative')
+		if (this.stage.css('position') === 'static') this.stage.css('position','relative')
 
 		// Remove any old overlay
 		$('#net-edges').remove()
 
 		// Build nodes from the current DOM (.cont[data-node])
-		const $nodes = $('#net .cont[data-node]')
+		const $nodes = this.stage.find('.cont[data-node]')
 		if ($nodes.length === 0 || !dag || !dag.par) return
 
 		// If ELK is available, use it; otherwise try to load it. If that fails, fall back.
-		const run = () => ui._elkLayoutAndRender(dag, $nodes, $net).catch(err => {
+		const run = () => this._elkLayoutAndRender(dag, $nodes).catch(err => {
 			console.warn('ELK layout failed, falling back to straight lines.', err)
 			ui._drawEdgesFallbackStraightLines(dag, $net)
 		})
 		if (window.ELK) { run(); }
-		else {
-			const s = document.createElement('script')
-			s.src = 'https://unpkg.com/elkjs@0.9.3/lib/elk.bundled.js'
-			s.onload = run
-			s.onerror = () => ui._drawEdgesFallbackStraightLines(dag, $net)
-			document.head.appendChild(s)
-		}
 	}
 
-	static _elkLayoutAndRender(dag, $nodes, $net) {
+	_elkLayoutAndRender(dag, $nodes) {
 		// Measure current node sizes (use wrapper sizes so layout has real geometry)
 		const children = []
 		const id2size = {}
@@ -160,7 +158,7 @@ class ui {
 			const layoutH = Math.ceil(maxY + 40)
 
 			// Make #net a centered "shrink-to-layout" box
-			$net.css({
+			this.stage.css({
 			  width: layoutW + 'px',
 			  minHeight: layoutH + 'px',
 			  marginLeft: 'auto',
@@ -169,7 +167,7 @@ class ui {
 
 			// Draw routed edges from ELK sections
 			const svg = $(`<svg id='net-edges' style='position:absolute;top:0;left:0;width:${Math.ceil(maxX + 80)}px;height:${Math.ceil(maxY + 80)}px;pointer-events:none;overflow:visible'></svg>`)
-			$net.append(svg)
+			this.stage.append(svg)
 			const svgEl = svg[0]
 
 			// Arrowhead
@@ -204,42 +202,6 @@ class ui {
 				}
 			}
 		})
-	}
-
-	// Original simple overlay retained as a safe fallback
-	static _drawEdgesFallbackStraightLines(dag, $net) {
-		$('#net-edges').remove()
-		let width = $net.innerWidth()
-		let height = $net.innerHeight()
-		if (!width) width = $net[0].scrollWidth || 0
-		if (!height) height = $net[0].scrollHeight || 0
-		let svg = $(`<svg id='net-edges' style='position:absolute;top:0;left:0;width:${width}px;height:${height}px;pointer-events:none;overflow:visible'></svg>`)
-		$net.append(svg)
-		let svgEl = svg[0]
-		if (!svgEl || !dag || !dag.par) return
-		for (let child in dag.par) {
-			let parents = dag.par[child] || []
-			let $child = $('#'+child)
-			if ($child.length === 0) continue
-			let co = $child.position()
-			let cx = co.left + $child.outerWidth()/2
-			let cy = co.top + $child.outerHeight()/2
-			for (let p of parents) {
-				let $p = $('#'+p)
-				if ($p.length === 0) continue
-				let po = $p.position()
-				let px = po.left + $p.outerWidth()/2
-				let py = po.top + $p.outerHeight()/2
-				let line = document.createElementNS('http://www.w3.org/2000/svg','line')
-				line.setAttribute('x1', px)
-				line.setAttribute('y1', py)
-				line.setAttribute('x2', cx)
-				line.setAttribute('y2', cy)
-				line.setAttribute('stroke', '#aaa')
-				line.setAttribute('stroke-width', '1')
-				svgEl.appendChild(line)
-			}
-		}
 	}
 
 }

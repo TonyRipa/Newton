@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	3/19/2026
+	Date:	4/20/2026
 	Data:	A data library
 */
 
@@ -111,7 +111,9 @@ factors(N,[N]) :- number(N) , ! .
 factors(N,[N]) :- atom(N) , ! .
 factors(prod([F]),A) :- factors(F,A) , ! .
 factors(prod(F),F) :- ! .
+factors(sum([F]),A) :- factors(F,A) , ! .
 factors(sum(S),[prod(D1),sum(N3)]) :- maplist(factors,S,N1) , reduce(multi_intersect,N1,D1) , maplist(multi_diff(D1),N1,N2) , bagof(prod(X),member(X,N2),N3) , ! .
+factors(traction(X,Y),[prod(I),traction(X2,Y2)]) :- factors(sum(X),X1),factors(sum(Y),Y1) , multi_intersect(X1,Y1,I) , multi_diff(I,X1,X2) , multi_diff(I,Y1,Y2) , ! .
 
 factor(E,A) :- factors(E,F) , flat(prod(F),A) , ! .
 
