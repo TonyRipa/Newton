@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/15/2025
+	Date:	6/10/2026
 	Plot:	A plotting library
 */
 
@@ -16,6 +16,10 @@ class Plot {
 
 	static fromString(str) {
 		return Plot.fromFrame(Frame.fromString(str))
+	}
+
+	static fromHeadedRows(arr) {
+		return Plot.fromFrame(Frame.fromHeadedRows(arr))
 	}
 
 	static fromFrame(frame) {
@@ -35,7 +39,7 @@ class Plot {
 
 	table2(id) {
 		let results = _.zip(this.x,this.y)
-		set_div(id,help2(results))
+		View.set(id,help2(results))
 		function help2(rows) {	//	Each row's 1st entry is a list of independent variables, and 2nd entry the dependent variable
 			let z = Stats.kv2marginalmatrix(rows)
 			z = Stats.marginalsort(z)
@@ -45,7 +49,7 @@ class Plot {
 
 	table3(id) {
 		let results = _.zip(this.x,this.y)
-		set_div(id,help3(results))
+		View.set(id,help3(results))
 		function help3(rows) {	//	Each row's 1st entry is a list of independent variables, and 2nd entry the dependent variable
 			let {xhead,yhead,zhead,f} = Stats.kv2tensor(rows)
 			return f.map((matrix,i)=>Stats.headmatrix2marginalmatrix({xhead:yhead,yhead:zhead,title:xhead[i]},matrix))

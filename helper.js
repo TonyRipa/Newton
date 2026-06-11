@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	11/02/2024
+	Date:	6/10/2026
 	Helper:	A utility library
 */
 
@@ -9,16 +9,8 @@ let log = console.log
 function last(x) { return x.slice(-1)[0] }
 function show(x) { alert(JSON.stringify(x)) }
 function alerto(x) { alert(JSON.stringify(x)) }
-function nodot(x) { return x?.replace(/\./g,'_') }
 function logo(x) { return log(JSON.stringify(x)) }
-function get_input(id) { return document.getElementById(id).value }
-function putval(id,val) { document.getElementById(id).value = val.replace(/\\n/g,'\n') }
-function set_div(id,val) { if (!Array.isArray(val)) val = [val]; document.getElementById(id).innerHTML = val.join('<br>') }
-function set_output(id,val) { if (!Array.isArray(val)) val = [val]; document.getElementById(id).innerHTML = val.join('<br>') }
-function set_textarea(id,val) { if (!Array.isArray(val)) val = [val]; document.getElementById(id).value = val.join('\n') }
 function colvals(data,colindex) { return [...new Set(math.transpose(data)[colindex])] }
-function id2array(id,sep=',') { return csv2array(id2text(id),sep) }
-function id2text(id) { return document.getElementById(id).value }
 function csv2array(csv,sep=',') {
 	return csv.trim().replace(new RegExp('\n'+sep+'*\n','g'),'\n').split('\n').map(row=>row.split(sep).map(e=>unquoteifposs(e)))
 }
@@ -26,6 +18,18 @@ function csv2dict(csv,sep=',') {
 	let [head,...rows] = csv2array(csv,sep)
 	let cols = math.transpose(rows)
 	return Object.fromEntries(_.unzip([head,cols]))
+}
+function isCSV(str) {
+	if (!str.includes(',')) return false
+	if (!str.includes('\n') && str.includes('|')) return false
+	let rows = str.trim().split('\n')
+	let counts = rows.map(row => (row.match(/,/g)||[]).length)
+	return new Set(counts).size == 1
+}
+function dim(x) {
+	if (x == undefined) return -1
+	if (!Array.isArray(x)) return 0
+ 	return 1 + dim(x[0])
 }
 function unquoteifposs(x) {
 	let ret

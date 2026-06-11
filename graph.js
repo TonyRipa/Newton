@@ -1,11 +1,25 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2/10/2025
+	Date:	6/10/2026
 	Graph:	A graph library
 */
 
 class Graph {
+
+	static prepro(net) {
+		return net.split(';').map(splitEdge).flat().join(';')
+		function splitEdge(edge) {
+			let layers = edge.split('→').map(layer => layer.split(',').map(node => node.trim()))
+			if (layers.length < 2) return [edge]
+			let newEdges = []
+			for (let i = 0; i < layers.length - 1; i++)
+				for (let head of layers[i])
+					for (let tail of layers[i + 1])
+						newEdges.push(head + '→' + tail)
+			return newEdges
+		}
+	}
 
 	static str2dag(str) {
 		let par = {}

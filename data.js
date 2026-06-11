@@ -1,14 +1,14 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	4/20/2026
+	Date:	6/10/2026
 	Data:	A data library
 */
 
 class Data {
 
 	static get(x) {
-		let [prefix,suffix] = x.split('_')
+		let [prefix,suffix] = x.split('.')
 		return Data[suffix]()
 	}
 
@@ -44,15 +44,16 @@ shop(Text) :- if(see, (write('□ '),writeln(Text))) .
 show(Text) :- if(see, (write('. '),writeln(Text))) .
 succ(Text) :- if(see, (write('+ '),writeln(Text))) .
 
-prepro(0,sum([])) :- shop(('1',0)) , ! .
-prepro(1,prod([])) :- shop(('2',1)) , ! .
-prepro(f(X),Ans) :- shop(('3',f(X))) , prepro(X*X, Ans) , ! .
-prepro(A+B,Ans) :- shop(('4',A+B)) , prepro(A,AP) , prepro(B,BP) , getsum(AP,AL) , getsum(BP,BL) , append(AL,BL,LR) , prepro(sum(LR),Ans) , ! .
-prepro(A*B,Ans) :- shop(('5',A*B)) , prepro(A,AP) , prepro(B,BP) , getprod(AP,AL) , getprod(BP,BL) , append(AL,BL,LR) , prepro(prod(LR),Ans) , ! .
-prepro(A-B,Ans) :- shop(('6',A-B)) , prepro(A,AP) , prepro(B,BP) , getsum(AP,AL) , getsum(BP,BL) , prepro(traction(AL,BL),Ans) , ! .
-prepro(A/B,Ans) :- shop(('7',A/B)) , prepro(A,AP) , prepro(B,BP) , getprod(AP,AL) , getprod(BP,BL) , prepro(fraction(AL,BL),Ans) , ! .
-prepro(A@B=C, AP@B=CP) :- shop(('8',A@B)) , prepro(A,AP) , prepro(C,CP) , ! .
-prepro(X,Ans) :- shop(('9',X)) , flat(X,Ans) , ! .
+prepro(0,sum([])) :- shop(('01',0)) , ! .
+prepro(1,prod([])) :- shop(('02',1)) , ! .
+prepro(f(X),Ans) :- shop(('03',f(X))) , prepro(X*X, Ans) , ! .
+prepro(+A,Ans) :- shop(('04',+A)) , prepro(A,Ans) , ! .
+prepro(A+B,Ans) :- shop(('05',A+B)) , prepro(A,AP) , prepro(B,BP) , getsum(AP,AL) , getsum(BP,BL) , append(AL,BL,LR) , prepro(sum(LR),Ans) , ! .
+prepro(A*B,Ans) :- shop(('06',A*B)) , prepro(A,AP) , prepro(B,BP) , getprod(AP,AL) , getprod(BP,BL) , append(AL,BL,LR) , prepro(prod(LR),Ans) , ! .
+prepro(A-B,Ans) :- shop(('07',A-B)) , prepro(A,AP) , prepro(B,BP) , getsum(AP,AL) , getsum(BP,BL) , prepro(traction(AL,BL),Ans) , ! .
+prepro(A/B,Ans) :- shop(('08',A/B)) , prepro(A,AP) , prepro(B,BP) , getprod(AP,AL) , getprod(BP,BL) , prepro(fraction(AL,BL),Ans) , ! .
+prepro(A@B=C, AP@B=CP) :- shop(('09',A@B)) , prepro(A,AP) , prepro(C,CP) , ! .
+prepro(X,Ans) :- shop(('10',X)) , flat(X,Ans) , ! .
 
 flat(prod([H]),Ans) :- flat(H,Ans) , ! .
 flat(sum([H]),Ans) :- flat(H,Ans) , ! .

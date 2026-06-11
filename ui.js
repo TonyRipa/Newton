@@ -1,207 +1,57 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	5/10/2026
+	Date:	6/05/2026
 	UI:	A user interface library
 */
 
-class ui {
+class UI {
 
-	constructor() {
-		this.stage = $('#net')
-		this.init()
-	}
-
-	init() {
-		this.stage.empty()
-		let net = nodot($('#netstr').val())
-		net = ui.prepro(net)
+	static draw(stageid, net) {
+		let stage = $(stageid)
+		LayoutRender.unwatch(stage)
+		stage.empty()
+		net = Graph.prepro(net)
 		let ids = Graph.net2ids(net)
 		let dag = Graph.str2dag(net)
 		let rank = Graph.dag2rank(dag)
 		ids = rank.flat()  // Rebuild ids from flattened rank to match fs order
-		let fs = this.makess(dag,rank)
+		let fs = makes()
 		for (let i = ids.length-1 ; i >= 0 ; i--) {
 			let id = ids[i]
 			let numpars = dag.par[id]?.length
 			let row = rank.filter(r=>r.includes(id))[0]
 			if (numpars > 0)
-				ui.makego(id,fs.slice(i-ids.length),numpars,row)
+				makego(id,fs.slice(i-ids.length),numpars,row)
 		}
-		this.drawEdges(dag)
-	}
-
-	static prepro(net) {
-		let edges = net.split(';')
-		edges = edges.map(splitedge)
-		return edges.join(';')
-		function splitedge(edge) {
-			if (!edge.includes(',')) return edge
-			let [heads,tail] = edge.split('→')
-			let newedges = []
-			for (let head of heads.split(','))
-				newedges.push(head + '→' + tail)
-			return newedges.join(';')
-		}
-	}
-
-	makess(dag,rank) {
-		let fs = []
-		let tempids = []
-		for (let row of rank) {
-			for (let col of row) {
-				if (!tempids.includes(col)) {
-					tempids.push(col)
-					fs.push(this.make(dag,col))
+		LayoutRender.draw(stage, dag).then(() => LayoutRender.watch(stage, dag))
+		function makes() {
+			let fs = []
+			let tempids = []
+			for (let row of rank) {
+				for (let col of row) {
+					if (!tempids.includes(col)) {
+						tempids.push(col)
+						fs.push(make(col))
+					}
 				}
 			}
-		}
-		return fs
-	}
-
-	make(dag,id) {
-		let view = new View(dag,id)
-		// wrap container for layout; we tag it with data-node so ELK can place it later
-		let $cont = $(`<span class='cont' data-node='${id}' style='display:inline-block;margin:10px;vertical-align:top'></span>`)
-		this.stage.append($cont)
-		$cont.append(view.html)
-		return view.f
-	}
-
-	static makego(id0,fs,numpars,row) {
-		id0 = id0?.split(',').slice(-1)[0]
-		let id = math.randomInt(1,9999)
-		let arrows = ['','↓','↘ ↙'][numpars]
-		$(`<button id='${id}' title='${arrows}\n${id0}'>${arrows}</button><br>`).insertBefore('#'+id0)
-		$('#'+id).on('click',()=>{fs.map(f=>f())})
-	}
-
-	// ===== ELK INTEGRATION =====
-
-	drawEdges(dag) {
-		if (this.stage.length === 0) return
-
-		// Ensure positioned container for absolute children + overlay
-		if (this.stage.css('position') === 'static') this.stage.css('position','relative')
-
-		// Remove any old overlay
-		$('#net-edges').remove()
-
-		// Build nodes from the current DOM (.cont[data-node])
-		const $nodes = this.stage.find('.cont[data-node]')
-		if ($nodes.length === 0 || !dag || !dag.par) return
-
-		// If ELK is available, use it; otherwise try to load it. If that fails, fall back.
-		const run = () => this._elkLayoutAndRender(dag, $nodes).catch(err => {
-			console.warn('ELK layout failed, falling back to straight lines.', err)
-			ui._drawEdgesFallbackStraightLines(dag, $net)
-		})
-		if (window.ELK) { run(); }
-	}
-
-	_elkLayoutAndRender(dag, $nodes) {
-		// Measure current node sizes (use wrapper sizes so layout has real geometry)
-		const children = []
-		const id2size = {}
-		$nodes.each(function(){
-			const $c = $(this)
-			const id = $c.attr('data-node')
-			// force layout measurement as block; then ELK will position absolutely
-			const w = Math.max(10, Math.ceil($c.outerWidth()))
-			const h = Math.max(10, Math.ceil($c.outerHeight()))
-			id2size[id] = { w, h }
-			children.push({ id, width: w, height: h })
-		})
-
-		// Build edges from dag.par
-		const edges = []
-		for (let child in dag.par) {
-			const parents = dag.par[child] || []
-			for (let p of parents) {
-				edges.push({ id: 'e_' + p + '_' + child, sources: [p], targets: [child] })
+			return fs
+			function make(id) {
+				let view = new View(dag,id)
+				let $cont = LayoutRender.node(id)
+				stage.append($cont)
+				$cont.append(view.html)
+				return view.f
 			}
 		}
-
-		const graph = {
-			id: 'root',
-			layoutOptions: {
-				// Layered top-down with nice routed edges
-				'elk.algorithm': 'layered',
-				'elk.direction': 'DOWN',
-				'elk.spacing.nodeNode': '24',
-				'elk.layered.spacing.nodeNodeBetweenLayers': '40',
-				'elk.spacing.edgeEdge': '16',
-				'elk.spacing.edgeNode': '16',
-				'elk.edgeRouting': 'POLYLINE',
-				'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
-				'elk.layered.wrapping.strategy': 'SINGLE_EDGE',
-				'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES'
-			},
-			children,
-			edges
+		function makego(id0,fs,numpars,row) {
+			id0 = id0?.split(',').slice(-1)[0]
+			let id = math.randomInt(1,9999)
+			let arrows = ['','↓','↘ ↙'][numpars]
+			$(`<button id='${id}' title='${arrows}\n${id0}'>${arrows}</button><br>`).insertBefore('#'+id0)
+			$('#'+id).on('click',()=>{fs.map(f=>f())})
 		}
-
-		const elk = new window.ELK()
-		return elk.layout(graph).then(layout => {
-			// Position nodes absolutely per ELK
-			let maxX = 0, maxY = 0
-			for (const n of (layout.children || [])) {
-				const $cont = $nodes.filter(`[data-node="${n.id}"]`)
-				// Convert to absolute positioning; remove margins to avoid offset drift
-				$cont.css({ position: 'absolute', left: n.x + 'px', top: n.y + 'px', margin: 0 })
-				maxX = Math.max(maxX, n.x + (n.width || id2size[n.id]?.w || 0))
-				maxY = Math.max(maxY, n.y + (n.height || id2size[n.id]?.h || 0))
-			}
-
-			// Size #net to the layout bounding box so margin:auto can actually center it
-			const layoutW = Math.ceil(maxX + 40)
-			const layoutH = Math.ceil(maxY + 40)
-
-			// Make #net a centered "shrink-to-layout" box
-			this.stage.css({
-			  width: layoutW + 'px',
-			  minHeight: layoutH + 'px',
-			  marginLeft: 'auto',
-			  marginRight: 'auto'
-			})
-
-			// Draw routed edges from ELK sections
-			const svg = $(`<svg id='net-edges' style='position:absolute;top:0;left:0;width:${Math.ceil(maxX + 80)}px;height:${Math.ceil(maxY + 80)}px;pointer-events:none;overflow:visible'></svg>`)
-			this.stage.append(svg)
-			const svgEl = svg[0]
-
-			// Arrowhead
-			const defs = document.createElementNS('http://www.w3.org/2000/svg','defs')
-			const marker = document.createElementNS('http://www.w3.org/2000/svg','marker')
-			marker.setAttribute('id','arrow')
-			marker.setAttribute('markerWidth','10')
-			marker.setAttribute('markerHeight','7')
-			marker.setAttribute('refX','10')
-			marker.setAttribute('refY','3.5')
-			marker.setAttribute('orient','auto')
-			const tip = document.createElementNS('http://www.w3.org/2000/svg','polygon')
-			tip.setAttribute('points','0 0, 10 3.5, 0 7')
-			tip.setAttribute('fill','#8a8a8a')
-			marker.appendChild(tip)
-			defs.appendChild(marker)
-			svgEl.appendChild(defs)
-
-			for (const e of (layout.edges || [])) {
-				for (const sec of (e.sections || [])) {
-					const pts = [sec.startPoint].concat(sec.bendPoints || [], [sec.endPoint])
-					if (!pts.length) continue
-					let d = `M ${pts[0].x} ${pts[0].y}`
-					for (let i = 1; i < pts.length; i++) d += ` L ${pts[i].x} ${pts[i].y}`
-					const path = document.createElementNS('http://www.w3.org/2000/svg','path')
-					path.setAttribute('d', d)
-					path.setAttribute('fill','none')
-					path.setAttribute('stroke','#8a8a8a')
-					path.setAttribute('stroke-width','1.5')
-					path.setAttribute('marker-end','url(#arrow)')
-					svgEl.appendChild(path)
-				}
-			}
-		})
 	}
 
 }

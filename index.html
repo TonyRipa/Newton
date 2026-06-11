@@ -1,7 +1,7 @@
 
 <!--
 	Author: Anthony John Ripa
-	Date:	5/7/2026
+	Date:	6/10/2026
 	Demo for Newton: An A.I. for Math
 -->
 
@@ -40,14 +40,15 @@
 		<script src="https://unpkg.com/elkjs@0.9.3/lib/elk.bundled.js"></script>
 		<script src="view.js"></script>
 		<script src="ui.js"></script>
+		<script src="layoutrender.js"></script>
 	</head>
 	<body>
 		<center>
 			<h1>Newton</h1>
 			<select onchange='$("#netstr").val($(this).val())'>
 				<optgroup label='Algebra'>
-					<option>datas.expr→input→template→laplace→invlaplace;template→var→invlaplace</option>
 					<option>datas.expr→input→template→laplace→invlaplace;template→var→invlaplace→substitution;input→substitute→substitution</option>
+					<option>datas.expr→input→template→laplace→invlaplace;template→var→invlaplace</option>
 					<option>datas.expr→input→sample→regress;sample→plot1</option>
 					<option>datas.expr→input→iegf→egf</option>
 					<option>datas.expr→input→trigpoly→polytrig</option>
@@ -96,11 +97,11 @@
 					<option>data.odds→oddschain2oddstable</option>
 				</optgroup>
 			</select>
-			<input id='netstr' value='datas.expr→input→template→laplace→invlaplace;template→var→invlaplace' size=65>
-			<button onclick='new ui()'>Make Net</button><br>
+			<input id='netstr' value='datas.expr→input→template→laplace→invlaplace;template→var→invlaplace→substitution;input→substitute→substitution' size=70>
+			<button onclick="UI.draw('#stage',$('#netstr').val())">Make Net</button><br>
 			<br>
 			<hr>
-			<div id='net'></div>
+			<div id='stage' style='position:relative;'>
 		</center>
 	</body>
 </html>

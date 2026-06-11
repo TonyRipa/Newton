@@ -1,20 +1,20 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	8/20/2025
+	Date:	6/10/2026
 	Prolog:	A prolog library
 */
 
 class prolog {
 
-	static do(queryid, programid, answerid) {
+	static do(query, program, answerid) {
 		let s = pl.create();
-		let program = get_input(programid).split('\n')
+		program = program.split('\n')
 					.map(x=>(x.includes('dynamic')&&!x.includes('('))?x.slice(0,x.indexOf('c')+1)+'('+x.slice(x.indexOf('c')+2,-1)+').':x)
 					.join('\n')
 		s.consult(prolog.lib() + program)
-		s.query(get_input(queryid));
-		s.answer({success:x=>set_textarea(answerid,s.format_answer(x))})
+		s.query(query);
+		s.answer({success:x=>View.set(answerid,s.format_answer(x))})
 	}
 
 	static lib() {

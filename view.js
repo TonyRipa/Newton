@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	3/15/2026
+	Date:	6/10/2026
 	View:	A view library
 */
 
@@ -16,8 +16,8 @@ class View {
 	}
 
 	init() {
-		if (this.me.startsWith('datas_')) this.select(Data.get(this.me))
-		if (this.me.startsWith('data_')) this.inputbig(Data.get(this.me))
+		if (this.me.startsWith('datas.')) this.select(Data.get(this.me))
+		if (this.me.startsWith('data.')) this.inputbig(Data.get(this.me))
 		switch(this.me) {
 			case 'input':
 			case 'input2': this.input() ; break
@@ -59,12 +59,28 @@ class View {
 	}
 
 	static get(id) {
-		return $('#'+id).val()
+		let ret = $('#'+CSS.escape(id)).val()
+		if (isCSV(ret)) ret = csv2array(ret)
+		return ret
+	}
+
+	static set(id, val) {
+		let me = $('#'+CSS.escape(id))
+		let setter = (me[0].tagName=='DIV') ? 'html' : 'val'
+		val = fixval(val)
+		me[setter](val)
+		function fixval(val) {
+			let d = dim(val)
+			if (d == -1) return undefined
+			if (d ==  0) return val.toString().replace(/\\n/g,'\n')
+			if (d ==  1) return val
+			if (d ==  2) return val.join('\n')
+		}				
 	}
 
 	inputbig(data) {
 		this.html = `<textarea id='${this.me}' cols='180' rows='7'>${data}</textarea>`
-		this.f = ()=>{if (this.par) putval(this.me,View.get(this.par))}
+		this.f = ()=>{if (this.par) View.set(this.me,View.get(this.par))}
 	}
 
 	select(data) {
@@ -78,30 +94,30 @@ class View {
 
 	input(data='') {
 		this.html = `<input id='${this.me}' value='${data}' placeholder='${this.me}'>`
-		this.f = ()=>{if (this.par) $('#'+this.me).val(View.get(this.par))}
+		this.f = ()=>{if (this.par) View.set(this.me,View.get(this.par))}
 	}
 
 	filter() {
 		this.html = `<textarea id='${this.me}' cols='50' rows='7' placeholder='${this.me}'></textarea>`
-		this.f = ()=>set_textarea(this.me,Stats.p(View.get(this.par[0]),id2array(this.par[1])))
+		this.f = ()=>View.set(this.me,Stats.p(View.get(this.par[0]),View.get(this.par[1])))
 	}
 
 	prolog() {
 		this.html = `<textarea id='${this.me}' cols='50' rows='7' placeholder='${this.me}'></textarea>`
-		this.f = () => {prolog.do(this.par[0],this.par[1],this.me)}
+		this.f = () => {prolog.do(View.get(this.par[0]),View.get(this.par[1]),this.me)}
 	}
 
 	where() {
 		this.html = `<textarea id='${this.me}' cols='150' rows='7' placeholder='${this.me}'></textarea>`
-		this.f = ()=>set_textarea(this.me,Frame.fromstr(View.get(this.par[1])).where(View.get(this.par[0])))
+		this.f = ()=>View.set(this.me,Frame.fromHeadedRows(View.get(this.par[1])).where(View.get(this.par[0])))
 	}
 
 	oddschain2oddstable() {
 		this.html = `<textarea id='${this.me}' cols='50' rows='10' placeholder='${this.me}'></textarea>`
 		this.f = ()=>{
-			let r = id2array(this.par,',')[0]
+			let r = View.get(this.par)[0]
 			let ret = Stats.oddschain2oddstable(r)
-			set_textarea(this.me,ret)
+			View.set(this.me,ret)
 		}
 	}
 
@@ -109,7 +125,7 @@ class View {
 		this.html = `<textarea id='${this.me}' cols='30' rows='10' placeholder='${this.me}'></textarea>`
 		this.f = ()=>{
 			let ret = ''
-			let p = id2array(this.par,',')[0]
+			let p = View.get(this.par)[0]
 			for (let i = 0 ; i < p.length ; i++) {
 				for (let j = 0 ; j < p.length ; j++) {
 					let odds = p[i] / p[j]
@@ -121,14 +137,14 @@ class View {
 				}
 				if (i<p.length-1) ret += '\n'
 			}
-			set_textarea(this.me,ret)
+			View.set(this.me,ret)
 		}
 	}
 
 	plot() {
 		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
 		this.f = () => {
-			let frame = Frame.fromString(View.get(this.par))
+			let frame = Frame.fromHeadedRows(View.get(this.par))
 			$('#'+this.me).empty()
 			$('#'+this.me).removeAttr('style')
 			if (frame.numcols()==2) Plot.fromFrame(frame).plot1 (this.me)
@@ -152,7 +168,7 @@ class View {
 	plots() {
 		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
 		this.f = () => {
-			let frame = Frame.fromString(View.get(this.par))
+			let frame = Frame.fromHeadedRows(View.get(this.par))
 			let frame1 = frame.copy().removecol(1)
 			let frame2 = frame.copy().removecol(0)
 			if (frame.numcols() >= 3) {
@@ -168,7 +184,7 @@ class View {
 	plot1() {
 		this.html = `<span id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</span>`
 		this.f = () => {
-			let frame = Frame.fromString(View.get(this.par))
+			let frame = Frame.fromHeadedRows(View.get(this.par))
 			$('#'+this.me).empty()
 			$('#'+this.me).removeAttr('style')
 			$('#'+this.me).append(`<table><tr><td id='${this.me}2' width='400px'></td></tr></table>`)
@@ -179,7 +195,7 @@ class View {
 	plot2() {
 		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
 		this.f = () => {
-			let frame = Frame.fromString(View.get(this.par))
+			let frame = Frame.fromHeadedRows(View.get(this.par))
 			let frame1 = frame.copy().removecol(1)
 			let frame2 = frame.copy().removecol(0)
 			if (frame.numcols() >= 3) {
@@ -196,7 +212,7 @@ class View {
 	plot23() {
 		this.html = `<div id='${this.me}' style='border:thin solid black;width:100px;height:50px;color:#999'>${this.me}</div>`
 		this.f = () => {
-			let frame = Frame.fromString(View.get(this.par))
+			let frame = Frame.fromHeadedRows(View.get(this.par))
 			let frame1 = frame.copy().removecol(1)
 			let frame2 = frame.copy().removecol(0)
 			if (frame.numcols() >= 3) {
@@ -216,7 +232,7 @@ class View {
 			$('#'+this.me).empty()
 			$('#'+this.me).removeAttr('style')
 			$('#'+this.me).append(`<table><tr><td id='${this.me}2' width='500px'></td></tr></table>`)
-			Plot.fromString(View.get(this.par)).plot2layer(this.me+2)
+			Plot.fromHeadedRows(View.get(this.par)).plot2layer(this.me+2)
 		}
 	}
 
@@ -224,17 +240,17 @@ class View {
 		this.html = `<textarea id='${this.me}' cols='50' rows='7' placeholder='${this.me}'></textarea>`
 		this.f = ()=>{
 			let csv = View.get(this.par)
-			let model = new Model(Frame.fromString(csv))
+			let model = new Model(Frame.fromHeadedRows(csv))
 			let middle = model.get_control_name()
 			let ends = model.get_noncontrol_names()
 			let graph = ends[0] + '-' + middle + '-' + ends[1]
-			set_textarea(this.me,graph)
+			View.set(this.me,graph)
 		}
 	}
 
 	func(f) {
 		this.html = `<textarea id='${this.me}' placeholder='${this.me}' cols='30'></textarea>`
-		this.f = ()=>$('#'+this.me).val(f(...this.par.map(p=>View.get(p))))
+		this.f = ()=>View.set(this.me,f(...this.par.map(p=>View.get(p))))
 	}
 
 }

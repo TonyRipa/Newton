@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	12/10/2024
+	Date:	6/10/2026
 	Stats:	A data-frame library
 */
 
@@ -20,6 +20,12 @@ class Frame {
 		let keys = str.split('\n')[0].split(',')
 		let dict = csv2dict(str)
 		return new Frame(dict,keys)
+	}
+
+	static fromHeadedRows(headedRows) {
+		let [head,...rows] = headedRows
+		let dict = this.dict = Frame.headCols2dict(head,math.transpose(rows))
+		return new Frame(dict,head)
 	}
 
 	static fromString(str) { return Frame.str2frame(str) }
