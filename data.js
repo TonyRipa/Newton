@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/10/2026
+	Date:	6/16/2026
 	Data:	A data library
 */
 
@@ -48,12 +48,13 @@ prepro(0,sum([])) :- shop(('01',0)) , ! .
 prepro(1,prod([])) :- shop(('02',1)) , ! .
 prepro(f(X),Ans) :- shop(('03',f(X))) , prepro(X*X, Ans) , ! .
 prepro(+A,Ans) :- shop(('04',+A)) , prepro(A,Ans) , ! .
-prepro(A+B,Ans) :- shop(('05',A+B)) , prepro(A,AP) , prepro(B,BP) , getsum(AP,AL) , getsum(BP,BL) , append(AL,BL,LR) , prepro(sum(LR),Ans) , ! .
-prepro(A*B,Ans) :- shop(('06',A*B)) , prepro(A,AP) , prepro(B,BP) , getprod(AP,AL) , getprod(BP,BL) , append(AL,BL,LR) , prepro(prod(LR),Ans) , ! .
-prepro(A-B,Ans) :- shop(('07',A-B)) , prepro(A,AP) , prepro(B,BP) , getsum(AP,AL) , getsum(BP,BL) , prepro(traction(AL,BL),Ans) , ! .
-prepro(A/B,Ans) :- shop(('08',A/B)) , prepro(A,AP) , prepro(B,BP) , getprod(AP,AL) , getprod(BP,BL) , prepro(fraction(AL,BL),Ans) , ! .
-prepro(A@B=C, AP@B=CP) :- shop(('09',A@B)) , prepro(A,AP) , prepro(C,CP) , ! .
-prepro(X,Ans) :- shop(('10',X)) , flat(X,Ans) , ! .
+prepro(-A,Ans) :- shop(('05',-A)) , prepro(A,AP) , getsum(AP,AL) , prepro(traction([],AL),Ans) , ! .
+prepro(A+B,Ans) :- shop(('06',A+B)) , prepro(A,AP) , prepro(B,BP) , getsum(AP,AL) , getsum(BP,BL) , append(AL,BL,LR) , prepro(sum(LR),Ans) , ! .
+prepro(A*B,Ans) :- shop(('07',A*B)) , prepro(A,AP) , prepro(B,BP) , getprod(AP,AL) , getprod(BP,BL) , append(AL,BL,LR) , prepro(prod(LR),Ans) , ! .
+prepro(A-B,Ans) :- shop(('08',A-B)) , prepro(A,AP) , prepro(B,BP) , getsum(AP,AL) , getsum(BP,BL) , prepro(traction(AL,BL),Ans) , ! .
+prepro(A/B,Ans) :- shop(('09',A/B)) , prepro(A,AP) , prepro(B,BP) , getprod(AP,AL) , getprod(BP,BL) , prepro(fraction(AL,BL),Ans) , ! .
+prepro(A@B=C, AP@B=CP) :- shop(('10',A@B)) , prepro(A,AP) , prepro(C,CP) , ! .
+prepro(X,Ans) :- shop(('11',X)) , flat(X,Ans) , ! .
 
 flat(prod([H]),Ans) :- flat(H,Ans) , ! .
 flat(sum([H]),Ans) :- flat(H,Ans) , ! .
@@ -142,11 +143,13 @@ postpro(sum(L),AP+BP) :- shop(('03',sum(L))) , append(L1,[E],L) , postpro(sum(L1
 postpro(prod([]),1) :- shop(('04',prod([]))) , ! .
 postpro(prod([A]),AP) :- shop(('05',prod([A]))) , postpro(A,AP) , ! .
 postpro(prod(L),AP*BP) :- shop(('06',prod(L))) , append(L1,[E],L) , postpro(prod(L1),AP) , postpro(E,BP) , ! .
-postpro(A-B,AP-BP) :- shop(('07',A-B)) , postpro(A,AP) , postpro(B,BP) , ! .
-postpro(A/B,AP/BP) :- shop(('08',A/B)) , postpro(A,AP) , postpro(B,BP) , ! .
-postpro(fraction(A,B),AP/BP) :- shop(('09',A/B)) , postpro(prod(A),AP) , postpro(prod(B),BP) , ! .
-postpro(traction(A,B),AP-BP) :- shop(('10',A-B)) , postpro(sum(A),AP) , postpro(sum(B),BP) , ! .
-postpro(X,X) :- shop(('11',X)) , ! .
+postpro(-A,Ans) :- shop(('07',-A)) , postpro(A,AP) , number(AP) , is(Ans,-AP) , ! .
+postpro(A-B,Ans) :- shop(('08',A-B)) , postpro(A,0) , postpro(B,BP) , postpro(-BP,Ans) , ! .
+postpro(A-B,AP-BP) :- shop(('09',A-B)) , postpro(A,AP) , postpro(B,BP) , ! .
+postpro(A/B,AP/BP) :- shop(('10',A/B)) , postpro(A,AP) , postpro(B,BP) , ! .
+postpro(fraction(A,B),AP/BP) :- shop(('11',A/B)) , postpro(prod(A),AP) , postpro(prod(B),BP) , ! .
+postpro(traction(A,B),AP-BP) :- shop(('12',A-B)) , postpro(sum(A),AP) , postpro(sum(B),BP) , ! .
+postpro(X,X) :- shop(('12',X)) , ! .
 
 <----(Answer,X) :- if(not(see),assert(see)) , show("PreProcessing") , prepro(X,Answer) .	%	PreProcess
 <---(Answer,X) :- <----(P,X) , show("Simplifying") , go(P,Answer) .							%	Simplify
