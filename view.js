@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/10/2026
+	Date:	7/15/2026
 	View:	A view library
 */
 
@@ -16,12 +16,14 @@ class View {
 	}
 
 	init() {
-		if (this.me.startsWith('datas.')) this.select(Data.get(this.me))
-		if (this.me.startsWith('data.')) this.inputbig(Data.get(this.me))
+		if (this.me.startsWith('objectdatas.')) return this.objectselect(Data.get(this.me))
+		if (this.me.startsWith('datas.')) return this.select(Data.get(this.me))
+		if (this.me.startsWith('data.')) return this.inputbig(Data.get(this.me))
 		switch(this.me) {
 			case 'input':
 			case 'input2': this.input() ; break
 			case 'inputbig': this.inputbig() ; break
+			case 'objectinput': this.objectinput() ; break
 			case 'filter': this.filter() ; break
 			case 'where': this.where() ; break
 			case 'plot': this.plot() ; break
@@ -64,7 +66,9 @@ class View {
 
 	static get(id) {
 		if (Array.isArray(id)) return id.map(x => View.get(x))
-		let ret = View.el(id).val().replace(/\\n/g,'\n')
+		let me = View.el(id)
+		if (me.is('form.object')) return Object.fromEntries(new FormData(me[0]))
+		let ret = me.val().replace(/\\n/g,'\n')
 		if (isCSV(ret)) ret = csv2array(ret)
 		return ret
 	}
@@ -75,12 +79,13 @@ class View {
 		val = fixval(val)
 		me[setter](val)
 		function fixval(val) {
+			if (math.typeOf(val) === 'Object') return JSON.stringify(val,null,2)
 			let d = dim(val)
 			if (d == -1) return undefined
 			if (d ==  0) return val.toString()
 			if (d ==  1) return val
 			if (d ==  2) return val.join('\n')
-		}				
+		}
 	}
 
 	in(i = 0) {
@@ -97,12 +102,15 @@ class View {
 	}
 
 	select(data) {
-		if (Array.isArray(data))
-			data = data.map(d=>'<option>'+d+'</option>').join('')
-		else
-			data = Object.keys(data).map(key=>`<optgroup label='${key}'>`+data[key].map(d=>'<option>'+d+'</option>').join('')+'</optgroup>').join('')
-		this.html = `<select style='max-width:1400px' id='${this.me}'>${data}</select>`
+		this.html = `<select style='max-width:1400px' id='${this.me}'>${View.options(data)}</select>`
 		this.f = ()=>{}
+	}
+
+	static options(data) {
+		if (Array.isArray(data))
+			return data.map(d=>'<option>'+d+'</option>').join('')
+		else
+			return Object.keys(data).map(key=>`<optgroup label='${key}'>`+data[key].map(d=>'<option>'+d+'</option>').join('')+'</optgroup>').join('')
 	}
 
 	input(data='') {
@@ -123,6 +131,58 @@ class View {
 	where() {
 		this.html = `<textarea id='${this.me}' cols='150' rows='7' placeholder='${this.me}'></textarea>`
 		this.f = ()=>View.set(this.me,Frame.fromHeadedRows(this.in(1)).where(this.in()))
+	}
+
+	objectinput() {
+		this.html = `
+			<form id='${this.me}' class='object' onsubmit='return false' style='outline: thin solid black'>
+				<table></table>
+			</form>`
+		this.f = () => {
+			let old = View.get(this.me)
+			let keys = this.in().flat()
+			let table = View.el(this.me).find('table').empty()
+
+			for (let key of keys) {
+				let input = $('<input>')
+					.attr('name',key)
+					.val(old[key] ?? '')
+
+				let row = $('<tr>').append(
+					$('<td>').text(key),
+					$('<td>').append(input)
+				)
+
+				table.append(row)
+			}
+		}
+	}
+
+	objectselect(data) {
+		this.html = `
+			<form id='${this.me}' class='object' onsubmit='return false' style='outline: thin solid black'>
+				<table></table>
+			</form>`
+		this.f = () => {
+			let old = View.get(this.me)
+			let keys = Array.isArray(this.in()) ? this.in().flat() : this.in()
+			let options = View.options(data)
+			let table = View.el(this.me).find('table').empty()
+
+			for (let key of keys) {
+				let select = $('<select>')
+					.attr('name',key)
+					.html(options)
+					.val(old[key] ?? '')
+
+				let row = $('<tr>').append(
+					$('<td>').text(key),
+					$('<td>').append(select)
+				)
+
+				table.append(row)
+			}
+		}
 	}
 
 	oddschain2oddstable() {

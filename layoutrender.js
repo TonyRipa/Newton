@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/05/2026
+	Date:	7/20/2026
 	LayoutRender:	A Layout & Render class
 */
 
@@ -80,7 +80,7 @@ class LayoutRender {
 				'elk.spacing.edgeNode': '16',
 				'elk.edgeRouting': 'POLYLINE',
 				'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
-				'elk.layered.wrapping.strategy': 'SINGLE_EDGE',
+				'elk.layered.wrapping.strategy': 'NONE',
 				'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES'
 			},
 			children,

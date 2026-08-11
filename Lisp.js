@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2025.11.15
+	Date:	2026.07.15
 	Lisp:	A Constraint Solver
 */
 
@@ -74,12 +74,12 @@ class Lisp {
 
 	static maketable(type) {			//	+2025.5
 		if (type === undefined || type === '') type = 'Any'	//	+2025.3
+		//if (type === undefined || type === '') type = 'Any'	//	+2025.3	//	-2026.7
+		if (math.typeOf(type) === 'Object') return x => type[x]	?? (x==x.toUpperCase() ? 'Any' : 'Indeterminate')	//	+2026.7
 		return x => x==x.toUpperCase() ? type : 'Indeterminate'
 	}
 
 	static solvelisp(lisp, symboltable = Lisp.maketable()) {	//	~2025.5
-	//static solvelisp(lisp, mytype) {							//	~2025.5
-	//	let symboltable = Lisp.maketable(mytype)				//	~2025.5
 		console.log(lisp,symboltable)
 		if (type(lisp) != 'OperatorNode') return lisp
 		if (op(lisp) != '=') return math.simplify(Lisp.toinfix(lisp)).toString()

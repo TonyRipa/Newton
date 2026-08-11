@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/05/2026
+	Date:	7/14/2026
 	UI:	A user interface library
 */
 
@@ -49,7 +49,7 @@ class UI {
 			id0 = id0?.split(',').slice(-1)[0]
 			let id = math.randomInt(1,9999)
 			let arrows = ['','↓','↘ ↙'][numpars]
-			$(`<button id='${id}' title='${arrows}\n${id0}'>${arrows}</button><br>`).insertBefore('#'+id0)
+			$(`<button id='${id}' title='${arrows}\n${id0}'>${arrows}</button><br>`).insertBefore('#'+CSS.escape(id0))
 			$('#'+id).on('click',()=>{fs.map(f=>f())})
 		}
 	}
