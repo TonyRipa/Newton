@@ -3,7 +3,7 @@
 
 Author : Anthony John Ripa
 
-Date : 2026.09.10
+Date : 2026.10.10
 
 Live Demo at <a target='_blank' href='http://tonyripa.github.io/Newton/'>http://tonyripa.github.io/Newton/</a>
 
@@ -70,15 +70,72 @@ Alternatively, we can say Laplace[1/(1-t)] exists and is -e^s\*Ei(-s), where Ei 
 
 One of the inconveniences of Laplace transforms is dealing with partial fractions. With the appropriate data-structure this is entirely avoided. We simply store everything as a partial fraction and all manipulations remain in partial fraction form.
 
-## Commentary - Backtracking
+## Commentary
+
+### Continuity - Lim & Con
+
+Another way to look at the problem is via introducing an operator that is in some sense dual to the limit operator: a continuity operator. For the limit operator, we write $\lim_{x\to c}f(x)$ . Similarly, for the continuity operator, we write $\mathrm{con}_{x\to c}f(x)$ . As they are dual, they are inter-definable. We may define:
+
+$$
+\mathrm{con}_{x\to c}f(x)=\begin{cases}
+f(x) & \text{if } x \neq c, \\
+\lim_{x \to c} f(x) & \text{if } x = c
+\end{cases}
+$$
+
+and/or
+
+$$
+\lim_{x\to c}f(x) = \left. \left( \mathrm{con}_{x\to c}f(x) \right) \right|_{x=c}
+$$
+
+Alternatively, we may define both via $\epsilon - \delta$ , or via open or closed sets, etc. . In that case, we may consider the above two relations to be theorems: perhaps the fundamental theorem(s) of limits and/or continuity.
+
+With this in mind we may see that limits really always come in two different kinds, which require 2 different approaches to solve them. We write:
+
+$$
+\lim_{x\to c}f(x) = \left. \left( \mathrm{con}_{x\to c}f(x) \right) \right|_{x=c}
+$$
+
+and the first thing we always have to do is simplfy what is in the parentheses first (i.e. the con). When we simplify the con, there are exactly 2 different things that can happen. Firstly, it may be that the $\mathrm{con}_{x\to c}f(x) = f(x)$ , in which case we effectively merely erase the con operator, and are left with $\lim_{x\to c}f(x) = f(x)|_{x=c}$ .  We see that in the case that $\mathrm{con}_{x\to c}f(x) = f(x)$ (i.e. f is continuous) then finding the limit reduces to evaluation . Secondly, finding lim in the case when $\mathrm{con}_{x\to c}f(x) \neq f(x)$ requires removing the discontinuity. We typically replace the discontinuous $f(x)$ with a continuous $g(x)$ so that:
+
+$$
+f(x)=\begin{cases}
+g(x) & \text{if } x \neq c
+\end{cases}
+$$
+
+Then $\lim_{x\to c}f(x) = g(x)|_{x=c}$ .
+
+An example of the first case is $\lim_{x\to 0}x^2 = x^2|_{x=0}=0$ .
+
+An example of the second case is $\lim_{x\to 0}\frac{x}{x} = \lim_{x\to 0}1,x\neq0 = \lim_{x\to 0}1 = 1$ .
+
+This lim/con construction can be considered an alternate explanation of indeterminates. In some sense, indeterminates are doing the con step of $\lim_{x\to c}f(x) = \left. \left( \mathrm{con}_{x\to c}f(x) \right) \right|_{x=c}$ .  So, that limits may always be taken simply by evaluating.
+
+#### Carathéodory
+
+As something of an after-thought, the con operator also allows for a somewhat more succinct version of Carathéodory's definition of derivative.
+
+Recall Carathéodory's definition:
+
+$$
+f'(c)=q(c) \text{ where } q(x) \text{ is the function, continuous at } c, \text{ satisfying } f(x)-f(c)=(x-c)q(x)
+$$
+
+With the con operator, it can be stated succinctly:
+
+$$f'(c)=\left. \left( \mathrm{con}_{x\to c}Q(x) \right) \right|_{x=c} \iff f(x)-f(c)=(x-c)\mathrm{con}_{x\to c}Q(x)$$
+
+### Backtracking
 
 Backtracking comes up often in computer science. In search, you may search a tree, down a specific branch without solution. Then you would backtrack, and proceed down a different branch. Different languages have different support for backtracking. Prolog has native support for backtracking. Many languages allow throwing an error, exception, or any throwable, which can be seen as a kind of backtracking. In C and C++, the address operator (or pointers in general) can be seen as a kind of backtracking. `Newton` may be thought of as exploiting the benefits of backtracking.
 
-### Generating Process
+#### Generating Process
 
 In statistics, situations may arise where there is ambiguity that may be removed, by relying on the process that generated the data. Borel's paradox may be thought of as an example of this. Returning to the generating process may be thought of as a kind of backtracking. When the generating process is not explicitly available, it may be implicitly available via probabilistically inferring the generating process. `Newton` may be thought of as exploiting the benefits of probabilistic backtracking. `Newton` receives an input expression, processes it down to points, then tries to probabilistically backtrack to the expression (generating process). The inference implicitly uses Occam's Razor, so if available a simpler equivalent generating process (expression) results. This can also be thought of as a compressed version of the generating process, or denoised like an auto-encoder. `Newton` is also like active learning, because the generating process (expression) is always available to sample as many points as needed. Unlike limits, which recognize the generating process (expression) [best 0th order approximation] of an infinitesimally local region, `Newton` recognizes the global generating process (expression). The difference between guessing a missing pixel from its 4 neighbors, or the whole image. More like guessing all infinitely many points, from finitely many. Though models are typically blemish-free, `Newton` could restore blemishes to well-known models, where limits would fail.
 
-### Numerical Stability
+#### Numerical Stability
 
 Backtracking arises in numerical stability. If an approach turns out to be numerically unstable, you may backtrack, and apply a more stable approach.
 

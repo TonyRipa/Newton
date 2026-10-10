@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	7/14/2026
+	Date:	9/15/2026
 	UI:	A user interface library
 */
 
@@ -9,7 +9,7 @@ class UI {
 
 	static draw(stageid, net) {
 		let stage = $(stageid)
-		LayoutRender.unwatch(stage)
+		Render.unwatch(stage)
 		stage.empty()
 		net = Graph.prepro(net)
 		let ids = Graph.net2ids(net)
@@ -24,7 +24,7 @@ class UI {
 			if (numpars > 0)
 				makego(id,fs.slice(i-ids.length),numpars,row)
 		}
-		LayoutRender.draw(stage, dag).then(() => LayoutRender.watch(stage, dag))
+		Render.draw(stage, dag).then(() => Render.watch(stage, dag))
 		function makes() {
 			let fs = []
 			let tempids = []
@@ -39,7 +39,7 @@ class UI {
 			return fs
 			function make(id) {
 				let view = new View(dag,id)
-				let $cont = LayoutRender.node(id)
+				let $cont = Render.node(id)
 				stage.append($cont)
 				$cont.append(view.html)
 				return view.f
