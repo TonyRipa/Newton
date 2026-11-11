@@ -1,7 +1,7 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2026.07.15
+	Date:	2026.10.15
 	Lisp:	A Constraint Solver
 */
 
@@ -133,7 +133,8 @@ class Lisp {
 				}
 		}
 		if (type(l)=='OperatorNode' && ground(r)) {
-			let anti = {'+': '-', '*': '/'}[op(l)]
+			//let anti = {'+': '-', '*': '/'}[op(l)]			//	-2026.10
+			let anti = {'+': '-', '-': '+', '*': '/'}[op(l)]	//	+2026.10
 			let [L,R] = args(l)
 			if ( ground(L) && !ground(R)) return Lisp.solvelisp(['=',[op(l),R,L],r], symboltable)
 			if (!ground(L) &&  ground(R)) {
@@ -201,35 +202,6 @@ class Lisp {
 			}
 			return [solution]
 		}
-		// function solution_intersect_mytype(solution, mytype) {	//	-2025.10
-		// 	if (math.typeOf(solution)=='number' && isNaN(solution)) {
-		// 		return name(mytype)
-		// 	} else if (mytype == 'Boolean') {
-		// 		if (math.typeOf(ret)=='OperatorNode') {
-		// 			return '{ }'
-		// 		} else if (1/ret==0) {
-		// 			return '{ }'
-		// 		}
-		// 	} else if (mytype == 'Real') {
-		// 		if (math.typeOf(ret)=='OperatorNode') {
-		// 			if (!arithmetic(Lisp.strto(solution.toString())))	//	+2025.8
-		// 				return '{ }'
-		// 		} else if (1/ret==0) {
-		// 			return '{ }'
-		// 		}
-		// 	} else if (mytype == 'IEEE754') {
-		// 		if (math.typeOf(ret)=='OperatorNode') {
-		// 			if (!arithmetic(Lisp.strto(solution.toString())))	//	+2025.9
-		// 				return '{ }'
-		// 		}
-		// 	} else if (mytype == 'Any') {
-		// 		//	Accept
-		// 	} else {
-		// 		console.trace()
-		// 		alert('Error: mytype = ' + mytype)
-		// 	}
-		// 	return '{ ' + solution + ' }'
-		// }
 		function compound(lisp) { return type(lisp)=='OperatorNode' }
 		function atomic(lisp) { return !compound(lisp) }
 		function isvar(lisp) { return type(lisp)=='SymbolNode' && symboltable(lisp)!='Indeterminate' }	//	+2025.4

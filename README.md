@@ -3,7 +3,7 @@
 
 Author : Anthony John Ripa
 
-Date : 2026.10.10
+Date : 2026.11.08
 
 Live Demo at <a target='_blank' href='http://tonyripa.github.io/Newton/'>http://tonyripa.github.io/Newton/</a>
 
@@ -97,7 +97,7 @@ $$
 \lim_{x\to c}f(x) = \left. \left( \mathrm{con}_{x\to c}f(x) \right) \right|_{x=c}
 $$
 
-and the first thing we always have to do is simplfy what is in the parentheses first (i.e. the con). When we simplify the con, there are exactly 2 different things that can happen. Firstly, it may be that the $\mathrm{con}_{x\to c}f(x) = f(x)$ , in which case we effectively merely erase the con operator, and are left with $\lim_{x\to c}f(x) = f(x)|_{x=c}$ .  We see that in the case that $\mathrm{con}_{x\to c}f(x) = f(x)$ (i.e. f is continuous) then finding the limit reduces to evaluation . Secondly, finding lim in the case when $\mathrm{con}_{x\to c}f(x) \neq f(x)$ requires removing the discontinuity. We typically replace the discontinuous $f(x)$ with a continuous $g(x)$ so that:
+and the first thing we always have to do is simplfy what is in the parentheses first (i.e. the con). When we simplify the con, there are exactly 2 different things that can happen. Firstly, it may be that the $`\mathrm{con}_{x\to c}f(x) = f(x)`$ , in which case we effectively merely erase the con operator, and are left with $\lim_{x\to c}f(x) = f(x)|_{x=c}$ .  We see that in the case that $\mathrm{con}_{x\to c}f(x) = f(x)$ (i.e. f is continuous) then finding the limit reduces to evaluation . Secondly, finding lim in the case when $\mathrm{con}_{x\to c}f(x) \neq f(x)$ requires removing the discontinuity. We typically replace the discontinuous $f(x)$ with a continuous $g(x)$ so that:
 
 $$
 f(x)=\begin{cases}

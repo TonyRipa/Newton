@@ -1,11 +1,15 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	2023.08.15
+	Date:	2026.11.07
 	Expression:	An expression library
 */
 
 class Expression {
+
+	static getvar(str) {	//	+2026.11
+		return Expression.getvars(str)[0]
+	}
 
 	static getvars(str) {
 		let ret

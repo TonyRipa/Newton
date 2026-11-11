@@ -1,11 +1,12 @@
 
 /*
 	Author:	Anthony John Ripa
-	Date:	6/10/2026
+	Date:	2026.11.07
 	Helper:	A utility library
 */
 
 let log = console.log
+let jstr = JSON.stringify
 function last(x) { return x.slice(-1)[0] }
 function show(x) { alert(JSON.stringify(x)) }
 function alerto(x) { alert(JSON.stringify(x)) }
